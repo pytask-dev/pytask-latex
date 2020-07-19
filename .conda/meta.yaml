@@ -1,0 +1,41 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: pytask-latex
+  version: {{ data.get('version') }}
+
+source:
+  # git_url is nice in that it won't capture devenv stuff.  However, it only captures
+  # committed code, so pay attention.
+  git_url: ../
+
+build:
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    - python
+    - setuptools
+
+  run:
+    - python >=3.6
+    - pytask >=0.0.3
+
+test:
+  requires:
+    - pytest
+  source_files:
+    - tox.ini
+    - tests
+  commands:
+    - pytask --version
+    - pytask --help
+
+    - pytest tests
+
+about:
+  home: https://github.com/pytask-dev/pytask-latex
+  license: none
+  summary: Compile LaTeX documents.
+  dev_url: https://github.com/pytask-dev/pytask-latex/

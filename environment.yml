@@ -1,0 +1,23 @@
+name: pytask-latex
+channels:
+  - conda-forge
+  - pytask
+dependencies:
+  - python=3.7
+  - pip
+
+  # Conda
+  - anaconda-client
+  - conda-build
+  - conda-verify
+
+  # Package dependencies
+  - pytask
+
+  # Misc
+  - jupyterlab
+  - matplotlib
+  - pdbpp
+  - pre-commit
+  - pytest-cov
+  - pytest-xdist
