@@ -10,16 +10,16 @@ from pytask.parametrize import _copy_func
 from pytask.shared import to_list
 
 
-def compile_latex_document(depends_on, produces, args):
+def compile_latex_document(depends_on, produces, latex):
     latex_document = to_list(depends_on)[0]
 
     if latex_document.stem != produces.stem:
-        args.append(f"--jobname={produces.stem}")
+        latex.append(f"--jobname={produces.stem}")
 
     subprocess.run(
         [
             "latexmk",
-            *args,
+            *latex,
             f"--output-directory={produces.parent.as_posix()}",
             f"{latex_document.as_posix()}",
         ]
@@ -43,7 +43,7 @@ def pytask_collect_task(session, path, name, obj):
         latex_function.pytestmark = copy.deepcopy(task.function.pytestmark)
 
         args = _create_command_line_arguments(task)
-        latex_function = functools.partial(latex_function, args=args)
+        latex_function = functools.partial(latex_function, latex=args)
 
         task.function = latex_function
 
