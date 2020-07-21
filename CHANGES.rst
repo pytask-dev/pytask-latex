@@ -6,7 +6,13 @@ chronological order. Releases follow `semantic versioning <https://semver.org/>`
 all releases are available on `Anaconda.org <https://anaconda.org/pytask/pytask-latex>`_.
 
 
-0.0.1 - 2020-xx-xx
+0.0.2 - 2020-07-21
+------------------
+
+- :gh:`2` allowed LaTeX tasks to have more than one dependency.
+
+
+0.0.1 - 2020-07-20
 ------------------
 
 - :gh:`1` combined the whole effort which went into releasing v0.0.1.

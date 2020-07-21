@@ -61,6 +61,18 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
         pass
 
 
+Note that, the first dependency is always assumed to be the LaTeX document. With
+multiple dependencies it may look like this
+
+.. code-block:: python
+
+    @pytask.mark.latex
+    @pytask.mark.depends_on("document.tex", "image.png")
+    @pytask.mark.produces("document.pdf")
+    def task_compile_latex_document():
+        pass
+
+
 To customize the compilation, you can pass some command line arguments to ``latexmk``
 via the ``@pytask.mark.latex`` marker. The default is the following.
 

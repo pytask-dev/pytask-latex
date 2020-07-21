@@ -198,3 +198,61 @@ def test_compile_latex_document_w_xelatex(tmp_path):
 
     assert session.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()
+
+
+def test_compile_latex_document_w_two_dependencies(tmp_path):
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex()
+    @pytask.mark.depends_on("document.tex", "in.txt")
+    @pytask.mark.produces("document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    Mother earth is pregnant for the third time.
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    tmp_path.joinpath("in.txt").touch()
+
+    session = main({"paths": tmp_path})
+
+    assert session.exit_code == 0
+    assert tmp_path.joinpath("document.pdf").exists()
+
+
+def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex()
+    @pytask.mark.depends_on("in.txt", "document.tex")
+    @pytask.mark.produces("document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    For y'all have knocked her up
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    tmp_path.joinpath("in.txt").touch()
+
+    session = main({"paths": tmp_path})
+
+    assert session.exit_code == 2
+    assert isinstance(session.collection_reports[0].exc_info[1], ValueError)

@@ -7,18 +7,21 @@ from pytask.mark import get_markers_from_task
 from pytask.mark import has_marker
 from pytask.nodes import PythonFunctionTask
 from pytask.parametrize import _copy_func
+from pytask.shared import to_list
 
 
 def compile_latex_document(depends_on, produces, args):
-    if depends_on.stem != produces.stem:
+    latex_document = to_list(depends_on)[0]
+
+    if latex_document.stem != produces.stem:
         args.append(f"--jobname={produces.stem}")
 
     subprocess.run(
-        ["latexmk"]
-        + args
-        + [
+        [
+            "latexmk",
+            *args,
             f"--output-directory={produces.parent.as_posix()}",
-            f"{depends_on.as_posix()}",
+            f"{latex_document.as_posix()}",
         ]
     )
 
@@ -43,6 +46,12 @@ def pytask_collect_task(session, path, name, obj):
         latex_function = functools.partial(latex_function, args=args)
 
         task.function = latex_function
+
+        if task.depends_on[0].value.suffix != ".tex":
+            raise ValueError(
+                "The first dependency of a LaTeX task must be the document which will "
+                "be compiled."
+            )
 
         return task
 
