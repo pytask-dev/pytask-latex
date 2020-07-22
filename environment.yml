@@ -12,7 +12,7 @@ dependencies:
   - conda-verify
 
   # Package dependencies
-  - pytask
+  - pytask >= 0.0.4
 
   # Misc
   - jupyterlab

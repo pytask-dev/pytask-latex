@@ -20,7 +20,7 @@ requirements:
 
   run:
     - python >=3.6
-    - pytask >=0.0.3
+    - pytask >=0.0.4
 
 test:
   requires:
