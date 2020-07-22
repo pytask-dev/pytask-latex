@@ -7,7 +7,7 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
-0.0.2 - 2020-07-21
+0.0.2 - 2020-07-22
 ------------------
 
 - :gh:`2` allowed LaTeX tasks to have more than one dependency and allows to parametrize
