@@ -10,11 +10,11 @@ all releases are available on `Anaconda.org
 0.0.2 - 2020-07-22
 ------------------
 
-- :gh:`2` allowed LaTeX tasks to have more than one dependency and allows to parametrize
+- :gh:`1` allowed LaTeX tasks to have more than one dependency and allows to parametrize
   over latex options and latex documents. It also prepares release v0.0.2.
 
 
 0.0.1 - 2020-07-20
 ------------------
 
-- :gh:`1` combined the whole effort which went into releasing v0.0.1.
+- Releases v0.0.1.
