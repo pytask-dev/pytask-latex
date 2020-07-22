@@ -2,6 +2,7 @@ import textwrap
 
 import pytest
 from conftest import needs_latexmk
+from conftest import skip_on_github_actions_with_win
 from pytask.main import main
 from pytask_latex.parametrize import pytask_generate_tasks_add_marker
 
@@ -29,6 +30,7 @@ def test_pytask_generate_tasks_add_marker(obj, kwargs, expected):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_parametrized_compilation_of_latex_documents(tmp_path):
     task_source = """
@@ -64,6 +66,7 @@ def test_parametrized_compilation_of_latex_documents(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_parametrizing_latex_options(tmp_path):
     task_source = """

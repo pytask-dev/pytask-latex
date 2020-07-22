@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from conftest import needs_latexmk
+from conftest import skip_on_github_actions_with_win
 from pytask.main import main
 from pytask.mark import Mark
 from pytask.nodes import FilePathNode
@@ -64,6 +65,7 @@ def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectatio
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document(tmp_path):
     task_source = """
@@ -93,6 +95,7 @@ def test_compile_latex_document(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document_to_different_name(tmp_path):
     task_source = """
@@ -122,6 +125,7 @@ def test_compile_latex_document_to_different_name(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_w_bibiliography(tmp_path):
     task_source = """
@@ -163,6 +167,7 @@ def test_compile_w_bibiliography(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     task_source = """
@@ -196,6 +201,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document_w_xelatex(tmp_path):
     task_source = """
@@ -225,6 +231,7 @@ def test_compile_latex_document_w_xelatex(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document_w_two_dependencies(tmp_path):
     task_source = """
@@ -256,6 +263,7 @@ def test_compile_latex_document_w_two_dependencies(tmp_path):
 
 
 @needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
     task_source = """
