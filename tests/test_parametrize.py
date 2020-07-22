@@ -1,7 +1,13 @@
+import shutil
 import textwrap
 
 import pytest
 from pytask.main import main
+
+
+pytestmark = pytest.mark.skipif(
+    shutil.which("latexmk") is None, reason="latexmk needs to be installed."
+)
 
 
 @pytest.mark.end_to_end
