@@ -50,9 +50,7 @@ class DummyTask:
         ),
     ],
 )
-def test_pytask_execute_task_setup_dependency(
-    monkeypatch, depends_on, produces, expectation
-):
+def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectation):
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: True)
 
