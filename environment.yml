@@ -15,6 +15,7 @@ dependencies:
   - pytask >= 0.0.4
 
   # Misc
+  - bumpversion
   - jupyterlab
   - matplotlib
   - pdbpp
