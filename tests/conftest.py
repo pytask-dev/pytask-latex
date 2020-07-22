@@ -9,6 +9,6 @@ needs_latexmk = pytest.mark.skipif(
 )
 
 skip_on_github_actions_with_win = pytest.mark.skipif(
-    os.environ.get("GITHUB_ACTIONS", False) and sys.platform == "win32",
+    os.environ.get("GITHUB_ACTIONS", "false") == "true" and sys.platform == "win32",
     reason="TinyTeX does not work on Windows.",
 )
