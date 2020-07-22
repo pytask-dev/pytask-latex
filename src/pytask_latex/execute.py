@@ -1,8 +1,8 @@
 import shutil
-from pathlib import Path
 
 import pytask
 from pytask.mark import get_markers_from_task
+from pytask.nodes import FilePathNode
 
 
 @pytask.hookimpl
@@ -14,8 +14,20 @@ def pytask_execute_task_setup(task):
                 "your PATH."
             )
 
-    if isinstance(task.depends_on, Path):
-        raise ValueError("'depends_on' must be a path to a single .tex document.")
+        if not (
+            isinstance(task.depends_on[0], FilePathNode)
+            and task.depends_on[0].value.suffix == ".tex"
+        ):
+            raise ValueError(
+                "The first or sole dependency must point to the .tex document which "
+                "will be compiled."
+            )
 
-    if isinstance(task.produces, Path):
-        raise ValueError("'produces' must be a path to a single .pdf document.")
+        if not (
+            isinstance(task.produces[0], FilePathNode)
+            and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+        ):
+            raise ValueError(
+                "The first or sole product must point to a .pdf, .ps or .dvi file "
+                "which is the compilation."
+            )

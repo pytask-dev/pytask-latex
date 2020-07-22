@@ -61,6 +61,18 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
         pass
 
 
+Note that, the first dependency is always assumed to be the LaTeX document. With
+multiple dependencies it may look like this
+
+.. code-block:: python
+
+    @pytask.mark.latex
+    @pytask.mark.depends_on("document.tex", "image.png")
+    @pytask.mark.produces("document.pdf")
+    def task_compile_latex_document():
+        pass
+
+
 To customize the compilation, you can pass some command line arguments to ``latexmk``
 via the ``@pytask.mark.latex`` marker. The default is the following.
 
@@ -74,13 +86,50 @@ For example, to compile your document with XeLaTeX, use
 
 .. code-block:: python
 
-    @pytask.mark.latex("--xelatex", "--interaction=nonstopmode", "--synctex=1")
+    @pytask.mark.latex("--xelatex", "--interaction=nonstopmode")
     def task_compile_latex_document():
         pass
 
 The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
 compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
 markers and cannot be changed.
+
+
+Parametrization
+~~~~~~~~~~~~~~~
+
+You can also parametrize the compilation, meaning compiling multiple .tex documents
+as well as compiling a .tex document with different command line arguments.
+
+The following task compiles two latex documents.
+
+.. code-block:: python
+
+    @pytask.mark.latex
+    @pytask.mark.parametrize(
+        "depends_on, produces",
+        [("document_1.tex", "document_1.pdf"), ("document_2.tex", "document_2.pdf")],
+    )
+    def task_compile_latex_document():
+        pass
+
+
+If you want to compile the same document with different command line options, you have
+to include the latex decorator in the parametrization just like with
+``@pytask.mark.depends_on`` and ``@pytask.mark.produces``.
+
+.. code-block:: python
+
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.parametrize(
+        "produces, latex",
+        [
+            ("document.pdf", ["--pdf", "interaction=nonstopmode"]),
+            ("document.dvi", ["--dvi", "interaction=nonstopmode"]),
+        ],
+    )
+    def task_compile_latex_document():
+        pass
 
 
 Changes
