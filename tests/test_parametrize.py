@@ -1,15 +1,34 @@
-import shutil
 import textwrap
 
 import pytest
+from conftest import needs_latexmk
 from pytask.main import main
+from pytask_latex.parametrize import pytask_generate_tasks_add_marker
 
 
-pytestmark = pytest.mark.skipif(
-    shutil.which("latexmk") is None, reason="latexmk needs to be installed."
+def func():
+    pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "obj, kwargs, expected",
+    [(len, {}, None), (func, {"latex": ["--dummy-option"]}, func), (func, {}, None)],
 )
+def test_pytask_generate_tasks_add_marker(obj, kwargs, expected):
+    pytask_generate_tasks_add_marker(obj, kwargs)
+
+    if expected is None:
+        assert not hasattr(obj, "pytestmark")
+    else:
+        assert obj.pytestmark
+
+    # Cleanup necessary since func is changed in-place.
+    if hasattr(obj, "pytestmark"):
+        delattr(obj, "pytestmark")
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_parametrized_compilation_of_latex_documents(tmp_path):
     task_source = """
@@ -44,6 +63,7 @@ def test_parametrized_compilation_of_latex_documents(tmp_path):
     assert tmp_path.joinpath("document_2.pdf").exists()
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_parametrizing_latex_options(tmp_path):
     task_source = """

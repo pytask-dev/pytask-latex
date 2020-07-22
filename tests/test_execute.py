@@ -1,15 +1,66 @@
-import shutil
 import textwrap
+from contextlib import ExitStack as does_not_raise  # noqa: N813
+from pathlib import Path
 
 import pytest
+from conftest import needs_latexmk
 from pytask.main import main
+from pytask.mark import Mark
+from pytask.nodes import FilePathNode
+from pytask_latex.execute import pytask_execute_task_setup
 
 
-pytestmark = pytest.mark.skipif(
-    shutil.which("latexmk") is None, reason="latexmk needs to be installed."
+class DummyTask:
+    pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "depends_on, produces, expectation",
+    [
+        (
+            [FilePathNode("a", Path("a.tex"))],
+            [FilePathNode("a", Path("a.pdf"))],
+            does_not_raise(),
+        ),
+        (
+            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
+            [FilePathNode("a", Path("a.pdf"))],
+            pytest.raises(ValueError),
+        ),
+        (
+            [FilePathNode("a", Path("a.tex"))],
+            [FilePathNode("a", Path("a.dvi"))],
+            does_not_raise(),
+        ),
+        (
+            [FilePathNode("a", Path("a.tex"))],
+            [FilePathNode("a", Path("a.ps"))],
+            does_not_raise(),
+        ),
+        (
+            [FilePathNode("a", Path("a.tex"))],
+            [FilePathNode("a", Path("a.txt"))],
+            pytest.raises(ValueError),
+        ),
+        (
+            [FilePathNode("a", Path("a.tex"))],
+            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
+            pytest.raises(ValueError),
+        ),
+    ],
 )
+def test_pytask_execute_task_setup_dependency(depends_on, produces, expectation):
+    task = DummyTask()
+    task.depends_on = depends_on
+    task.produces = produces
+    task.markers = [Mark("latex", (), {})]
+
+    with expectation:
+        pytask_execute_task_setup(task)
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_compile_latex_document(tmp_path):
     task_source = """
@@ -38,6 +89,7 @@ def test_compile_latex_document(tmp_path):
     assert tmp_path.joinpath("document.pdf").exists()
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_compile_latex_document_to_different_name(tmp_path):
     task_source = """
@@ -66,13 +118,14 @@ def test_compile_latex_document_to_different_name(tmp_path):
     assert tmp_path.joinpath("out.pdf").exists()
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_compile_w_bibiliography(tmp_path):
     task_source = """
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on("in_w_bib.tex")
+    @pytask.mark.depends_on(["in_w_bib.tex", "bib.bib"])
     @pytask.mark.produces("out_w_bib.pdf")
     def task_compile_document():
         pass
@@ -106,6 +159,7 @@ def test_compile_w_bibiliography(tmp_path):
     assert tmp_path.joinpath("out_w_bib.pdf").exists()
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     task_source = """
@@ -138,6 +192,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_compile_latex_document_w_xelatex(tmp_path):
     task_source = """
@@ -166,6 +221,8 @@ def test_compile_latex_document_w_xelatex(tmp_path):
     assert tmp_path.joinpath("document.pdf").exists()
 
 
+@needs_latexmk
+@pytest.mark.end_to_end
 def test_compile_latex_document_w_two_dependencies(tmp_path):
     task_source = """
     import pytask
@@ -195,6 +252,8 @@ def test_compile_latex_document_w_two_dependencies(tmp_path):
     assert tmp_path.joinpath("document.pdf").exists()
 
 
+@needs_latexmk
+@pytest.mark.end_to_end
 def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
     task_source = """
     import pytask
