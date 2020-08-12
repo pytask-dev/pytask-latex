@@ -94,6 +94,9 @@ The options ``jobname``, ``output-directory`` and the ``.tex`` file which will b
 compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
 markers and cannot be changed.
 
+You can either pass a string or a list of strings to the ``@pytask.mark.latex``
+decorator.
+
 
 Parametrization
 ~~~~~~~~~~~~~~~
@@ -124,8 +127,8 @@ to include the latex decorator in the parametrization just like with
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", ["--pdf", "interaction=nonstopmode"]),
-            ("document.dvi", ["--dvi", "interaction=nonstopmode"]),
+            ("document.pdf", (["--pdf", "interaction=nonstopmode"],)),
+            ("document.dvi", (["--dvi", "interaction=nonstopmode"],)),
         ],
     )
     def task_compile_latex_document():
