@@ -1,13 +1,13 @@
 import shutil
 
-import pytask
-from pytask.mark import get_markers_from_task
-from pytask.nodes import FilePathNode
+from _pytask.config import hookimpl
+from _pytask.mark import get_specific_markers_from_task
+from _pytask.nodes import FilePathNode
 
 
-@pytask.hookimpl
+@hookimpl
 def pytask_execute_task_setup(task):
-    if get_markers_from_task(task, "latex"):
+    if get_specific_markers_from_task(task, "latex"):
         if shutil.which("latexmk") is None:
             raise RuntimeError(
                 "latexmk is needed to compile LaTeX documents, but it is not found on "

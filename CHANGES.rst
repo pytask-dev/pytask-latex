@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.3 - 2020-08-12
+------------------
+
+- :gh:`3` prepares pytask-latex for pytask v0.0.5 and releases v0.0.3.
+
+
 0.0.2 - 2020-07-22
 ------------------
 

@@ -78,7 +78,7 @@ via the ``@pytask.mark.latex`` marker. The default is the following.
 
 .. code-block:: python
 
-    @pytask.mark.latex("--pdf", "--interaction=nonstopmode", "--synctex=1")
+    @pytask.mark.latex(["--pdf", "--interaction=nonstopmode", "--synctex=1"])
     def task_compile_latex_document():
         pass
 
@@ -86,13 +86,16 @@ For example, to compile your document with XeLaTeX, use
 
 .. code-block:: python
 
-    @pytask.mark.latex("--xelatex", "--interaction=nonstopmode")
+    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode"])
     def task_compile_latex_document():
         pass
 
 The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
 compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
 markers and cannot be changed.
+
+You can either pass a string or a list of strings to the ``@pytask.mark.latex``
+decorator.
 
 
 Parametrization
@@ -124,8 +127,8 @@ to include the latex decorator in the parametrization just like with
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", ["--pdf", "interaction=nonstopmode"]),
-            ("document.dvi", ["--dvi", "interaction=nonstopmode"]),
+            ("document.pdf", (["--pdf", "interaction=nonstopmode"],)),
+            ("document.dvi", (["--dvi", "interaction=nonstopmode"],)),
         ],
     )
     def task_compile_latex_document():

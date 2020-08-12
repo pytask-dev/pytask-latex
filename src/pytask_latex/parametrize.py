@@ -1,8 +1,9 @@
-import pytask
+from _pytask.config import hookimpl
+from _pytask.mark import MARK_GEN as mark  # noqa: N811
 
 
-@pytask.hookimpl
-def pytask_generate_tasks_add_marker(obj, kwargs):
+@hookimpl
+def pytask_parametrize_kwarg_to_marker(obj, kwargs):
     if callable(obj):
         if "latex" in kwargs:
-            pytask.mark.__getattr__("latex")(*kwargs.pop("latex"))(obj)
+            mark.latex(*kwargs.pop("latex"))(obj)

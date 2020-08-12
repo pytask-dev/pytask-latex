@@ -3,8 +3,8 @@ import textwrap
 import pytest
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
-from pytask.main import main
-from pytask_latex.parametrize import pytask_generate_tasks_add_marker
+from pytask import main
+from pytask_latex.parametrize import pytask_parametrize_kwarg_to_marker
 
 
 def func():
@@ -17,16 +17,16 @@ def func():
     [(len, {}, None), (func, {"latex": ["--dummy-option"]}, func), (func, {}, None)],
 )
 def test_pytask_generate_tasks_add_marker(obj, kwargs, expected):
-    pytask_generate_tasks_add_marker(obj, kwargs)
+    pytask_parametrize_kwarg_to_marker(obj, kwargs)
 
     if expected is None:
-        assert not hasattr(obj, "pytestmark")
+        assert not hasattr(obj, "pytaskmark")
     else:
-        assert obj.pytestmark
+        assert obj.pytaskmark
 
     # Cleanup necessary since func is changed in-place.
-    if hasattr(obj, "pytestmark"):
-        delattr(obj, "pytestmark")
+    if hasattr(obj, "pytaskmark"):
+        delattr(obj, "pytaskmark")
 
 
 @needs_latexmk
@@ -73,8 +73,8 @@ def test_parametrizing_latex_options(tmp_path):
     import pytask
 
     @pytask.mark.parametrize("depends_on, produces, latex", [
-        ("document.tex", "document.pdf", ("--interaction=nonstopmode", "--pdf")),
-        ("document.tex", "document.dvi", ("--interaction=nonstopmode", "--dvi")),
+        ("document.tex", "document.pdf", (["--interaction=nonstopmode", "--pdf"],)),
+        ("document.tex", "document.dvi", (["--interaction=nonstopmode", "--dvi"],)),
     ])
     def task_compile_latex_document():
         pass
