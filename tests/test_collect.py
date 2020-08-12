@@ -1,5 +1,5 @@
 import pytest
-from pytask.mark import Mark
+from _pytask.mark import Mark
 from pytask_latex.collect import _create_command_line_arguments
 
 

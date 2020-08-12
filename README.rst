@@ -78,7 +78,7 @@ via the ``@pytask.mark.latex`` marker. The default is the following.
 
 .. code-block:: python
 
-    @pytask.mark.latex("--pdf", "--interaction=nonstopmode", "--synctex=1")
+    @pytask.mark.latex(["--pdf", "--interaction=nonstopmode", "--synctex=1"])
     def task_compile_latex_document():
         pass
 
@@ -86,7 +86,7 @@ For example, to compile your document with XeLaTeX, use
 
 .. code-block:: python
 
-    @pytask.mark.latex("--xelatex", "--interaction=nonstopmode")
+    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode"])
     def task_compile_latex_document():
         pass
 

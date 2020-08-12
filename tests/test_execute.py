@@ -3,11 +3,11 @@ from contextlib import ExitStack as does_not_raise  # noqa: N813
 from pathlib import Path
 
 import pytest
+from _pytask.mark import Mark
+from _pytask.nodes import FilePathNode
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
-from pytask.main import main
-from pytask.mark import Mark
-from pytask.nodes import FilePathNode
+from pytask import main
 from pytask_latex.execute import pytask_execute_task_setup
 
 
@@ -207,7 +207,7 @@ def test_compile_latex_document_w_xelatex(tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex("--xelatex", "--interaction=nonstopmode", "--synctex=1")
+    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode", "--synctex=1"])
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.produces("document.pdf")
     def task_compile_document():
@@ -237,8 +237,8 @@ def test_compile_latex_document_w_two_dependencies(tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex()
-    @pytask.mark.depends_on("document.tex", "in.txt")
+    @pytask.mark.latex
+    @pytask.mark.depends_on(["document.tex", "in.txt"])
     @pytask.mark.produces("document.pdf")
     def task_compile_document():
         pass
@@ -269,8 +269,8 @@ def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex()
-    @pytask.mark.depends_on("in.txt", "document.tex")
+    @pytask.mark.latex
+    @pytask.mark.depends_on(["in.txt", "document.tex"])
     @pytask.mark.produces("document.pdf")
     def task_compile_document():
         pass

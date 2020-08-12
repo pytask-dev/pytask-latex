@@ -1,13 +1,32 @@
 import copy
 import functools
 import subprocess
+from typing import Iterable
+from typing import Optional
+from typing import Union
 
-import pytask
-from pytask.mark import get_markers_from_task
-from pytask.mark import has_marker
-from pytask.nodes import PythonFunctionTask
-from pytask.parametrize import _copy_func
-from pytask.shared import to_list
+from _pytask.config import hookimpl
+from _pytask.mark import get_specific_markers_from_task
+from _pytask.mark import has_marker
+from _pytask.nodes import PythonFunctionTask
+from _pytask.parametrize import _copy_func
+from _pytask.shared import to_list
+
+
+def latex(options: Optional[Union[str, Iterable[str]]] = None):
+    """Specify command line options for latexmk.
+
+    Parameters
+    ----------
+    options : Optional[Union[str, Iterable[str]]]
+        One or multiple command line options passed to latexmk.
+
+    """
+    if options is None:
+        options = ["--pdf", "--interaction=nonstopmode", "--synctex=1"]
+    elif isinstance(options, str):
+        options = [options]
+    return options
 
 
 def compile_latex_document(depends_on, produces, latex):
@@ -26,7 +45,7 @@ def compile_latex_document(depends_on, produces, latex):
     )
 
 
-@pytask.hookimpl
+@hookimpl
 def pytask_collect_task(session, path, name, obj):
     """Collect a task which is a function.
 
@@ -40,7 +59,7 @@ def pytask_collect_task(session, path, name, obj):
             path, name, obj, session
         )
         latex_function = _copy_func(compile_latex_document)
-        latex_function.pytestmark = copy.deepcopy(task.function.pytestmark)
+        latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
         args = _create_command_line_arguments(task)
         latex_function = functools.partial(latex_function, latex=args)
@@ -57,10 +76,11 @@ def pytask_collect_task(session, path, name, obj):
 
 
 def _create_command_line_arguments(task):
-    args = get_markers_from_task(task, "latex")[0].args
-    if args:
-        out = list(args)
-    else:
-        out = ["--pdf", "--interaction=nonstopmode", "--synctex=1"]
+    latex_marks = get_specific_markers_from_task(task, "latex")
+    mark = latex_marks[0]
+    for mark_ in latex_marks[1:]:
+        mark = mark.combine_with(mark_)
 
-    return out
+    options = latex(*mark.args, **mark.kwargs)
+
+    return options
