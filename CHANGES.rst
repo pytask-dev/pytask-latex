@@ -7,6 +7,13 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.4 - 2020-08-21
+------------------
+
+- :gh:`4` changes the default options. latexmk will step into the source directory
+  before compiling the document. Releases 0.0.4.
+
+
 0.0.3 - 2020-08-12
 ------------------
 

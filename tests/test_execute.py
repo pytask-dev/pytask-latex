@@ -292,3 +292,49 @@ def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
 
     assert session.exit_code == 2
     assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
+    """Test that motivates the ``"--cd"`` flag.
+
+    If you have a document which includes other resources via relative paths and you
+    compile the document to a different output folder, latexmk will not find the
+    relative resources. Thus, use the ``"--cd"`` flag to enter the source directory
+    before the compilation.
+
+    """
+    tmp_path.joinpath("sub", "resources").mkdir(parents=True)
+
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex
+    @pytask.mark.depends_on(["document.tex", "resources/content.tex"])
+    @pytask.mark.produces("out/document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    \input{resources/content}
+    \end{document}
+    """
+    tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
+
+    resources = r"""
+    In Ottakring, in Ottakring, wo das Bitter so viel süßer schmeckt als irgendwo in
+    Wien.
+    """
+    tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
+
+    session = main({"paths": tmp_path})
+
+    assert session.exit_code == 0
+    assert len(session.tasks) == 1

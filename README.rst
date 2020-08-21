@@ -78,7 +78,7 @@ via the ``@pytask.mark.latex`` marker. The default is the following.
 
 .. code-block:: python
 
-    @pytask.mark.latex(["--pdf", "--interaction=nonstopmode", "--synctex=1"])
+    @pytask.mark.latex(["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"])
     def task_compile_latex_document():
         pass
 
@@ -93,6 +93,9 @@ For example, to compile your document with XeLaTeX, use
 The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
 compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
 markers and cannot be changed.
+
+For more options and their explanations, visit the `manual for latexmk
+<https://man.cx/latexmk>`_.
 
 You can either pass a string or a list of strings to the ``@pytask.mark.latex``
 decorator.

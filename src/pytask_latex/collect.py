@@ -13,6 +13,9 @@ from _pytask.parametrize import _copy_func
 from _pytask.shared import to_list
 
 
+DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
+
+
 def latex(options: Optional[Union[str, Iterable[str]]] = None):
     """Specify command line options for latexmk.
 
@@ -23,7 +26,7 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
 
     """
     if options is None:
-        options = ["--pdf", "--interaction=nonstopmode", "--synctex=1"]
+        options = DEFAULT_OPTIONS.copy()
     elif isinstance(options, str):
         options = [options]
     return options
