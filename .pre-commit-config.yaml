@@ -55,6 +55,7 @@ repos:
   rev: v1.17.1
   hooks:
     - id: codespell
+      args: [-L=als]
 -   repo: meta
     hooks:
     -   id: check-hooks-apply

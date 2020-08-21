@@ -1,6 +1,7 @@
 import pytest
 from _pytask.mark import Mark
 from pytask_latex.collect import _create_command_line_arguments
+from pytask_latex.collect import DEFAULT_OPTIONS
 
 
 class DummyTask:
@@ -9,11 +10,7 @@ class DummyTask:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "args, expected",
-    [
-        ((), ["--pdf", "--interaction=nonstopmode", "--synctex=1"]),
-        (("--xelatex",), ["--xelatex"]),
-    ],
+    "args, expected", [((), DEFAULT_OPTIONS.copy()), (("--xelatex",), ["--xelatex"])],
 )
 def test_create_command_line_arguments(args, expected):
     task = DummyTask()
