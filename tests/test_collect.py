@@ -10,7 +10,8 @@ class DummyTask:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "args, expected", [((), DEFAULT_OPTIONS.copy()), (("--xelatex",), ["--xelatex"])],
+    "args, expected",
+    [((), DEFAULT_OPTIONS.copy()), (("--xelatex",), ["--xelatex"])],
 )
 def test_create_command_line_arguments(args, expected):
     task = DummyTask()
