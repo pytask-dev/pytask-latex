@@ -26,7 +26,7 @@ Installation
 
 Install the plugin with
 
-.. code-block:: bash
+.. code-block:: console
 
     $ conda config --add channels conda-forge --add channels pytask
     $ conda install pytask-latex
@@ -35,7 +35,7 @@ You also need to have ``latexmk`` installed which determines the necessary numbe
 compilation steps. To test whether it is installed, type the following on the command
 line
 
-.. code-block:: bash
+.. code-block:: console
 
     $ latexmk --help
 

@@ -7,6 +7,7 @@ from _pytask.mark import Mark
 from _pytask.nodes import FilePathNode
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
+from pytask import cli
 from pytask import main
 from pytask_latex.execute import pytask_execute_task_setup
 
@@ -67,7 +68,7 @@ def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectatio
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document(tmp_path):
+def test_compile_latex_document(runner, tmp_path):
     task_source = """
     import pytask
 
@@ -88,16 +89,16 @@ def test_compile_latex_document(tmp_path):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert session.exit_code == 0
+    assert result.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document_to_different_name(tmp_path):
+def test_compile_latex_document_to_different_name(runner, tmp_path):
     task_source = """
     import pytask
 
@@ -118,16 +119,16 @@ def test_compile_latex_document_to_different_name(tmp_path):
     """
     tmp_path.joinpath("in.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert session.exit_code == 0
+    assert result.exit_code == 0
     assert tmp_path.joinpath("out.pdf").exists()
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_w_bibiliography(tmp_path):
+def test_compile_w_bibiliography(runner, tmp_path):
     task_source = """
     import pytask
 
@@ -160,9 +161,9 @@ def test_compile_w_bibiliography(tmp_path):
     """
     tmp_path.joinpath("bib.bib").write_text(textwrap.dedent(bib_source))
 
-    session = main({"paths": tmp_path})
+    result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert session.exit_code == 0
+    assert result.exit_code == 0
     assert tmp_path.joinpath("out_w_bib.pdf").exists()
 
 
@@ -203,7 +204,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document_w_xelatex(tmp_path):
+def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
     import pytask
 
@@ -224,16 +225,16 @@ def test_compile_latex_document_w_xelatex(tmp_path):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert session.exit_code == 0
+    assert result.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document_w_two_dependencies(tmp_path):
+def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
     task_source = """
     import pytask
 
@@ -256,9 +257,9 @@ def test_compile_latex_document_w_two_dependencies(tmp_path):
 
     tmp_path.joinpath("in.txt").touch()
 
-    session = main({"paths": tmp_path})
+    result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert session.exit_code == 0
+    assert result.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()
 
 
@@ -290,7 +291,7 @@ def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
 
     session = main({"paths": tmp_path})
 
-    assert session.exit_code == 2
+    assert session.exit_code == 3
     assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
 
 

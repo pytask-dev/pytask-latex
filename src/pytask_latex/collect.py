@@ -1,3 +1,4 @@
+"""Collect tasks."""
 import copy
 import functools
 import subprocess
@@ -33,6 +34,12 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
 
 
 def compile_latex_document(depends_on, produces, latex):
+    """Compile a LaTeX document.
+
+    This function replaces the dummy function of an LaTeX task. It is a nice wrapper
+    around subprocess.
+
+    """
     latex_document = to_list(depends_on)[0]
 
     if latex_document.stem != produces.stem:
@@ -79,6 +86,7 @@ def pytask_collect_task(session, path, name, obj):
 
 
 def _create_command_line_arguments(task):
+    """Combine all information from markers for the compile latex function."""
     latex_marks = get_specific_markers_from_task(task, "latex")
     mark = latex_marks[0]
     for mark_ in latex_marks[1:]:

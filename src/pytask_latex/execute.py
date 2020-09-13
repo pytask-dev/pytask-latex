@@ -1,3 +1,4 @@
+"""Execute tasks."""
 import shutil
 
 from _pytask.config import hookimpl
@@ -7,6 +8,15 @@ from _pytask.nodes import FilePathNode
 
 @hookimpl
 def pytask_execute_task_setup(task):
+    """Perform some checks before a LaTeX document is compiled.
+
+    Perform the following checks.
+
+    1. latexmk needs to be found on your PATH.
+    2. The first dependency must be the source document.
+    3. The first product must point to a .pdf, .ps, or .dvi file.
+
+    """
     if get_specific_markers_from_task(task, "latex"):
         if shutil.which("latexmk") is None:
             raise RuntimeError(
