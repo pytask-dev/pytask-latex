@@ -1,6 +1,7 @@
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import pytest
 from _pytask.mark import Mark
@@ -330,7 +331,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
     resources = r"""
-    In Ottakring, in Ottakring, wo das Bitter so viel süßer schmeckt als irgendwo in
+    In Ottakring, in Ottakring, wo das Bitter so viel suesser schmeckt als irgendwo in
     Wien.
     """
     tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
@@ -339,3 +340,37 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
 
     assert session.exit_code == 0
     assert len(session.tasks) == 1
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_document_w_wrong_flag(tmp_path):
+    """Test that wrong flags raise errors."""
+    tmp_path.joinpath("sub", "resources").mkdir(parents=True)
+
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(["--wrong-flag"])
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.produces("out/document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    The book of love is long and boring ...
+    \end{document}
+    """
+    tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
+
+    session = main({"paths": tmp_path})
+
+    assert session.exit_code == 1
+    assert len(session.tasks) == 1
+    assert isinstance(session.execution_reports[0].exc_info[1], CalledProcessError)

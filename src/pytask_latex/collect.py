@@ -51,7 +51,8 @@ def compile_latex_document(depends_on, produces, latex):
             *latex,
             f"--output-directory={produces.parent.as_posix()}",
             f"{latex_document.as_posix()}",
-        ]
+        ],
+        check=True,
     )
 
 
