@@ -54,6 +54,7 @@ class DummyTask:
     ],
 )
 def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectation):
+    """Test errors being raised when the task is setup."""
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: True)
 
@@ -100,6 +101,7 @@ def test_compile_latex_document(runner, tmp_path):
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document_to_different_name(runner, tmp_path):
+    """Compile a LaTeX document where source and output name differ."""
     task_source = """
     import pytask
 
@@ -129,7 +131,8 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_w_bibiliography(runner, tmp_path):
+def test_compile_w_bibliography(runner, tmp_path):
+    """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
 
