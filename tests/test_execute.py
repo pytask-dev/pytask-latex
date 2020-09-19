@@ -158,9 +158,10 @@ def test_compile_w_bibliography(runner, tmp_path):
 
     bib_source = r"""
     @Article{pytask,
-      author = {Tobias Raabe},
-      title  = {pytask},
-      year   = {2020},
+      author  = {Tobias Raabe},
+      title   = {pytask},
+      journal = {Unpublished},
+      year    = {2020},
     }
     """
     tmp_path.joinpath("bib.bib").write_text(textwrap.dedent(bib_source))
