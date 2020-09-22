@@ -54,7 +54,7 @@ class DummyTask:
     ],
 )
 def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectation):
-    """Test errors being raised when the task is setup."""
+    """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: True)
 
@@ -71,6 +71,7 @@ def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectatio
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document(runner, tmp_path):
+    """Test simple compilation."""
     task_source = """
     import pytask
 
@@ -137,8 +138,8 @@ def test_compile_w_bibliography(runner, tmp_path):
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on(["in_w_bib.tex", "bib.bib"])
-    @pytask.mark.produces("out_w_bib.pdf")
+    @pytask.mark.depends_on(["in_w_bib.tex", "references.bib"])
+    @pytask.mark.produces("in_w_bib.pdf")
     def task_compile_document():
         pass
 
@@ -151,7 +152,7 @@ def test_compile_w_bibliography(runner, tmp_path):
     \begin{document}
     \cite{pytask}
     \bibliographystyle{plain}
-    \bibliography{bib}
+    \bibliography{references}
     \end{document}
     """
     tmp_path.joinpath("in_w_bib.tex").write_text(textwrap.dedent(latex_source))
@@ -164,7 +165,7 @@ def test_compile_w_bibliography(runner, tmp_path):
       year    = {2020},
     }
     """
-    tmp_path.joinpath("bib.bib").write_text(textwrap.dedent(bib_source))
+    tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
 
