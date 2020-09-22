@@ -73,8 +73,16 @@ def test_parametrizing_latex_options(tmp_path):
     import pytask
 
     @pytask.mark.parametrize("depends_on, produces, latex", [
-        ("document.tex", "document.pdf", (["--interaction=nonstopmode", "--pdf"],)),
-        ("document.tex", "document.dvi", (["--interaction=nonstopmode", "--dvi"],)),
+        (
+            "document.tex",
+            "document.pdf",
+            (["--interaction=nonstopmode", "--pdf", "--cd"],)
+        ),
+        (
+            "document.tex",
+            "document.dvi",
+            (["--interaction=nonstopmode", "--dvi", "--cd"],)
+        ),
     ])
     def task_compile_latex_document():
         pass

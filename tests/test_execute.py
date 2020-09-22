@@ -132,14 +132,14 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_w_bibliography(runner, tmp_path):
+def test_compile_w_bibliography(tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
 
     @pytask.mark.latex
     @pytask.mark.depends_on(["in_w_bib.tex", "references.bib"])
-    @pytask.mark.produces("in_w_bib.pdf")
+    @pytask.mark.produces("out_w_bib.pdf")
     def task_compile_document():
         pass
 
@@ -167,9 +167,9 @@ def test_compile_w_bibliography(runner, tmp_path):
     """
     tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
 
-    result = runner.invoke(cli, [tmp_path.as_posix()])
+    session = main({"paths": tmp_path})
 
-    assert result.exit_code == 0
+    assert session.exit_code == 0
     assert tmp_path.joinpath("out_w_bib.pdf").exists()
 
 
@@ -214,7 +214,9 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode", "--synctex=1"])
+    @pytask.mark.latex(
+        ["--xelatex", "--interaction=nonstopmode", "--synctex=1", "--cd"]
+    )
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.produces("document.pdf")
     def task_compile_document():

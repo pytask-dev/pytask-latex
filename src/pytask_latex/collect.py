@@ -39,17 +39,34 @@ def compile_latex_document(depends_on, produces, latex):
     This function replaces the dummy function of an LaTeX task. It is a nice wrapper
     around subprocess.
 
+    The output folder needs to be declared as a relative path to the directory where the
+    latex source lies.
+
+    1. It must be relative because bibtex / biber, which is necessary for
+       bibliographies, does not accept full paths as a safety measure.
+    2. Due to the ``--cd`` flag, latexmk will change the directory to the one where the
+       source files are. Thus, relative to the latex sources.
+
+    See this `discussion on Github
+    <https://github.com/James-Yu/LaTeX-Workshop/issues/1932#issuecomment-582416434>`_
+    for additional information.
+
     """
     latex_document = to_list(depends_on)[0]
+    compiled_document = to_list(produces)[0]
 
-    if latex_document.stem != produces.stem:
-        latex.append(f"--jobname={produces.stem}")
+    if latex_document.stem != compiled_document.stem:
+        latex.append(f"--jobname={compiled_document.stem}")
 
+    # See comment in doc string.
+    out_relative_to_latex_source = compiled_document.parent.relative_to(
+        latex_document.parent
+    )
     subprocess.run(
         [
             "latexmk",
             *latex,
-            f"--output-directory={produces.parent.as_posix()}",
+            f"--output-directory={out_relative_to_latex_source.as_posix()}",
             f"{latex_document.as_posix()}",
         ],
         check=True,
