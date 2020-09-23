@@ -30,6 +30,7 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
         options = DEFAULT_OPTIONS.copy()
     elif isinstance(options, str):
         options = [options]
+
     return options
 
 
@@ -89,7 +90,8 @@ def pytask_collect_task(session, path, name, obj):
         latex_function = _copy_func(compile_latex_document)
         latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
-        args = _create_command_line_arguments(task)
+        merged_mark = _merge_all_markers(task)
+        args = latex(*merged_mark.args, **merged_mark.kwargs)
         latex_function = functools.partial(latex_function, latex=args)
 
         task.function = latex_function
@@ -103,13 +105,10 @@ def pytask_collect_task(session, path, name, obj):
         return task
 
 
-def _create_command_line_arguments(task):
+def _merge_all_markers(task):
     """Combine all information from markers for the compile latex function."""
     latex_marks = get_specific_markers_from_task(task, "latex")
     mark = latex_marks[0]
     for mark_ in latex_marks[1:]:
-        mark = mark.combine_with(mark_)
-
-    options = latex(*mark.args, **mark.kwargs)
-
-    return options
+        mark = mark.combined_with(mark_)
+    return mark

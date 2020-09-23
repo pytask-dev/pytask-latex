@@ -95,7 +95,12 @@ compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produ
 markers and cannot be changed.
 
 For more options and their explanations, visit the `manual for latexmk
-<https://man.cx/latexmk>`_.
+<https://man.cx/latexmk>`_ or type the following commands.
+
+.. code-block:: console
+
+    $ latexmk -h
+    $ latexmk -showextraoptions
 
 You can either pass a string or a list of strings to the ``@pytask.mark.latex``
 decorator.
