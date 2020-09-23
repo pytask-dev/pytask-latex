@@ -9,6 +9,7 @@ from typing import Union
 from _pytask.config import hookimpl
 from _pytask.mark import get_specific_markers_from_task
 from _pytask.mark import has_marker
+from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from _pytask.shared import to_list
@@ -84,6 +85,7 @@ def pytask_collect_task(session, path, name, obj):
 
     """
     if name.startswith("task_") and callable(obj) and has_marker(obj, "latex"):
+        # Collect the task.
         task = PythonFunctionTask.from_path_name_function_session(
             path, name, obj, session
         )
@@ -96,10 +98,23 @@ def pytask_collect_task(session, path, name, obj):
 
         task.function = latex_function
 
-        if task.depends_on[0].value.suffix != ".tex":
+        # Perform some checks.
+        if not (
+            isinstance(task.depends_on[0], FilePathNode)
+            and task.depends_on[0].value.suffix == ".tex"
+        ):
             raise ValueError(
-                "The first dependency of a LaTeX task must be the document which will "
-                "be compiled."
+                "The first or sole dependency of a LaTeX task must be the document "
+                "which will be compiled and has a .tex extension."
+            )
+
+        if not (
+            isinstance(task.produces[0], FilePathNode)
+            and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+        ):
+            raise ValueError(
+                "The first or sole product of a LaTeX task must point to a .pdf, .ps "
+                "or .dvi file which is the compiled document."
             )
 
         return task

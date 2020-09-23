@@ -1,11 +1,9 @@
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
-from pathlib import Path
 from subprocess import CalledProcessError
 
 import pytest
 from _pytask.mark import Mark
-from _pytask.nodes import FilePathNode
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
 from pytask import cli
@@ -19,48 +17,18 @@ class DummyTask:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "depends_on, produces, expectation",
+    "found_latexmk, expectation",
     [
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.pdf"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
-            [FilePathNode("a", Path("a.pdf"))],
-            pytest.raises(ValueError),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.dvi"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.ps"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.txt"))],
-            pytest.raises(ValueError),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
-            pytest.raises(ValueError),
-        ),
+        (True, does_not_raise()),
+        (None, pytest.raises(RuntimeError)),
     ],
 )
-def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectation):
+def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
     """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
-    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: True)
+    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: found_latexmk)
 
     task = DummyTask()
-    task.depends_on = depends_on
-    task.produces = produces
     task.markers = [Mark("latex", (), {})]
 
     with expectation:
