@@ -9,6 +9,7 @@ from typing import Union
 from _pytask.config import hookimpl
 from _pytask.mark import get_specific_markers_from_task
 from _pytask.mark import has_marker
+from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from _pytask.shared import to_list
@@ -30,6 +31,7 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
         options = DEFAULT_OPTIONS.copy()
     elif isinstance(options, str):
         options = [options]
+
     return options
 
 
@@ -39,19 +41,37 @@ def compile_latex_document(depends_on, produces, latex):
     This function replaces the dummy function of an LaTeX task. It is a nice wrapper
     around subprocess.
 
+    The output folder needs to be declared as a relative path to the directory where the
+    latex source lies.
+
+    1. It must be relative because bibtex / biber, which is necessary for
+       bibliographies, does not accept full paths as a safety measure.
+    2. Due to the ``--cd`` flag, latexmk will change the directory to the one where the
+       source files are. Thus, relative to the latex sources.
+
+    See this `discussion on Github
+    <https://github.com/James-Yu/LaTeX-Workshop/issues/1932#issuecomment-582416434>`_
+    for additional information.
+
     """
     latex_document = to_list(depends_on)[0]
+    compiled_document = to_list(produces)[0]
 
-    if latex_document.stem != produces.stem:
-        latex.append(f"--jobname={produces.stem}")
+    if latex_document.stem != compiled_document.stem:
+        latex.append(f"--jobname={compiled_document.stem}")
 
+    # See comment in doc string.
+    out_relative_to_latex_source = compiled_document.parent.relative_to(
+        latex_document.parent
+    )
     subprocess.run(
         [
             "latexmk",
             *latex,
-            f"--output-directory={produces.parent.as_posix()}",
+            f"--output-directory={out_relative_to_latex_source.as_posix()}",
             f"{latex_document.as_posix()}",
-        ]
+        ],
+        check=True,
     )
 
 
@@ -65,33 +85,45 @@ def pytask_collect_task(session, path, name, obj):
 
     """
     if name.startswith("task_") and callable(obj) and has_marker(obj, "latex"):
+        # Collect the task.
         task = PythonFunctionTask.from_path_name_function_session(
             path, name, obj, session
         )
         latex_function = _copy_func(compile_latex_document)
         latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
-        args = _create_command_line_arguments(task)
+        merged_mark = _merge_all_markers(task)
+        args = latex(*merged_mark.args, **merged_mark.kwargs)
         latex_function = functools.partial(latex_function, latex=args)
 
         task.function = latex_function
 
-        if task.depends_on[0].value.suffix != ".tex":
+        # Perform some checks.
+        if not (
+            isinstance(task.depends_on[0], FilePathNode)
+            and task.depends_on[0].value.suffix == ".tex"
+        ):
             raise ValueError(
-                "The first dependency of a LaTeX task must be the document which will "
-                "be compiled."
+                "The first or sole dependency of a LaTeX task must be the document "
+                "which will be compiled and has a .tex extension."
+            )
+
+        if not (
+            isinstance(task.produces[0], FilePathNode)
+            and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+        ):
+            raise ValueError(
+                "The first or sole product of a LaTeX task must point to a .pdf, .ps "
+                "or .dvi file which is the compiled document."
             )
 
         return task
 
 
-def _create_command_line_arguments(task):
+def _merge_all_markers(task):
     """Combine all information from markers for the compile latex function."""
     latex_marks = get_specific_markers_from_task(task, "latex")
     mark = latex_marks[0]
     for mark_ in latex_marks[1:]:
-        mark = mark.combine_with(mark_)
-
-    options = latex(*mark.args, **mark.kwargs)
-
-    return options
+        mark = mark.combined_with(mark_)
+    return mark

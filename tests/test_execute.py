@@ -1,10 +1,9 @@
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
-from pathlib import Path
+from subprocess import CalledProcessError
 
 import pytest
 from _pytask.mark import Mark
-from _pytask.nodes import FilePathNode
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
 from pytask import cli
@@ -18,47 +17,18 @@ class DummyTask:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "depends_on, produces, expectation",
+    "found_latexmk, expectation",
     [
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.pdf"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
-            [FilePathNode("a", Path("a.pdf"))],
-            pytest.raises(ValueError),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.dvi"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.ps"))],
-            does_not_raise(),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.txt"))],
-            pytest.raises(ValueError),
-        ),
-        (
-            [FilePathNode("a", Path("a.tex"))],
-            [FilePathNode("a", Path("a.txt")), FilePathNode("b", Path("b.pdf"))],
-            pytest.raises(ValueError),
-        ),
+        (True, does_not_raise()),
+        (None, pytest.raises(RuntimeError)),
     ],
 )
-def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectation):
+def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
+    """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
-    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: True)
+    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: found_latexmk)
 
     task = DummyTask()
-    task.depends_on = depends_on
-    task.produces = produces
     task.markers = [Mark("latex", (), {})]
 
     with expectation:
@@ -69,6 +39,7 @@ def test_pytask_execute_task_setup(monkeypatch, depends_on, produces, expectatio
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document(runner, tmp_path):
+    """Test simple compilation."""
     task_source = """
     import pytask
 
@@ -99,6 +70,7 @@ def test_compile_latex_document(runner, tmp_path):
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_latex_document_to_different_name(runner, tmp_path):
+    """Compile a LaTeX document where source and output name differ."""
     task_source = """
     import pytask
 
@@ -128,12 +100,13 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_w_bibiliography(runner, tmp_path):
+def test_compile_w_bibliography(tmp_path):
+    """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on(["in_w_bib.tex", "bib.bib"])
+    @pytask.mark.depends_on(["in_w_bib.tex", "references.bib"])
     @pytask.mark.produces("out_w_bib.pdf")
     def task_compile_document():
         pass
@@ -147,23 +120,24 @@ def test_compile_w_bibiliography(runner, tmp_path):
     \begin{document}
     \cite{pytask}
     \bibliographystyle{plain}
-    \bibliography{bib}
+    \bibliography{references}
     \end{document}
     """
     tmp_path.joinpath("in_w_bib.tex").write_text(textwrap.dedent(latex_source))
 
     bib_source = r"""
     @Article{pytask,
-      author = {Tobias Raabe},
-      title  = {pytask},
-      year   = {2020},
+      author  = {Tobias Raabe},
+      title   = {pytask},
+      journal = {Unpublished},
+      year    = {2020},
     }
     """
-    tmp_path.joinpath("bib.bib").write_text(textwrap.dedent(bib_source))
+    tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
 
-    result = runner.invoke(cli, [tmp_path.as_posix()])
+    session = main({"paths": tmp_path})
 
-    assert result.exit_code == 0
+    assert session.exit_code == 0
     assert tmp_path.joinpath("out_w_bib.pdf").exists()
 
 
@@ -208,7 +182,9 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode", "--synctex=1"])
+    @pytask.mark.latex(
+        ["--xelatex", "--interaction=nonstopmode", "--synctex=1", "--cd"]
+    )
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.produces("document.pdf")
     def task_compile_document():
@@ -330,7 +306,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
     resources = r"""
-    In Ottakring, in Ottakring, wo das Bitter so viel süßer schmeckt als irgendwo in
+    In Ottakring, in Ottakring, wo das Bitter so viel suesser schmeckt als irgendwo in
     Wien.
     """
     tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
@@ -339,3 +315,37 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
 
     assert session.exit_code == 0
     assert len(session.tasks) == 1
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_document_w_wrong_flag(tmp_path):
+    """Test that wrong flags raise errors."""
+    tmp_path.joinpath("sub", "resources").mkdir(parents=True)
+
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(["--wrong-flag"])
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.produces("out/document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    The book of love is long and boring ...
+    \end{document}
+    """
+    tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
+
+    session = main({"paths": tmp_path})
+
+    assert session.exit_code == 1
+    assert len(session.tasks) == 1
+    assert isinstance(session.execution_reports[0].exc_info[1], CalledProcessError)
