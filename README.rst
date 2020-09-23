@@ -94,6 +94,9 @@ The options ``jobname``, ``output-directory`` and the ``.tex`` file which will b
 compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
 markers and cannot be changed.
 
+You can either pass a string or a list of strings to the ``@pytask.mark.latex``
+decorator.
+
 For more options and their explanations, visit the `manual for latexmk
 <https://man.cx/latexmk>`_ or type the following commands.
 
@@ -101,9 +104,6 @@ For more options and their explanations, visit the `manual for latexmk
 
     $ latexmk -h
     $ latexmk -showextraoptions
-
-You can either pass a string or a list of strings to the ``@pytask.mark.latex``
-decorator.
 
 
 Parametrization
