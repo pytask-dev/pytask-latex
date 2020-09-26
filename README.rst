@@ -5,7 +5,7 @@
     :target: https://anaconda.org/pytask/pytask-latex
 
 .. image:: https://github.com/pytask-dev/pytask-latex/workflows/Continuous%20Integration%20Workflow/badge.svg?branch=main
-    :target: https://github.com/pytask-dev/pytask/actions?query=branch%3Amain
+    :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
@@ -61,13 +61,13 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
         pass
 
 
-Note that, the first dependency is always assumed to be the LaTeX document. With
-multiple dependencies it may look like this
+Note that, LaTeX document which will be compiled must be the first dependency. Add other
+dependencies like images after the source file.
 
 .. code-block:: python
 
     @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex", "image.png")
+    @pytask.mark.depends_on(["document.tex", "image.png"])
     @pytask.mark.produces("document.pdf")
     def task_compile_latex_document():
         pass
@@ -91,13 +91,12 @@ For example, to compile your document with XeLaTeX, use
         pass
 
 The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
-compiled are handled by the ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``
-markers and cannot be changed.
+compiled are automatically handled and inferred from the ``@pytask.mark.depends_on`` and
+``@pytask.mark.produces`` markers.
 
-You can either pass a string or a list of strings to the ``@pytask.mark.latex``
-decorator.
+The ``@pytask.mark.latex`` accepts both, a string or a list of strings with options.
 
-For more options and their explanations, visit the `manual for latexmk
+For more options and their explanations, visit the `latexmk manual
 <https://man.cx/latexmk>`_ or type the following commands.
 
 .. code-block:: console
@@ -135,8 +134,8 @@ to include the latex decorator in the parametrization just like with
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", (["--pdf", "interaction=nonstopmode"],)),
-            ("document.dvi", (["--dvi", "interaction=nonstopmode"],)),
+            ("document.pdf", (["--pdf", "interaction=nonstopmode"])),
+            ("document.dvi", (["--dvi", "interaction=nonstopmode"])),
         ],
     )
     def task_compile_latex_document():
