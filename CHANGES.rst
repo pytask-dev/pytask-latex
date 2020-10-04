@@ -7,12 +7,13 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
-0.0.5 - 2020-xx-xx
+0.0.5 - 2020-10-04
 ------------------
 
 - :gh:`5` fixes some errors in the test suite due to pytask v0.0.6.
 - :gh:`6` check that exit codes are equal to zero.
 - :gh:`7` fixes the README.
+- :gh:`8` works with pytask v0.0.7 and releases v0.0.5.
 
 
 0.0.4 - 2020-08-21
