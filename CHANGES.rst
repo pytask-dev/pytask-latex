@@ -12,6 +12,7 @@ all releases are available on `Anaconda.org
 
 - :gh:`5` fixes some errors in the test suite due to pytask v0.0.6.
 - :gh:`6` check that exit codes are equal to zero.
+- :gh:`8` align with pytask v0.0.7.
 
 
 0.0.4 - 2020-08-21
