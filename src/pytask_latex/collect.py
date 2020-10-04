@@ -98,26 +98,34 @@ def pytask_collect_task(session, path, name, obj):
 
         task.function = latex_function
 
-        # Perform some checks.
-        if not (
-            isinstance(task.depends_on[0], FilePathNode)
-            and task.depends_on[0].value.suffix == ".tex"
+        return task
+
+
+@hookimpl
+def pytask_collect_task_teardown(task):
+    """Perform some checks."""
+    if task is not None:
+        if (len(task.depends_on) == 0) or (
+            not (
+                isinstance(task.depends_on[0], FilePathNode)
+                and task.depends_on[0].value.suffix == ".tex"
+            )
         ):
             raise ValueError(
                 "The first or sole dependency of a LaTeX task must be the document "
                 "which will be compiled and has a .tex extension."
             )
 
-        if not (
-            isinstance(task.produces[0], FilePathNode)
-            and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+        if (len(task.produces) == 0) or (
+            not (
+                isinstance(task.produces[0], FilePathNode)
+                and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+            )
         ):
             raise ValueError(
                 "The first or sole product of a LaTeX task must point to a .pdf, .ps "
                 "or .dvi file which is the compiled document."
             )
-
-        return task
 
 
 def _merge_all_markers(task):
