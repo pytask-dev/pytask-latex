@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.6 - 2020-10-14
+------------------
+
+- :gh:`9` fixes the last release and the ``pytask_collect_task_teardown`` call.
+
+
 0.0.5 - 2020-10-04
 ------------------
 
