@@ -100,6 +100,39 @@ def test_compile_latex_document(runner, tmp_path):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
+def test_compile_latex_document_w_relative(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = f"""
+    import pytask
+
+    @pytask.mark.latex
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.produces("{tmp_path.joinpath("bld", "document.pdf").as_posix()}")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("bld").mkdir()
+    tmp_path.joinpath("src").mkdir()
+    tmp_path.joinpath("src", "task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("src", "document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+
+    assert result.exit_code == 0
+    assert tmp_path.joinpath("bld", "document.pdf").exists()
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
 def test_compile_latex_document_to_different_name(runner, tmp_path):
     """Compile a LaTeX document where source and output name differ."""
     task_source = """

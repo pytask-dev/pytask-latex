@@ -1,7 +1,9 @@
 """Collect tasks."""
 import copy
 import functools
+import os
 import subprocess
+from pathlib import Path
 from typing import Iterable
 from typing import Optional
 from typing import Union
@@ -61,14 +63,15 @@ def compile_latex_document(depends_on, produces, latex):
         latex.append(f"--jobname={compiled_document.stem}")
 
     # See comment in doc string.
-    out_relative_to_latex_source = compiled_document.parent.relative_to(
-        latex_document.parent
-    )
+    out_relative_to_latex_source = Path(
+        os.path.relpath(compiled_document.parent, latex_document.parent)
+    ).as_posix()
+
     subprocess.run(
         [
             "latexmk",
             *latex,
-            f"--output-directory={out_relative_to_latex_source.as_posix()}",
+            f"--output-directory={out_relative_to_latex_source}",
             f"{latex_document.as_posix()}",
         ],
         check=True,
