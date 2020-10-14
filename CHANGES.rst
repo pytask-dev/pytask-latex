@@ -7,6 +7,13 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.7 - 2020-10-14
+------------------
+
+- :gh:`10` fixes error that ``outputdirectory`` has to be relative to latex document due
+  to security problems.
+
+
 0.0.6 - 2020-10-14
 ------------------
 
