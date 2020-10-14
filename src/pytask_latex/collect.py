@@ -103,8 +103,12 @@ def pytask_collect_task(session, path, name, obj):
 
 @hookimpl
 def pytask_collect_task_teardown(task):
-    """Perform some checks."""
-    if task is not None:
+    """Perform some checks.
+
+    Remove check for task is none with pytask 0.0.9.
+
+    """
+    if task is not None and get_specific_markers_from_task(task, "latex"):
         if (len(task.depends_on) == 0) or (
             not (
                 isinstance(task.depends_on[0], FilePathNode)
