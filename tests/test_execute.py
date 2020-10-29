@@ -1,4 +1,3 @@
-import itertools
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
 from subprocess import CalledProcessError
@@ -14,38 +13,6 @@ from pytask_latex.execute import pytask_execute_task_setup
 
 class DummyTask:
     pass
-
-
-@pytest.mark.end_to_end
-@pytest.mark.parametrize(
-    "dependencies, products",
-    itertools.product(
-        ([], ["in.txt"], ["in_1.txt", "in_2.txt"]),
-        (["out.txt"], ["out_1.txt", "out_2.txt"]),
-    ),
-)
-def test_normal_flow_w_varying_dependencies_products(tmp_path, dependencies, products):
-    source = f"""
-    import pytask
-    from pathlib import Path
-
-
-    @pytask.mark.depends_on({dependencies})
-    @pytask.mark.produces({products})
-    def task_dummy(depends_on, produces):
-        if isinstance(produces, dict):
-            produces = list(produces.values())
-        elif not isinstance(produces, list):
-            produces = [produces]
-        for product in produces:
-            product.touch()
-    """
-    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))
-    for dependency in dependencies:
-        tmp_path.joinpath(dependency).touch()
-
-    session = main({"paths": tmp_path})
-    assert session.exit_code == 0
 
 
 @pytest.mark.unit
