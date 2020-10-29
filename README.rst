@@ -84,16 +84,26 @@ for a ``"source"`` key in the dictionary and, secondly, under the key ``0``.
 
 .. code-block:: python
 
-    pytask.mark.depends_on({"source": "document.tex", "image": "image.png"})
+    @pytask.mark.depends_on({"source": "document.tex", "image": "image.png"})
+    def task_compile_document():
+        pass
+
 
     # or
 
-    pytask.mark.depends_on({0: "document.tex", "image": "image.png"})
+
+    @pytask.mark.depends_on({0: "document.tex", "image": "image.png"})
+    def task_compile_document():
+        pass
+
 
     # or two decorators for the function, if you do not assign a name to the image.
 
-    pytask.mark.depends_on({"source": "document.tex"})
-    pytask.mark.depends_on("image.png")
+
+    @pytask.mark.depends_on({"source": "document.tex"})
+    @pytask.mark.depends_on("image.png")
+    def task_compile_document():
+        pass
 
 The same applies to the compiled document which is either in the first position, under
 the key ``"document"`` or ``0``.
