@@ -14,7 +14,6 @@ from _pytask.mark import has_marker
 from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
-from _pytask.shared import to_list
 
 
 DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
@@ -56,8 +55,8 @@ def compile_latex_document(depends_on, produces, latex):
     for additional information.
 
     """
-    latex_document = to_list(depends_on)[0]
-    compiled_document = to_list(produces)[0]
+    latex_document = _get_node_from_dictionary(depends_on, "source")
+    compiled_document = _get_node_from_dictionary(produces, "document")
 
     if latex_document.stem != compiled_document.stem:
         latex.append(f"--jobname={compiled_document.stem}")
@@ -106,33 +105,36 @@ def pytask_collect_task(session, path, name, obj):
 
 @hookimpl
 def pytask_collect_task_teardown(task):
-    """Perform some checks.
-
-    Remove check for task is none with pytask 0.0.9.
-
-    """
-    if task is not None and get_specific_markers_from_task(task, "latex"):
+    """Perform some checks."""
+    if get_specific_markers_from_task(task, "latex"):
+        source = _get_node_from_dictionary(task.depends_on, "source")
         if (len(task.depends_on) == 0) or (
-            not (
-                isinstance(task.depends_on[0], FilePathNode)
-                and task.depends_on[0].value.suffix == ".tex"
-            )
+            not (isinstance(source, FilePathNode) and source.value.suffix == ".tex")
         ):
             raise ValueError(
                 "The first or sole dependency of a LaTeX task must be the document "
                 "which will be compiled and has a .tex extension."
             )
 
+        document = _get_node_from_dictionary(task.produces, "document")
         if (len(task.produces) == 0) or (
             not (
-                isinstance(task.produces[0], FilePathNode)
-                and task.produces[0].value.suffix in [".pdf", ".ps", ".dvi"]
+                isinstance(document, FilePathNode)
+                and document.value.suffix in [".pdf", ".ps", ".dvi"]
             )
         ):
             raise ValueError(
                 "The first or sole product of a LaTeX task must point to a .pdf, .ps "
                 "or .dvi file which is the compiled document."
             )
+
+
+def _get_node_from_dictionary(obj, key, fallback=0):
+    if isinstance(obj, Path):
+        pass
+    elif isinstance(obj, dict):
+        obj = obj.get(key) or obj.get(fallback)
+    return obj
 
 
 def _merge_all_markers(task):

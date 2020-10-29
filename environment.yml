@@ -12,7 +12,7 @@ dependencies:
   - conda-verify
 
   # Package dependencies
-  - pytask >= 0.0.7
+  - pytask >= 0.0.9
 
   # Misc
   - bumpversion

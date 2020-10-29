@@ -33,7 +33,9 @@ def test_normal_flow_w_varying_dependencies_products(tmp_path, dependencies, pro
     @pytask.mark.depends_on({dependencies})
     @pytask.mark.produces({products})
     def task_dummy(depends_on, produces):
-        if not isinstance(produces, list):
+        if isinstance(produces, dict):
+            produces = list(produces.values())
+        elif not isinstance(produces, list):
             produces = [produces]
         for product in produces:
             product.touch()
