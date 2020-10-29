@@ -25,6 +25,7 @@ requirements:
 test:
   requires:
     - pytest
+    - pytask-parallel
   source_files:
     - tox.ini
     - tests

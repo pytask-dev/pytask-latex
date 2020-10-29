@@ -3,6 +3,8 @@ import textwrap
 import time
 
 import pytest
+from conftest import needs_latexmk
+from conftest import skip_on_github_actions_with_win
 from pytask import cli
 
 try:
@@ -18,6 +20,8 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_parallel_parametrization_over_source_files(runner, tmp_path):
     source = """
@@ -65,15 +69,25 @@ def test_parallel_parametrization_over_source_files(runner, tmp_path):
     assert duration_parallel < duration_normal
 
 
+@needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_parallel_parametrization_over_source_file(runner, tmp_path):
     source = """
+    import pytask
+
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", (["--pdf", "interaction=nonstopmode"])),
-            ("document.dvi", (["--dvi", "interaction=nonstopmode"])),
+            (
+                "document.pdf",
+                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
+            ),
+            (
+                "document.dvi",
+                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
+            ),
         ],
     )
     def task_compile_latex_document():
@@ -84,7 +98,7 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     latex_source = r"""
     \documentclass{report}
     \begin{document}
-    Ma il mio mistero è chiuso in me
+    Ma il mio mistero e chiuso in me
     \end{document}
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))

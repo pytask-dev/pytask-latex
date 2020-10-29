@@ -38,14 +38,20 @@ def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document(runner, tmp_path):
+@pytest.mark.parametrize(
+    "depends_on", ["'document.tex'", {"source": "document.tex"}, {0: "document.tex"}]
+)
+@pytest.mark.parametrize(
+    "produces", ["'document.pdf'", {"document": "document.pdf"}, {0: "document.pdf"}]
+)
+def test_compile_latex_document(runner, tmp_path, depends_on, produces):
     """Test simple compilation."""
-    task_source = """
+    task_source = f"""
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.depends_on({depends_on})
+    @pytask.mark.produces({produces})
     def task_compile_document():
         pass
 

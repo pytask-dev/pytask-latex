@@ -173,8 +173,14 @@ to include the latex decorator in the parametrization just like with
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", (["--pdf", "interaction=nonstopmode"])),
-            ("document.dvi", (["--dvi", "interaction=nonstopmode"])),
+            (
+                "document.pdf",
+                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+            ),
+            (
+                "document.dvi",
+                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+            ),
         ],
     )
     def task_compile_latex_document():
