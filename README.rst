@@ -60,9 +60,16 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
     def task_compile_latex_document():
         pass
 
+When the task is executed, you find a ``document.pdf`` in the same folder as your
+``document.text``, but you could also compile the report into a another folder by
+changing the path in ``produces``.
 
-Note that, LaTeX document which will be compiled must be the first dependency. Add other
-dependencies like images after the source file.
+
+Multiple dependencies and products
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+What happens if a task has more dependencies? Using a list, the LaTeX document which
+should be compiled must be found in the first position of the list.
 
 .. code-block:: python
 
@@ -72,6 +79,38 @@ dependencies like images after the source file.
     def task_compile_latex_document():
         pass
 
+If you use a dictionary to pass dependencies to the task, pytask-latex will, first, look
+for a ``"source"`` key in the dictionary and, secondly, under the key ``0``.
+
+.. code-block:: python
+
+    @pytask.mark.depends_on({"source": "document.tex", "image": "image.png"})
+    def task_compile_document():
+        pass
+
+
+    # or
+
+
+    @pytask.mark.depends_on({0: "document.tex", "image": "image.png"})
+    def task_compile_document():
+        pass
+
+
+    # or two decorators for the function, if you do not assign a name to the image.
+
+
+    @pytask.mark.depends_on({"source": "document.tex"})
+    @pytask.mark.depends_on("image.png")
+    def task_compile_document():
+        pass
+
+The same applies to the compiled document which is either in the first position, under
+the key ``"document"`` or ``0``.
+
+
+Command Line Arguments
+~~~~~~~~~~~~~~~~~~~~~~
 
 To customize the compilation, you can pass some command line arguments to ``latexmk``
 via the ``@pytask.mark.latex`` marker. The default is the following.
@@ -134,12 +173,32 @@ to include the latex decorator in the parametrization just like with
     @pytask.mark.parametrize(
         "produces, latex",
         [
-            ("document.pdf", (["--pdf", "interaction=nonstopmode"])),
-            ("document.dvi", (["--dvi", "interaction=nonstopmode"])),
+            (
+                "document.pdf",
+                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+            ),
+            (
+                "document.dvi",
+                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+            ),
         ],
     )
     def task_compile_latex_document():
         pass
+
+
+Configuration
+-------------
+
+If you want to change the names of the keys which identify the source file and the
+compiled document, change the following default configuration in your pytask
+configuration file.
+
+.. code-block:: ini
+
+    latex_source_key = source
+    latex_document_key = document
+
 
 
 Changes

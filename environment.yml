@@ -12,7 +12,8 @@ dependencies:
   - conda-verify
 
   # Package dependencies
-  - pytask >= 0.0.7
+  - pytask >= 0.0.9
+  - pytask-parallel >= 0.0.4
 
   # Misc
   - bumpversion

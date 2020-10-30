@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-tinytex@v1
+        if: runner.os != 'Windows'
       - uses: goanpeca/setup-miniconda@v1
         with:
           auto-update-conda: true

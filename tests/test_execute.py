@@ -1,4 +1,3 @@
-import itertools
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
 from subprocess import CalledProcessError
@@ -14,36 +13,6 @@ from pytask_latex.execute import pytask_execute_task_setup
 
 class DummyTask:
     pass
-
-
-@pytest.mark.end_to_end
-@pytest.mark.parametrize(
-    "dependencies, products",
-    itertools.product(
-        ([], ["in.txt"], ["in_1.txt", "in_2.txt"]),
-        (["out.txt"], ["out_1.txt", "out_2.txt"]),
-    ),
-)
-def test_normal_flow_w_varying_dependencies_products(tmp_path, dependencies, products):
-    source = f"""
-    import pytask
-    from pathlib import Path
-
-
-    @pytask.mark.depends_on({dependencies})
-    @pytask.mark.produces({products})
-    def task_dummy(depends_on, produces):
-        if not isinstance(produces, list):
-            produces = [produces]
-        for product in produces:
-            product.touch()
-    """
-    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))
-    for dependency in dependencies:
-        tmp_path.joinpath(dependency).touch()
-
-    session = main({"paths": tmp_path})
-    assert session.exit_code == 0
 
 
 @pytest.mark.unit
@@ -69,14 +38,32 @@ def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document(runner, tmp_path):
+@pytest.mark.parametrize(
+    "depends_on",
+    [
+        "'document.tex'",
+        {"source": "document.tex"},
+        {0: "document.tex"},
+        {"script": "document.tex"},
+    ],
+)
+@pytest.mark.parametrize(
+    "produces",
+    [
+        "'document.pdf'",
+        {"document": "document.pdf"},
+        {0: "document.pdf"},
+        {"compiled_doc": "document.pdf"},
+    ],
+)
+def test_compile_latex_document(runner, tmp_path, depends_on, produces):
     """Test simple compilation."""
-    task_source = """
+    task_source = f"""
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.depends_on({depends_on})
+    @pytask.mark.produces({produces})
     def task_compile_document():
         pass
 
@@ -90,6 +77,17 @@ def test_compile_latex_document(runner, tmp_path):
     \end{document}
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    config = "[pytask]\n"
+    if (
+        isinstance(depends_on, dict)
+        and "source" not in depends_on
+        and 0 not in depends_on
+    ):
+        config += "latex_source_key = script\n"
+    if isinstance(produces, dict) and "document" not in produces and 0 not in produces:
+        config += "latex_document_key = compiled_doc\n"
+    tmp_path.joinpath("pytask.ini").write_text(config)
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
 

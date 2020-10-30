@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.8 - 2020-10-29
+------------------
+
+- :gh:`11` makes pytask-latex work with pytask v0.0.9.
+
+
 0.0.7 - 2020-10-14
 ------------------
 
