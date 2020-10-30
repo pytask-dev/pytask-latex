@@ -39,10 +39,22 @@ def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 @pytest.mark.parametrize(
-    "depends_on", ["'document.tex'", {"source": "document.tex"}, {0: "document.tex"}]
+    "depends_on",
+    [
+        "'document.tex'",
+        {"source": "document.tex"},
+        {0: "document.tex"},
+        {"script": "document.tex"},
+    ],
 )
 @pytest.mark.parametrize(
-    "produces", ["'document.pdf'", {"document": "document.pdf"}, {0: "document.pdf"}]
+    "produces",
+    [
+        "'document.pdf'",
+        {"document": "document.pdf"},
+        {0: "document.pdf"},
+        {"compiled_doc": "document.pdf"},
+    ],
 )
 def test_compile_latex_document(runner, tmp_path, depends_on, produces):
     """Test simple compilation."""
@@ -65,6 +77,17 @@ def test_compile_latex_document(runner, tmp_path, depends_on, produces):
     \end{document}
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    config = "[pytask]\n"
+    if (
+        isinstance(depends_on, dict)
+        and "source" not in depends_on
+        and 0 not in depends_on
+    ):
+        config += "latex_source_key = script\n"
+    if isinstance(produces, dict) and "document" not in produces and 0 not in produces:
+        config += "latex_document_key = compiled_doc\n"
+    tmp_path.joinpath("pytask.ini").write_text(config)
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
 

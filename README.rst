@@ -109,8 +109,8 @@ The same applies to the compiled document which is either in the first position,
 the key ``"document"`` or ``0``.
 
 
-Passing options to latexmk
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Command Line Arguments
+~~~~~~~~~~~~~~~~~~~~~~
 
 To customize the compilation, you can pass some command line arguments to ``latexmk``
 via the ``@pytask.mark.latex`` marker. The default is the following.
@@ -185,6 +185,20 @@ to include the latex decorator in the parametrization just like with
     )
     def task_compile_latex_document():
         pass
+
+
+Configuration
+-------------
+
+If you want to change the names of the keys which identify the source file and the
+compiled document, change the following default configuration in your pytask
+configuration file.
+
+.. code-block:: ini
+
+    latex_source_key = source
+    latex_document_key = document
+
 
 
 Changes
