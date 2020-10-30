@@ -109,6 +109,7 @@ def test_pytask_collect_task_teardown(
     }
     task.markers = [Mark("latex", (), {})]
     task.function = task_dummy
+    task.function.pytaskmark = task.markers
 
     with expectation:
         pytask_collect_task_teardown(session, task)
