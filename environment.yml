@@ -14,6 +14,7 @@ dependencies:
   # Package dependencies
   - pytask >= 0.0.9
   - pytask-parallel >= 0.0.4
+  - latex-dependency-scanner
 
   # Misc
   - bumpversion

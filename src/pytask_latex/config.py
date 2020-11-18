@@ -10,3 +10,4 @@ def pytask_parse_config(config, config_from_file):
     config["latex_document_key"] = config_from_file.get(
         "latex_document_key", "document"
     )
+    config["latex_scan_errors"] = config_from_file.get("latex_scan_errors", "warn")

@@ -20,6 +20,9 @@ pytask-latex
 
 pytask-latex allows you to compile LaTeX documents.
 
+It also tries to infer the dependency of the LaTeX document such as included images,
+bibliography files and other .tex files.
+
 
 Installation
 ------------
@@ -32,8 +35,9 @@ Install the plugin with
     $ conda install pytask-latex
 
 You also need to have ``latexmk`` installed which determines the necessary number of
-compilation steps. To test whether it is installed, type the following on the command
-line
+compilation steps (`here <https://tex.stackexchange.com/a/249243/194826>`_ is an
+explanation for what latexmk achieves). To test whether it is installed, type the
+following on the command line
 
 .. code-block:: console
 
@@ -190,14 +194,35 @@ to include the latex decorator in the parametrization just like with
 Configuration
 -------------
 
-If you want to change the names of the keys which identify the source file and the
-compiled document, change the following default configuration in your pytask
-configuration file.
 
-.. code-block:: ini
+latex_source_key
+    If you want to change the name of the key which identifies the source file, change
+    the following default configuration in your pytask configuration file.
 
-    latex_source_key = source
-    latex_document_key = document
+    .. code-block:: ini
+
+        latex_source_key = source
+
+latex_document_key
+    If you want to change the name of the key which identifies the compiled document,
+    change the following default configuration in your pytask configuration file.
+
+    .. code-block:: ini
+
+        latex_source_key = source
+
+latex_scan_errors
+    pytask-latex tries to scan your LaTeX document for included files with the help of
+    `latex-dependency-scanner
+    <https://github.com/pytask-dev/latex-dependency-scanner>`_. If a
+
+
+        latex_scan_errors = warn
+
+    Since the package is in its early development phase and LaTeX provides a myriad of
+    ways to include files as well as providing shortcuts for paths (e.g.,
+    ``\graphicspath``)
+
 
 
 
