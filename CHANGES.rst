@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.9 - 2020-xx-xx
+------------------
+
+- :gh:`13` fixes the CI.
+
+
 0.0.8 - 2020-10-29
 ------------------
 
