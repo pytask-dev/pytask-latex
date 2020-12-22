@@ -102,10 +102,12 @@ def test_pytask_collect_task_teardown(
 
     task = DummyClass()
     task.depends_on = {
-        i: FilePathNode(n.split(".")[0], Path(n)) for i, n in enumerate(depends_on)
+        i: FilePathNode(n.split(".")[0], Path(n), Path(n))
+        for i, n in enumerate(depends_on)
     }
     task.produces = {
-        i: FilePathNode(n.split(".")[0], Path(n)) for i, n in enumerate(produces)
+        i: FilePathNode(n.split(".")[0], Path(n), Path(n))
+        for i, n in enumerate(produces)
     }
     task.markers = [Mark("latex", (), {})]
     task.function = task_dummy

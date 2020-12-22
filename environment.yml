@@ -16,6 +16,7 @@ dependencies:
   - pytask-parallel >= 0.0.4
 
   # Misc
+  - black
   - bumpversion
   - jupyterlab
   - matplotlib
