@@ -1,5 +1,7 @@
 """Configure pytask."""
 from _pytask.config import hookimpl
+from _pytask.shared import convert_truthy_or_falsy_to_bool
+from _pytask.shared import get_first_non_none_value
 
 
 @hookimpl
@@ -10,4 +12,9 @@ def pytask_parse_config(config, config_from_file):
     config["latex_document_key"] = config_from_file.get(
         "latex_document_key", "document"
     )
-    config["latex_scan_errors"] = config_from_file.get("latex_scan_errors", "warn")
+    config["infer_latex_dependencies"] = get_first_non_none_value(
+        config_from_file,
+        key="infer_latex_dependencies",
+        callback=convert_truthy_or_falsy_to_bool,
+        default=True,
+    )

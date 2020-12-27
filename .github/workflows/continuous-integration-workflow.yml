@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.6', '3.7', '3.8']
+        python-version: ['3.6', '3.7', '3.8', '3.9']
 
     steps:
       - uses: actions/checkout@v2
@@ -66,23 +66,3 @@ jobs:
         if: runner.os == 'Linux' && matrix.python-version == '3.8'
         shell: bash -l {0}
         run: cat codecov.yml | curl --data-binary @- https://codecov.io/validate
-
-
-  pre-commit:
-
-    name: Run pre-commit.
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-
-      - name: Install dependencies
-        run: pip install tox
-
-      - name: Run pre-commit
-        run: tox -e pre-commit

@@ -11,6 +11,7 @@ from typing import Union
 from _pytask.config import hookimpl
 from _pytask.mark import get_specific_markers_from_task
 from _pytask.mark import has_marker
+from _pytask.mark import Mark
 from _pytask.nodes import _collect_nodes
 from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
@@ -21,18 +22,13 @@ from latex_dependency_scanner import scan
 DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
 
 
-def latex(
-    options: Optional[Union[str, Iterable[str]]] = None,
-    scan_errors: Optional[str] = None,
-):
+def latex(options: Optional[Union[str, Iterable[str]]] = None):
     """Specify command line options for latexmk.
 
     Parameters
     ----------
     options : Optional[Union[str, Iterable[str]]]
         One or multiple command line options passed to latexmk.
-    errors : Optional[str]
-        Allows to specify
 
     """
     if options is None:
@@ -40,7 +36,7 @@ def latex(
     elif isinstance(options, str):
         options = [options]
 
-    return options, scan_errors
+    return options
 
 
 def compile_latex_document(latex):
@@ -94,13 +90,14 @@ def pytask_collect_task_teardown(session, task):
         latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
         merged_mark = _merge_all_markers(task)
-        args, scan_errors = latex(*merged_mark.args, **merged_mark.kwargs)
+        args = latex(*merged_mark.args, **merged_mark.kwargs)
         options = _prepare_cmd_options(session, task, args)
         latex_function = functools.partial(latex_function, latex=options)
 
         task.function = latex_function
 
-        task = _add_latex_dependencies_retroactively(task, session)
+        if session.config["infer_latex_dependencies"]:
+            task = _add_latex_dependencies_retroactively(task, session)
 
 
 def _get_node_from_dictionary(obj, key, fallback=0):
@@ -118,9 +115,10 @@ def _add_latex_dependencies_retroactively(task, session):
     been created, since one needs access to the LaTeX document which is validated after
     the task is created.
 
-    First, collect all files from the LaTeX document. Second, take all files which are
-    not already added as a dependency. Thirdly, add them to the task by enumerating
-    them.
+    1. Collect all possible files from the LaTeX document.
+    2. Keep only files which exist or which are produced by some other task. Note that
+       only tasks are considered which have been collected until this point.
+    3. Mark the task such that it will be evaluated at last.
 
     Parameters
     ----------
@@ -135,20 +133,25 @@ def _add_latex_dependencies_retroactively(task, session):
     )
 
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(scan(source.value))
+    latex_dependencies = set(scan(source.path))
 
     # Remove duplicated dependencies which have already been added by the user.
     existing_paths = {
-        i.value for i in task.depends_on.values() if isinstance(i, FilePathNode)
+        i.path for i in task.depends_on.values() if isinstance(i, FilePathNode)
     }
     new_dependencies = latex_dependencies - existing_paths
 
-    max_int = max(i for i in task.depends_on if isinstance(i, int))
+    used_integer_keys = [i for i in task.depends_on if isinstance(i, int)]
+    max_int = max(used_integer_keys) if used_integer_keys else 0
+
     new_dependencies = dict(enumerate(new_dependencies, max_int + 1))
     collected_dependencies = _collect_nodes(
         session, task.path, task.name, new_dependencies
     )
     task.depends_on = {**task.depends_on, **collected_dependencies}
+
+    # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
+    task.markers.append(Mark("try_last", (), {}))
 
     return task
 

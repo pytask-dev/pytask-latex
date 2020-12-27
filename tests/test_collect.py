@@ -91,21 +91,34 @@ def test_pytask_collect_task(name, expected):
 )
 @pytest.mark.parametrize("latex_source_key", ["source", "script", "main"])
 @pytest.mark.parametrize("latex_document_key", ["document", "compiled_doc"])
+@pytest.mark.parametrize("infer_latex_dependencies", [True, False])
 def test_pytask_collect_task_teardown(
-    depends_on, produces, expectation, latex_source_key, latex_document_key
+    tmp_path,
+    depends_on,
+    produces,
+    expectation,
+    latex_source_key,
+    latex_document_key,
+    infer_latex_dependencies,
 ):
+    if infer_latex_dependencies:
+        tmp_path.joinpath(depends_on[0]).touch()
+
     session = DummyClass()
     session.config = {
         "latex_source_key": latex_source_key,
         "latex_document_key": latex_document_key,
+        "infer_latex_dependencies": infer_latex_dependencies,
     }
 
     task = DummyClass()
+    task.path = tmp_path / "task_dummy.py"
+    task.name = tmp_path.as_posix() + "task_dummy.py::task_dummy"
     task.depends_on = {
-        i: FilePathNode.from_path(Path(n)) for i, n in enumerate(depends_on)
+        i: FilePathNode.from_path(tmp_path / n) for i, n in enumerate(depends_on)
     }
     task.produces = {
-        i: FilePathNode.from_path(Path(n)) for i, n in enumerate(produces)
+        i: FilePathNode.from_path(tmp_path / n) for i, n in enumerate(produces)
     }
     task.markers = [Mark("latex", (), {})]
     task.function = task_dummy
@@ -118,12 +131,7 @@ def test_pytask_collect_task_teardown(
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "obj, key, expected",
-    [
-        (1, "asds", 1),
-        (1, None, 1),
-        ({"a": 1}, "a", 1),
-        ({0: 1}, "a", 1),
-    ],
+    [(1, "asds", 1), (1, None, 1), ({"a": 1}, "a", 1), ({0: 1}, "a", 1)],
 )
 def test_get_node_from_dictionary(obj, key, expected):
     result = _get_node_from_dictionary(obj, key)

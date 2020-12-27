@@ -21,7 +21,8 @@ pytask-latex
 pytask-latex allows you to compile LaTeX documents.
 
 It also tries to infer the dependency of the LaTeX document such as included images,
-bibliography files and other .tex files.
+bibliography files and other .tex files automatically to compile LaTeX documents when it
+is possible.
 
 
 Installation
@@ -194,7 +195,6 @@ to include the latex decorator in the parametrization just like with
 Configuration
 -------------
 
-
 latex_source_key
     If you want to change the name of the key which identifies the source file, change
     the following default configuration in your pytask configuration file.
@@ -211,19 +211,17 @@ latex_document_key
 
         latex_source_key = source
 
-latex_scan_errors
+infer_latex_dependencies
     pytask-latex tries to scan your LaTeX document for included files with the help of
-    `latex-dependency-scanner
-    <https://github.com/pytask-dev/latex-dependency-scanner>`_. If a
+    `latex-dependency-scanner <https://github.com/pytask-dev/latex-dependency-scanner>`_
+    if the following configuration value is true which is also the default.
 
-
-        latex_scan_errors = warn
+        infer_latex_dependencies = true
 
     Since the package is in its early development phase and LaTeX provides a myriad of
     ways to include files as well as providing shortcuts for paths (e.g.,
-    ``\graphicspath``)
-
-
+    ``\graphicspath``), there are definitely some rough edges left. File an issue here
+    or in the other project to make us aware of the problem.
 
 
 Changes
