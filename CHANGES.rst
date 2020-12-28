@@ -10,6 +10,8 @@ all releases are available on `Anaconda.org
 0.0.9 - 2020-xx-xx
 ------------------
 
+- :gh:`12` integrates the latex-dependency-scanner to automatically detect dependencies
+  of a LaTeX document.
 - :gh:`13` fixes the CI.
 
 

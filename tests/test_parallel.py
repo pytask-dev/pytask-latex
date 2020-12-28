@@ -30,28 +30,16 @@ def test_parallel_parametrization_over_source_files(runner, tmp_path):
     @pytask.mark.latex
     @pytask.mark.parametrize(
         "depends_on, produces",
-        [("document_1.tex", "document_1.pdf"), ("document_2.tex", "document_2.pdf")],
+        [(f"document_{i}.tex", f"document_{i}.pdf") for i in range(3)],
     )
     def task_compile_latex_document():
         pass
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))
 
-    latex_source = r"""
-    \documentclass{report}
-    \begin{document}
-    He said yeah.
-    \end{document}
-    """
-    tmp_path.joinpath("document_1.tex").write_text(textwrap.dedent(latex_source))
-
-    latex_source = r"""
-    \documentclass{report}
-    \begin{document}
-    You better come out with your hands up.
-    \end{document}
-    """
-    tmp_path.joinpath("document_2.tex").write_text(textwrap.dedent(latex_source))
+    for i in range(3):
+        latex_source = "\\documentclass{report}\n\\begin{document}.\\end{document}"
+        tmp_path.joinpath(f"document_{i}.tex").write_text(textwrap.dedent(latex_source))
 
     start = time.time()
     result = runner.invoke(cli, [tmp_path.as_posix()])
@@ -76,20 +64,9 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     source = """
     import pytask
 
+    @pytask.mark.latex
     @pytask.mark.depends_on("document.tex")
-    @pytask.mark.parametrize(
-        "produces, latex",
-        [
-            (
-                "document.pdf",
-                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
-            ),
-            (
-                "document.dvi",
-                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
-            ),
-        ],
-    )
+    @pytask.mark.parametrize("produces", [f"document_{i}.pdf" for i in range(4)])
     def task_compile_latex_document():
         pass
     """
@@ -108,7 +85,7 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     assert result.exit_code == 0
     duration_normal = time.time() - start
 
-    for name in ["document.pdf", "document.dvi"]:
+    for name in [f"document_{i}.pdf" for i in range(4)]:
         tmp_path.joinpath(name).unlink()
 
     start = time.time()
