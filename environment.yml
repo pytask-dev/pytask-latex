@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - pytask
 dependencies:
-  - python
+  - python = 3.8
   - pip
 
   # Conda
