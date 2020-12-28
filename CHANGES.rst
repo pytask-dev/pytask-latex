@@ -7,11 +7,11 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
-0.0.9 - 2020-xx-xx
+0.0.9 - 2020-12-28
 ------------------
 
 - :gh:`12` integrates the latex-dependency-scanner to automatically detect dependencies
-  of a LaTeX document.
+  of a LaTeX document and releases v0.0.9.
 - :gh:`13` fixes the CI.
 
 
