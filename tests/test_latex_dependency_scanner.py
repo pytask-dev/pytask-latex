@@ -1,9 +1,13 @@
 import textwrap
 
 import pytest
+from conftest import needs_latexmk
+from conftest import skip_on_github_actions_with_win
 from pytask import main
 
 
+@needs_latexmk
+@skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_infer_dependencies_from_task(tmp_path):
     task_source = """
