@@ -418,12 +418,13 @@ def test_compile_document_w_wrong_flag(tmp_path):
 def test_compile_document_w_image(runner, tmp_path):
     task_source = f"""
     import pytask
+    import shutil
 
     @pytask.mark.produces("image.png")
     def task_create_image():
         shutil.copy(
             "{TEST_RESOURCES.joinpath("image.png").as_posix()}",
-            "{tmp_path.as_posix()}"
+            "{tmp_path.joinpath("image.png").as_posix()}"
         )
 
     @pytask.mark.latex

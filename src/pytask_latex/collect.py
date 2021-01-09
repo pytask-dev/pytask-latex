@@ -135,18 +135,20 @@ def _add_latex_dependencies_retroactively(task, session):
     # Scan the LaTeX document for included files.
     latex_dependencies = set(scan(source.path))
 
-    # Remove duplicated dependencies which have already been added by the user.
+    # Remove duplicated dependencies which have already been added by the user and those
+    # which do not exist.
     existing_paths = {
         i.path for i in task.depends_on.values() if isinstance(i, FilePathNode)
     }
-    new_dependencies = latex_dependencies - existing_paths
+    new_deps = latex_dependencies - existing_paths
+    new_existing_deps = {i for i in new_deps if i.exists()}
 
     used_integer_keys = [i for i in task.depends_on if isinstance(i, int)]
     max_int = max(used_integer_keys) if used_integer_keys else 0
 
-    new_dependencies = dict(enumerate(new_dependencies, max_int + 1))
+    new_existing_deps = dict(enumerate(new_existing_deps, max_int + 1))
     collected_dependencies = _collect_nodes(
-        session, task.path, task.name, new_dependencies
+        session, task.path, task.name, new_existing_deps
     )
     task.depends_on = {**task.depends_on, **collected_dependencies}
 
