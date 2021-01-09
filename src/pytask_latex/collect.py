@@ -143,10 +143,12 @@ def _add_latex_dependencies_retroactively(task, session):
     new_deps = latex_dependencies - existing_paths
     new_existing_deps = {i for i in new_deps if i.exists()}
 
+    # Put scanned dependencies in a dictionary with incrementing keys.
     used_integer_keys = [i for i in task.depends_on if isinstance(i, int)]
     max_int = max(used_integer_keys) if used_integer_keys else 0
-
     new_existing_deps = dict(enumerate(new_existing_deps, max_int + 1))
+
+    # Collect new dependencies and add them to the task.
     collected_dependencies = _collect_nodes(
         session, task.path, task.name, new_existing_deps
     )
