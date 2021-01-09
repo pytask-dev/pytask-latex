@@ -2,9 +2,14 @@
 import os
 import shutil
 import sys
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
+
+
+TEST_RESOURCES = Path(__file__).parent / "resources"
+
 
 needs_latexmk = pytest.mark.skipif(
     shutil.which("latexmk") is None, reason="latexmk needs to be installed."

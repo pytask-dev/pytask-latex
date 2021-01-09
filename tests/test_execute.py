@@ -6,6 +6,7 @@ import pytest
 from _pytask.mark import Mark
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
+from conftest import TEST_RESOURCES
 from pytask import cli
 from pytask import main
 from pytask_latex.execute import pytask_execute_task_setup
@@ -384,7 +385,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
 @pytest.mark.end_to_end
 def test_compile_document_w_wrong_flag(tmp_path):
     """Test that wrong flags raise errors."""
-    tmp_path.joinpath("sub", "resources").mkdir(parents=True)
+    tmp_path.joinpath("sub").mkdir(parents=True)
 
     task_source = """
     import pytask
@@ -411,3 +412,38 @@ def test_compile_document_w_wrong_flag(tmp_path):
     assert session.exit_code == 1
     assert len(session.tasks) == 1
     assert isinstance(session.execution_reports[0].exc_info[1], CalledProcessError)
+
+
+@pytest.mark.end_to_end
+def test_compile_document_w_image(runner, tmp_path):
+    task_source = f"""
+    import pytask
+
+    @pytask.mark.produces("image.png")
+    def task_create_image():
+        shutil.copy(
+            "{TEST_RESOURCES.joinpath("image.png").as_posix()}",
+            "{tmp_path.as_posix()}"
+        )
+
+    @pytask.mark.latex
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.produces("document.pdf")
+    def task_compile_document():
+        pass
+
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \usepackage{graphicx}
+    \begin{document}
+    \includegraphics{image}
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+
+    assert result.exit_code == 0

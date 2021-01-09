@@ -10,6 +10,10 @@
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
 
+.. image:: https://results.pre-commit.ci/badge/github/pytask-dev/pytask-latex/main.svg
+    :target: https://results.pre-commit.ci/latest/github/pytask-dev/pytask-latex/main
+    :alt: pre-commit.ci status
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
@@ -215,6 +219,8 @@ infer_latex_dependencies
     pytask-latex tries to scan your LaTeX document for included files with the help of
     `latex-dependency-scanner <https://github.com/pytask-dev/latex-dependency-scanner>`_
     if the following configuration value is true which is also the default.
+
+    .. code-block:: ini
 
         infer_latex_dependencies = true
 
