@@ -414,6 +414,7 @@ def test_compile_document_w_wrong_flag(tmp_path):
     assert isinstance(session.execution_reports[0].exc_info[1], CalledProcessError)
 
 
+@needs_latexmk
 @pytest.mark.end_to_end
 def test_compile_document_w_image(runner, tmp_path):
     task_source = f"""
