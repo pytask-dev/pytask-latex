@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Iterable
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from _pytask.config import hookimpl
@@ -33,14 +34,15 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
     """
     if options is None:
         options = DEFAULT_OPTIONS.copy()
-    elif isinstance(options, str):
-        options = [options]
-
+    else:
+        options = _to_list(options)
+    options = [str(i) for i in options]
     return options
 
 
 def compile_latex_document(latex):
     """Replaces the dummy function provided by the user."""
+    print("Executing " + " ".join(latex) + ".")  # noqa: T001
     subprocess.run(latex, check=True)
 
 
@@ -101,9 +103,7 @@ def pytask_collect_task_teardown(session, task):
 
 
 def _get_node_from_dictionary(obj, key, fallback=0):
-    if isinstance(obj, Path):
-        pass
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         obj = obj.get(key) or obj.get(fallback)
     return obj
 
@@ -214,4 +214,30 @@ def _prepare_cmd_options(session, task, args):
             f"--output-directory={out_relative_to_latex_source}",
             latex_document.as_posix(),
         ]
+    )
+
+
+def _to_list(scalar_or_iter):
+    """Convert scalars and iterables to list.
+
+    Parameters
+    ----------
+    scalar_or_iter : str or list
+
+    Returns
+    -------
+    list
+
+    Examples
+    --------
+    >>> _to_list("a")
+    ['a']
+    >>> _to_list(["b"])
+    ['b']
+
+    """
+    return (
+        [scalar_or_iter]
+        if isinstance(scalar_or_iter, str) or not isinstance(scalar_or_iter, Sequence)
+        else list(scalar_or_iter)
     )

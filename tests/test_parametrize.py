@@ -76,12 +76,12 @@ def test_parametrizing_latex_options(tmp_path):
         (
             "document.tex",
             "document.pdf",
-            (["--interaction=nonstopmode", "--pdf", "--cd"],)
+            ("--interaction=nonstopmode", "--pdf", "--cd")
         ),
         (
             "document.tex",
             "document.dvi",
-            (["--interaction=nonstopmode", "--dvi", "--cd"],)
+            ("--interaction=nonstopmode", "--dvi", "--cd")
         ),
     ])
     def task_compile_latex_document():

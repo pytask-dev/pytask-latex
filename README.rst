@@ -184,11 +184,11 @@ to include the latex decorator in the parametrization just like with
         [
             (
                 "document.pdf",
-                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+                ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"),
             ),
             (
                 "document.dvi",
-                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+                ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"),
             ),
         ],
     )
