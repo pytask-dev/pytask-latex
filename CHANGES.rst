@@ -10,7 +10,8 @@ all releases are available on `Anaconda.org
 0.0.10 - 2021-xx-xx
 -------------------
 
-- :gh:`16` fixes the scanner by keeping only scanned dependencies which exist.
+- :gh:`16` fixes the scanner by keeping only scanned dependencies which exist. Convert
+  args to strings.
 
 
 0.0.9 - 2020-12-28
