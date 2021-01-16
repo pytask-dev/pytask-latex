@@ -138,7 +138,7 @@ For example, to compile your document with XeLaTeX, use
     def task_compile_latex_document():
         pass
 
-The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
+The options ``--jobname``, ``--output-directory`` and the ``.tex`` file which will be
 compiled are automatically handled and inferred from the ``@pytask.mark.depends_on`` and
 ``@pytask.mark.produces`` markers.
 
@@ -227,7 +227,7 @@ infer_latex_dependencies
     Since the package is in its early development phase and LaTeX provides a myriad of
     ways to include files as well as providing shortcuts for paths (e.g.,
     ``\graphicspath``), there are definitely some rough edges left. File an issue here
-    or in the other project to make us aware of the problem.
+    or in the other project in case of a problem.
 
 
 Changes
