@@ -7,7 +7,7 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
-0.0.10 - 2021-xx-xx
+0.0.10 - 2021-01-16
 -------------------
 
 - :gh:`16` fixes the scanner by keeping only scanned dependencies which exist. Convert
