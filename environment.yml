@@ -25,3 +25,4 @@ dependencies:
   - pre-commit
   - pytest-cov
   - pytest-xdist
+  - virtualenv=20.0.33

@@ -84,11 +84,11 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
         [
             (
                 "document.pdf",
-                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
+                ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
             ),
             (
                 "document.dvi",
-                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],)
+                ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
             ),
         ],
     )

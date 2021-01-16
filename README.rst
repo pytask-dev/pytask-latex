@@ -10,6 +10,10 @@
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
 
+.. image:: https://results.pre-commit.ci/badge/github/pytask-dev/pytask-latex/main.svg
+    :target: https://results.pre-commit.ci/latest/github/pytask-dev/pytask-latex/main
+    :alt: pre-commit.ci status
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
@@ -134,7 +138,7 @@ For example, to compile your document with XeLaTeX, use
     def task_compile_latex_document():
         pass
 
-The options ``jobname``, ``output-directory`` and the ``.tex`` file which will be
+The options ``--jobname``, ``--output-directory`` and the ``.tex`` file which will be
 compiled are automatically handled and inferred from the ``@pytask.mark.depends_on`` and
 ``@pytask.mark.produces`` markers.
 
@@ -180,11 +184,11 @@ to include the latex decorator in the parametrization just like with
         [
             (
                 "document.pdf",
-                (["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+                ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"),
             ),
             (
                 "document.dvi",
-                (["--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"],),
+                ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"),
             ),
         ],
     )
@@ -216,12 +220,14 @@ infer_latex_dependencies
     `latex-dependency-scanner <https://github.com/pytask-dev/latex-dependency-scanner>`_
     if the following configuration value is true which is also the default.
 
+    .. code-block:: ini
+
         infer_latex_dependencies = true
 
     Since the package is in its early development phase and LaTeX provides a myriad of
     ways to include files as well as providing shortcuts for paths (e.g.,
     ``\graphicspath``), there are definitely some rough edges left. File an issue here
-    or in the other project to make us aware of the problem.
+    or in the other project in case of a problem.
 
 
 Changes

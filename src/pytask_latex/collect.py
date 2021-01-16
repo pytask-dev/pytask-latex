@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Iterable
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from _pytask.config import hookimpl
@@ -33,14 +34,15 @@ def latex(options: Optional[Union[str, Iterable[str]]] = None):
     """
     if options is None:
         options = DEFAULT_OPTIONS.copy()
-    elif isinstance(options, str):
-        options = [options]
-
+    else:
+        options = _to_list(options)
+    options = [str(i) for i in options]
     return options
 
 
 def compile_latex_document(latex):
     """Replaces the dummy function provided by the user."""
+    print("Executing " + " ".join(latex) + ".")  # noqa: T001
     subprocess.run(latex, check=True)
 
 
@@ -101,9 +103,7 @@ def pytask_collect_task_teardown(session, task):
 
 
 def _get_node_from_dictionary(obj, key, fallback=0):
-    if isinstance(obj, Path):
-        pass
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         obj = obj.get(key) or obj.get(fallback)
     return obj
 
@@ -135,18 +135,22 @@ def _add_latex_dependencies_retroactively(task, session):
     # Scan the LaTeX document for included files.
     latex_dependencies = set(scan(source.path))
 
-    # Remove duplicated dependencies which have already been added by the user.
+    # Remove duplicated dependencies which have already been added by the user and those
+    # which do not exist.
     existing_paths = {
         i.path for i in task.depends_on.values() if isinstance(i, FilePathNode)
     }
-    new_dependencies = latex_dependencies - existing_paths
+    new_deps = latex_dependencies - existing_paths
+    new_existing_deps = {i for i in new_deps if i.exists()}
 
+    # Put scanned dependencies in a dictionary with incrementing keys.
     used_integer_keys = [i for i in task.depends_on if isinstance(i, int)]
     max_int = max(used_integer_keys) if used_integer_keys else 0
+    new_existing_deps = dict(enumerate(new_existing_deps, max_int + 1))
 
-    new_dependencies = dict(enumerate(new_dependencies, max_int + 1))
+    # Collect new dependencies and add them to the task.
     collected_dependencies = _collect_nodes(
-        session, task.path, task.name, new_dependencies
+        session, task.path, task.name, new_existing_deps
     )
     task.depends_on = {**task.depends_on, **collected_dependencies}
 
@@ -210,4 +214,30 @@ def _prepare_cmd_options(session, task, args):
             f"--output-directory={out_relative_to_latex_source}",
             latex_document.as_posix(),
         ]
+    )
+
+
+def _to_list(scalar_or_iter):
+    """Convert scalars and iterables to list.
+
+    Parameters
+    ----------
+    scalar_or_iter : str or list
+
+    Returns
+    -------
+    list
+
+    Examples
+    --------
+    >>> _to_list("a")
+    ['a']
+    >>> _to_list(["b"])
+    ['b']
+
+    """
+    return (
+        [scalar_or_iter]
+        if isinstance(scalar_or_iter, str) or not isinstance(scalar_or_iter, Sequence)
+        else list(scalar_or_iter)
     )
