@@ -1,0 +1,11 @@
+include LICENSE
+include versioneer.py
+include src/pytask_latex/_version.py
+
+exclude *.rst
+exclude *.yml
+exclude *.yaml
+exclude tox.ini
+
+prune .conda
+prune tests
