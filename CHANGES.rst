@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.11 - 2021-xx-xx
+-------------------
+
+- :gh:`18` prepares pytask-latex to be published on PyPI, adds versioneer and more.
+
+
 0.0.10 - 2021-01-16
 -------------------
 
