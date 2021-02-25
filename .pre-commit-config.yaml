@@ -72,7 +72,11 @@ repos:
   rev: v2.0.0
   hooks:
     - id: codespell
-      args: [-L=als]
+      args: [-L als, -L unparseable]
+-   repo: https://github.com/mgedmin/check-manifest
+    rev: "0.46"
+    hooks:
+    -   id: check-manifest
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
