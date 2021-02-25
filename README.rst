@@ -1,3 +1,11 @@
+.. image:: https://img.shields.io/pypi/v/pytask-latex?color=blue
+    :alt: PyPI
+    :target: https://pypi.org/project/pytask-latex
+
+.. image:: https://img.shields.io/pypi/pyversions/pytask-latex
+    :alt: PyPI - Python Version
+    :target: https://pypi.org/project/pytask-latex
+
 .. image:: https://anaconda.org/pytask/pytask-latex/badges/version.svg
     :target: https://anaconda.org/pytask/pytask-latex
 
@@ -32,9 +40,14 @@ is possible.
 Installation
 ------------
 
-Install the plugin with
+pytask-latex is available on `PyPI <https://pypi.org/project/pytask-latex>`_ and
+`Anaconda.org <https://anaconda.org/pytask/pytask-latex>`_. Install it with
 
 .. code-block:: console
+
+    $ pip install pytask-latex
+
+    # or
 
     $ conda config --add channels conda-forge --add channels pytask
     $ conda install pytask-latex

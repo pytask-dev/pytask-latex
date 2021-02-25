@@ -4,6 +4,14 @@ from setuptools import setup
 import versioneer
 
 
+PROJECT_URLS = {
+    "Documentation": "https://github.com/pytask-dev/pytask-latex",
+    "Github": "https://github.com/pytask-dev/pytask-latex",
+    "Tracker": "https://github.com/pytask-dev/pytask-latex/issues",
+    "Changelog": "https://github.com/pytask-dev/pytask-latex/blob/main/" "CHANGES.rst",
+}
+
+
 setup(
     name="pytask-latex",
     version=versioneer.get_version(),
@@ -12,6 +20,8 @@ setup(
     author="Tobias Raabe",
     author_email="raabe@posteo.de",
     python_requires=">=3.6",
+    url=PROJECT_URLS["Github"],
+    project_urls=PROJECT_URLS,
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
