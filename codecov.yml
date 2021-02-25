@@ -23,4 +23,4 @@ ignore:
   - ".tox/**/*"
   - "setup.py"
   - "versioneer.py"
-  - "src/pytask_parallel/_version.py"
+  - "src/pytask_latex/_version.py"
