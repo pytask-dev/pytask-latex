@@ -12,6 +12,9 @@
 .. image:: https://anaconda.org/pytask/pytask-latex/badges/platforms.svg
     :target: https://anaconda.org/pytask/pytask-latex
 
+.. image:: https://img.shields.io/pypi/l/pytask-latex
+    :alt: PyPI - License
+
 .. image:: https://github.com/pytask-dev/pytask-latex/workflows/Continuous%20Integration%20Workflow/badge.svg?branch=main
     :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
