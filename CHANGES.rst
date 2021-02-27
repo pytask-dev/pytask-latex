@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/pytask/pytask-latex>`_.
 
 
+0.0.12 - 2021-xx-xx
+-------------------
+
+- :gh:`19` fixes some post-release issues.
+
+
 0.0.11 - 2021-02-25
 -------------------
 
