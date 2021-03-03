@@ -11,7 +11,7 @@ all releases are available on `Anaconda.org
 -------------------
 
 - :gh:`19` fixes some post-release issues.
-- :gh:`20` adds dependencies to ``setup.py``.
+- :gh:`21` adds dependencies to ``setup.py``.
 
 
 0.0.11 - 2021-02-25
