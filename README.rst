@@ -14,6 +14,7 @@
 
 .. image:: https://img.shields.io/pypi/l/pytask-latex
     :alt: PyPI - License
+    :target: https://pypi.org/project/pytask-latex
 
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
@@ -25,7 +26,7 @@
     :target: https://results.pre-commit.ci/latest/github/pytask-dev/pytask-latex/main
     :alt: pre-commit.ci status
 
-.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/Continuous%20Integration%20Workflow/main
+.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/PyPI/main
     :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 ------
