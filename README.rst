@@ -25,7 +25,7 @@
     :target: https://results.pre-commit.ci/latest/github/pytask-dev/pytask-latex/main
     :alt: pre-commit.ci status
 
-.. image:: https://github.com/pytask-dev/pytask-latex/workflows/Continuous%20Integration%20Workflow/badge.svg?branch=main
+.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/Continuous%20Integration%20Workflow/main
     :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 ------
