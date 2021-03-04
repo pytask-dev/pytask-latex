@@ -19,7 +19,7 @@ PROJECT_URLS = {
 setup(
     name="pytask-latex",
     version=versioneer.get_version(),
-    cmd_class=versioneer.get_cmdclass(),
+    cmdclass=versioneer.get_cmdclass(),
     description="Compile LaTeX documents with pytask.",
     long_description=README,
     long_description_content_type="text/x-rst",
