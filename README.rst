@@ -16,8 +16,8 @@
     :alt: PyPI - License
     :target: https://pypi.org/project/pytask-latex
 
-.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/PyPI/main
-    :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
+.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/Continuous%20Integration%20Workflow/main
+   :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
@@ -45,7 +45,7 @@ Installation
 ------------
 
 pytask-latex is available on `PyPI <https://pypi.org/project/pytask-latex>`_ and
-`Anaconda.org <https://anaconda.org/pytask/pytask-latex>`_. Install it with
+`Anaconda.org <https://anaconda.org/conda-forge/pytask-latex>`_. Install it with
 
 .. code-block:: console
 
