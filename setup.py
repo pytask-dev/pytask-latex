@@ -39,8 +39,9 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     install_requires=[
-        "pytask >= 0.0.11",
+        "click",
         "latex-dependency-scanner",
+        "pytask >= 0.0.11",
     ],
     python_requires=">=3.6",
     entry_points={"pytask": ["pytask_latex = pytask_latex.plugin"]},
