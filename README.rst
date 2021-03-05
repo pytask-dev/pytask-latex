@@ -6,17 +6,18 @@
     :alt: PyPI - Python Version
     :target: https://pypi.org/project/pytask-latex
 
-.. image:: https://anaconda.org/pytask/pytask-latex/badges/version.svg
-    :target: https://anaconda.org/pytask/pytask-latex
+.. image:: https://img.shields.io/conda/vn/conda-forge/pytask-latex.svg
+    :target: https://anaconda.org/conda-forge/pytask-latex
 
-.. image:: https://anaconda.org/pytask/pytask-latex/badges/platforms.svg
-    :target: https://anaconda.org/pytask/pytask-latex
+.. image:: https://img.shields.io/conda/pn/conda-forge/pytask-latex.svg
+    :target: https://anaconda.org/conda-forge/pytask-latex
 
 .. image:: https://img.shields.io/pypi/l/pytask-latex
     :alt: PyPI - License
+    :target: https://pypi.org/project/pytask-latex
 
-.. image:: https://github.com/pytask-dev/pytask-latex/workflows/Continuous%20Integration%20Workflow/badge.svg?branch=main
-    :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
+.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/Continuous%20Integration%20Workflow/main
+   :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/pytask-dev/pytask-latex
@@ -44,7 +45,7 @@ Installation
 ------------
 
 pytask-latex is available on `PyPI <https://pypi.org/project/pytask-latex>`_ and
-`Anaconda.org <https://anaconda.org/pytask/pytask-latex>`_. Install it with
+`Anaconda.org <https://anaconda.org/conda-forge/pytask-latex>`_. Install it with
 
 .. code-block:: console
 
@@ -52,8 +53,7 @@ pytask-latex is available on `PyPI <https://pypi.org/project/pytask-latex>`_ and
 
     # or
 
-    $ conda config --add channels conda-forge --add channels pytask
-    $ conda install pytask-latex
+    $ conda install -c conda-forge pytask-latex
 
 You also need to have ``latexmk`` installed which determines the necessary number of
 compilation steps (`here <https://tex.stackexchange.com/a/249243/194826>`_ is an
