@@ -86,15 +86,20 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
         pass
 
 When the task is executed, you find a ``document.pdf`` in the same folder as your
-``document.text``, but you could also compile the report into a another folder by
+``document.tex``, but you could also compile the report into a another folder by
 changing the path in ``produces``.
 
 
 Multiple dependencies and products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-What happens if a task has more dependencies? Using a list, the LaTeX document which
-should be compiled must be found in the first position of the list.
+In general, you might not need to add dependencies other than the main LaTeX file
+because pytask-latex tries to infer other dependencies automatically. See the
+explanation for ``infer_latex_dependencies`` below.
+
+What happens if you need to add more dependencies to a task because they are not found
+automatically? You could use a list, but ensure that the LaTeX document which should be
+compiled is in the first position of the list.
 
 .. code-block:: python
 
