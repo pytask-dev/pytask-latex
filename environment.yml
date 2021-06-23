@@ -1,9 +1,11 @@
 name: pytask-latex
+
 channels:
   - conda-forge
-  - pytask
+  - nodefaults
+
 dependencies:
-  - python = 3.8
+  - python >= 3.6
   - pip
   - setuptools_scm
   - toml
