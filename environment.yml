@@ -5,6 +5,8 @@ channels:
 dependencies:
   - python = 3.8
   - pip
+  - setuptools_scm
+  - toml
 
   # Conda
   - anaconda-client
@@ -25,4 +27,3 @@ dependencies:
   - pre-commit
   - pytest-cov
   - pytest-xdist
-  - versioneer
