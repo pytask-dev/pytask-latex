@@ -30,6 +30,10 @@ repos:
     rev: v2.5.0
     hooks:
     -   id: reorder-python-imports
+-   repo: https://github.com/asottile/setup-cfg-fmt
+    rev: v1.17.0
+    hooks:
+    -   id: setup-cfg-fmt
 -   repo: https://github.com/psf/black
     rev: 21.6b0
     hooks:
@@ -54,6 +58,7 @@ repos:
             flake8-print,
             flake8-pytest-style,
             flake8-todo,
+            flake8-typing-imports,
             flake8-unused-arguments,
             pep8-naming,
             pydocstyle,

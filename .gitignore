@@ -13,3 +13,7 @@ __pycache__
 *.egg-info
 
 .pytask.sqlite3
+
+build
+dist
+src/pytask_latex/_version.py

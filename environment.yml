@@ -1,10 +1,14 @@
 name: pytask-latex
+
 channels:
   - conda-forge
-  - pytask
+  - nodefaults
+
 dependencies:
-  - python = 3.8
+  - python >= 3.6
   - pip
+  - setuptools_scm
+  - toml
 
   # Conda
   - anaconda-client
@@ -25,4 +29,3 @@ dependencies:
   - pre-commit
   - pytest-cov
   - pytest-xdist
-  - versioneer
