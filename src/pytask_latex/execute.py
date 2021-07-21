@@ -2,7 +2,7 @@
 import shutil
 
 from _pytask.config import hookimpl
-from _pytask.mark import get_specific_markers_from_task
+from _pytask.mark_utils import get_specific_markers_from_task
 
 
 @hookimpl

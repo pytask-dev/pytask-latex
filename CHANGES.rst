@@ -7,11 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/conda-forge/pytask-latex>`_.
 
 
-0.0.13 - 2021-xx-xx
--------------------
+0.1.0 - 2021-07-21
+------------------
 
 - :gh:`23` updates the ``README.rst``.
 - :gh:`24` replaces versioneer with setuptools-scm.
+- :gh:`26` aligns pytask-latex with pytask v0.1.0.
 
 
 0.0.12 - 2021-03-05
