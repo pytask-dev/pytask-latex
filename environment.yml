@@ -10,11 +10,6 @@ dependencies:
   - setuptools_scm
   - toml
 
-  # Conda
-  - anaconda-client
-  - conda-build
-  - conda-verify
-
   # Package dependencies
   - pytask >= 0.1.0
   - pytask-parallel >= 0.1.0
@@ -22,10 +17,10 @@ dependencies:
 
   # Misc
   - black
-  - bumpversion
   - jupyterlab
   - matplotlib
   - pdbpp
   - pre-commit
+  - pytest
   - pytest-cov
   - pytest-xdist
