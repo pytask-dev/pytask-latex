@@ -27,7 +27,9 @@ class DummyTask:
 def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
     """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
-    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: found_latexmk)
+    monkeypatch.setattr(
+        "pytask_latex.execute.shutil.which", lambda x: found_latexmk  # noqa: U100
+    )
 
     task = DummyTask()
     task.markers = [Mark("latex", (), {})]
@@ -230,7 +232,9 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
     # Hide latexmk if available.
-    monkeypatch.setattr("pytask_latex.execute.shutil.which", lambda x: None)
+    monkeypatch.setattr(
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: U100
+    )
 
     session = main({"paths": tmp_path})
 
