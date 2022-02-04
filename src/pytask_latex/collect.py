@@ -3,8 +3,9 @@ import copy
 import functools
 import os
 import subprocess
+import warnings
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Callable
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -19,31 +20,17 @@ from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from latex_dependency_scanner import scan
 
-
-DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
-
-
-def latex(options: Optional[Union[str, Iterable[str]]] = None):
-    """Specify command line options for latexmk.
-
-    Parameters
-    ----------
-    options : Optional[Union[str, Iterable[str]]]
-        One or multiple command line options passed to latexmk.
-
-    """
-    if options is None:
-        options = DEFAULT_OPTIONS.copy()
-    else:
-        options = _to_list(options)
-    options = [str(i) for i in options]
-    return options
+from . import build_steps
 
 
-def compile_latex_document(latex):
+def compile_latex_document(build_steps, main_file, job_name, out_dir):
     """Replaces the dummy function provided by the user."""
-    print("Executing " + " ".join(latex) + ".")  # noqa: T001
-    subprocess.run(latex, check=True)
+
+    for step in build_steps:
+        try:
+            step(main_file, job_name, out_dir)
+        except Exception as e:
+            raise RuntimeError(f"Build step {step.__name__} failed.") from e
 
 
 @hookimpl
@@ -80,23 +67,23 @@ def pytask_collect_task_teardown(session, task):
             task.produces, session.config["latex_document_key"]
         )
         if not (
-            isinstance(document, FilePathNode)
-            and document.value.suffix in [".pdf", ".ps", ".dvi"]
+                isinstance(document, FilePathNode)
+                and document.value.suffix in [".pdf", ".ps", ".dvi"]
         ):
             raise ValueError(
                 "The first or sole product of a LaTeX task must point to a .pdf, .ps "
                 "or .dvi file which is the compiled document."
             )
 
-        latex_function = _copy_func(compile_latex_document)
-        latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
+        task_function = _copy_func(compile_latex_document)
+        task_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
         merged_mark = _merge_all_markers(task)
-        args = latex(*merged_mark.args, **merged_mark.kwargs)
-        options = _prepare_cmd_options(session, task, args)
-        latex_function = functools.partial(latex_function, latex=options)
+        steps = get_build_steps(merged_mark)
+        args = get_build_step_args(session, task)
+        task_function = functools.partial(task_function, build_steps=steps, **args)
 
-        task.function = latex_function
+        task.function = task_function
 
         if session.config["infer_latex_dependencies"]:
             task = _add_latex_dependencies_retroactively(task, session)
@@ -169,22 +156,30 @@ def _merge_all_markers(task):
     return mark
 
 
-def _prepare_cmd_options(session, task, args):
-    """Prepare the command line arguments to compile the LaTeX document.
+def get_build_steps(latex_mark: Mark):
+    if isinstance(list, latex_mark.args[0]):
+        warnings.warn(
+            "The old argument syntax for latexmk is deprecated and will be removed in the next minor update. Afterwards a given list will be interpreted as list of build steps.")
+        yield build_steps.latexmk(_to_list(latex_mark.args[0]))
 
-    The output folder needs to be declared as a relative path to the directory where the
-    latex source lies.
+    elif "build_steps" in latex_mark.kwargs:
+        for step in latex_mark.kwargs["build_steps"]:
+            if isinstance(step, str):
+                yield getattr(build_steps, step)()  # create step with default args
+                continue
 
-    1. It must be relative because bibtex / biber, which is necessary for
-       bibliographies, does not accept full paths as a safety measure.
-    2. Due to the ``--cd`` flag, latexmk will change the directory to the one where the
-       source files are. Thus, relative to the latex sources.
+            if isinstance(step, Callable):
+                yield step  # already step function
+                continue
 
-    See this `discussion on Github
-    <https://github.com/James-Yu/LaTeX-Workshop/issues/1932#issuecomment-582416434>`_
-    for additional information.
+            raise ValueError("Unrecognized item given in build_steps")
 
-    """
+    else:
+        yield from build_steps.default_steps()
+
+
+def get_build_step_args(session, task):
+    """Prepare arguments for build step functions"""
     latex_document = _get_node_from_dictionary(
         task.depends_on, session.config["latex_source_key"]
     ).value
@@ -192,28 +187,14 @@ def _prepare_cmd_options(session, task, args):
         task.produces, session.config["latex_document_key"]
     ).value
 
-    # Jobname controls the name of the compiled document. No suffix!
-    if latex_document.stem != compiled_document.stem:
-        jobname = [f"--jobname={compiled_document.stem}"]
-    else:
-        jobname = []
+    job_name = compiled_document.stem
 
-    # The path to the output directory must be relative from the location of the source
-    # file. See docstring for more information.
-    out_relative_to_latex_source = Path(
-        os.path.relpath(compiled_document.parent, latex_document.parent)
-    ).as_posix()
+    out_dir = compiled_document.parent
 
-    return (
-        [
-            "latexmk",
-            *args,
-        ]
-        + jobname
-        + [
-            f"--output-directory={out_relative_to_latex_source}",
-            latex_document.as_posix(),
-        ]
+    return dict(
+        main_file=latex_document,
+        job_name=job_name,
+        out_dir=out_dir
     )
 
 
