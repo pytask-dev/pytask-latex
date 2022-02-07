@@ -7,9 +7,7 @@ import os
 import subprocess
 from pathlib import Path
 from typing import Iterable
-from typing import Optional
 from typing import Sequence
-from typing import Union
 
 from _pytask.config import hookimpl
 from _pytask.mark import Mark
@@ -25,7 +23,7 @@ from latex_dependency_scanner import scan
 DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
 
 
-def latex(options: Optional[Union[str, Iterable[str]]] = None):
+def latex(options: str | Iterable[str] | None = None):
     """Specify command line options for latexmk.
 
     Parameters
