@@ -6,9 +6,16 @@ repos:
         args: ['--maxkb=100']
     -   id: check-merge-conflict
     -   id: check-yaml
-        exclude: meta.yaml
     -   id: debug-statements
     -   id: end-of-file-fixer
+    -   id: check-case-conflict
+    -   id: check-vcs-permalinks
+    -   id: check-yaml
+    -   id: fix-byte-order-marker
+    -   id: mixed-line-ending
+    -   id: no-commit-to-branch
+        args: [--branch, main]
+    -   id: trailing-whitespace
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.9.0  # Use the ref you want to point at
     hooks:
@@ -25,11 +32,12 @@ repos:
     rev: v2.31.0
     hooks:
     -   id: pyupgrade
-        args: [--py36-plus]
+        args: [--py37-plus]
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v2.7.1
     hooks:
     -   id: reorder-python-imports
+        args: [--py37-plus, --add-import, 'from __future__ import annotations']
 -   repo: https://github.com/asottile/setup-cfg-fmt
     rev: v1.20.0
     hooks:

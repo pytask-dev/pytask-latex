@@ -1,4 +1,6 @@
 """Execute tasks."""
+from __future__ import annotations
+
 import shutil
 
 from _pytask.config import hookimpl
