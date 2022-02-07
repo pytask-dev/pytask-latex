@@ -1,4 +1,6 @@
 """Configure pytask."""
+from __future__ import annotations
+
 from _pytask.config import hookimpl
 from _pytask.shared import convert_truthy_or_falsy_to_bool
 from _pytask.shared import get_first_non_none_value
