@@ -1,4 +1,6 @@
 """Contains tests which do not require the plugin and ensure normal execution."""
+from __future__ import annotations
+
 import textwrap
 
 import pytest

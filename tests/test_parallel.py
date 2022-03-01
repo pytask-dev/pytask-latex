@@ -1,4 +1,6 @@
 """Contains test which ensure that the plugin works with pytask-parallel."""
+from __future__ import annotations
+
 import textwrap
 import time
 

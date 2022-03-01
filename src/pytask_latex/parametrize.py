@@ -1,4 +1,6 @@
 """Parametrize tasks."""
+from __future__ import annotations
+
 from _pytask.config import hookimpl
 from _pytask.mark import MARK_GEN as mark  # noqa: N811
 

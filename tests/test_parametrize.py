@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import textwrap
 
 import pytest
@@ -50,7 +52,7 @@ def test_parametrized_compilation_of_latex_documents(tmp_path):
         ("document_1.tex", "Like a worn out recording"),
         ("document_2.tex", "Of a favorite song"),
     ]:
-        latex_source = fr"""
+        latex_source = rf"""
         \documentclass{{report}}
         \begin{{document}}
         {content}
