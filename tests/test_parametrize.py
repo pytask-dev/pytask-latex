@@ -99,7 +99,8 @@ def test_parametrizing_latex_options(tmp_path):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        session = main({"paths": tmp_path})
 
     assert session.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()

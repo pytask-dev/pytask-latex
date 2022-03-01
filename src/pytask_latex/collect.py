@@ -4,9 +4,13 @@ from __future__ import annotations
 import copy
 import functools
 import warnings
+from subprocess import CalledProcessError
+from typing import Any
 from typing import Callable
+from typing import Iterable
 from typing import Sequence
 
+import latex_dependency_scanner as lds
 from _pytask.config import hookimpl
 from _pytask.mark import Mark
 from _pytask.mark_utils import get_specific_markers_from_task
@@ -15,8 +19,63 @@ from _pytask.nodes import _collect_nodes
 from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
-from latex_dependency_scanner import scan
-from pytask_latex import build_steps
+from pytask_latex import build_steps as bs
+
+
+_DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
+and will be removed in v0.2.0. To pass custom options to latexmk and the compilation \
+process convert
+
+    @pytask.mark.latex(options)
+    def task_func():
+        ...
+
+to
+
+    from pytask_latex import build_steps
+
+    @pytask.mark.latex(build_steps.latexmk(options))
+    def task_func():
+        ...
+
+"""
+
+
+def latex(
+    options: str | Iterable[str] | None = None,
+    *,
+    build_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]] = None,
+):
+    """Specify command line options for latexmk.
+
+    Parameters
+    ----------
+    options
+        One or multiple command line options passed to latexmk.
+    build_steps
+        Build steps to compile the document.
+
+    """
+    build_steps = ["latexmk"] if build_steps is None else build_steps
+
+    if options is not None:
+        warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
+        out = [bs.latexmk(_to_list(options))]
+
+    else:
+        out = []
+        for step in _to_list(build_steps):
+            if isinstance(step, str):
+                parsed_step = getattr(bs, step)
+                if parsed_step is None:
+                    raise ValueError(f"Build step {step!r} is unknown.")
+                out.append(parsed_step())
+            elif callable(step):
+                out.append(step)
+            else:
+                raise ValueError(f"Build step {step!r} is not a valid step.")
+
+    return out
 
 
 def compile_latex_document(build_steps, main_file, job_name, out_dir):
@@ -25,7 +84,7 @@ def compile_latex_document(build_steps, main_file, job_name, out_dir):
     for step in build_steps:
         try:
             step(main_file, job_name, out_dir)
-        except Exception as e:
+        except CalledProcessError as e:
             raise RuntimeError(f"Build step {step.__name__} failed.") from e
 
 
@@ -75,7 +134,7 @@ def pytask_collect_task_teardown(session, task):
         task_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
         merged_mark = _merge_all_markers(task)
-        steps = get_build_steps(merged_mark)
+        steps = latex(*merged_mark.args, **merged_mark.kwargs)
         args = get_build_step_args(session, task)
         task_function = functools.partial(task_function, build_steps=steps, **args)
 
@@ -116,7 +175,7 @@ def _add_latex_dependencies_retroactively(task, session):
     )
 
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(scan(source.path))
+    latex_dependencies = set(lds.scan(source.path))
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
@@ -150,31 +209,6 @@ def _merge_all_markers(task):
     for mark_ in latex_marks[1:]:
         mark = mark.combined_with(mark_)
     return mark
-
-
-def get_build_steps(latex_mark: Mark):
-    if isinstance(list, latex_mark.args[0]):
-        warnings.warn(
-            "The old argument syntax for latexmk is deprecated and will be removed in "
-            "the next minor update. Afterwards a given list will be interpreted as "
-            "list of build steps."
-        )
-        yield build_steps.latexmk(_to_list(latex_mark.args[0]))
-
-    elif "build_steps" in latex_mark.kwargs:
-        for step in latex_mark.kwargs["build_steps"]:
-            if isinstance(step, str):
-                yield getattr(build_steps, step)()  # create step with default args
-                continue
-
-            if isinstance(step, Callable):
-                yield step  # already step function
-                continue
-
-            raise ValueError("Unrecognized item given in build_steps")
-
-    else:
-        yield from build_steps.default_steps()
 
 
 def get_build_step_args(session, task):

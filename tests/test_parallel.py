@@ -22,7 +22,6 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.mark.xfail(reason="I don't know.")
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
@@ -58,6 +57,7 @@ def test_parallel_parametrization_over_source_files(runner, tmp_path):
 
     start = time.time()
     result = runner.invoke(cli, [tmp_path.as_posix()])
+
     assert result.exit_code == 0
     duration_normal = time.time() - start
 
@@ -66,13 +66,13 @@ def test_parallel_parametrization_over_source_files(runner, tmp_path):
 
     start = time.time()
     result = runner.invoke(cli, [tmp_path.as_posix(), "-n", 2])
+
     assert result.exit_code == 0
     duration_parallel = time.time() - start
 
     assert duration_parallel < duration_normal
 
 
-@pytest.mark.xfail(reason="I don't know.")
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
@@ -108,7 +108,9 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
     start = time.time()
-    result = runner.invoke(cli, [tmp_path.as_posix()])
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        result = runner.invoke(cli, [tmp_path.as_posix()])
+
     assert result.exit_code == 0
     duration_normal = time.time() - start
 
@@ -116,7 +118,9 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
         tmp_path.joinpath(name).unlink()
 
     start = time.time()
-    result = runner.invoke(cli, [tmp_path.as_posix(), "-n", 2])
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        result = runner.invoke(cli, [tmp_path.as_posix(), "-n", 2])
+
     assert result.exit_code == 0
     duration_parallel = time.time() - start
 

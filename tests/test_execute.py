@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import textwrap
 from contextlib import ExitStack as does_not_raise  # noqa: N813
-from subprocess import CalledProcessError
 
 import pytest
 from _pytask.mark import Mark
@@ -270,7 +269,8 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
-    result = runner.invoke(cli, [tmp_path.as_posix()])
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        result = runner.invoke(cli, [tmp_path.as_posix()])
 
     assert result.exit_code == 0
     assert tmp_path.joinpath("document.pdf").exists()
@@ -413,11 +413,12 @@ def test_compile_document_w_wrong_flag(tmp_path):
     """
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        session = main({"paths": tmp_path})
 
     assert session.exit_code == 1
     assert len(session.tasks) == 1
-    assert isinstance(session.execution_reports[0].exc_info[1], CalledProcessError)
+    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
 
 
 @needs_latexmk
