@@ -1,14 +1,9 @@
 """Collect tasks."""
 import copy
 import functools
-import os
-import subprocess
 import warnings
-from pathlib import Path
-from typing import Iterable, Callable
-from typing import Optional
+from typing import Callable
 from typing import Sequence
-from typing import Union
 
 from _pytask.config import hookimpl
 from _pytask.mark import Mark
@@ -19,8 +14,7 @@ from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from latex_dependency_scanner import scan
-
-from . import build_steps
+from pytask_latex import build_steps
 
 
 def compile_latex_document(build_steps, main_file, job_name, out_dir):
@@ -67,8 +61,8 @@ def pytask_collect_task_teardown(session, task):
             task.produces, session.config["latex_document_key"]
         )
         if not (
-                isinstance(document, FilePathNode)
-                and document.value.suffix in [".pdf", ".ps", ".dvi"]
+            isinstance(document, FilePathNode)
+            and document.value.suffix in [".pdf", ".ps", ".dvi"]
         ):
             raise ValueError(
                 "The first or sole product of a LaTeX task must point to a .pdf, .ps "
@@ -159,7 +153,10 @@ def _merge_all_markers(task):
 def get_build_steps(latex_mark: Mark):
     if isinstance(list, latex_mark.args[0]):
         warnings.warn(
-            "The old argument syntax for latexmk is deprecated and will be removed in the next minor update. Afterwards a given list will be interpreted as list of build steps.")
+            "The old argument syntax for latexmk is deprecated and will be removed in "
+            "the next minor update. Afterwards a given list will be interpreted as "
+            "list of build steps."
+        )
         yield build_steps.latexmk(_to_list(latex_mark.args[0]))
 
     elif "build_steps" in latex_mark.kwargs:
@@ -191,11 +188,7 @@ def get_build_step_args(session, task):
 
     out_dir = compiled_document.parent
 
-    return dict(
-        main_file=latex_document,
-        job_name=job_name,
-        out_dir=out_dir
-    )
+    return {"main_file": latex_document, "job_name": job_name, "out_dir": out_dir}
 
 
 def _to_list(scalar_or_iter):
