@@ -1,6 +1,7 @@
 """Contains test which ensure that the plugin works with pytask-parallel."""
 from __future__ import annotations
 
+import os
 import textwrap
 import time
 
@@ -22,6 +23,15 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+if "CI" in os.environ:
+    xfail_on_remote = pytest.xfail(reason="Does not succeed on CI.")
+else:
+
+    def xfail_on_remote(func):
+        return func
+
+
+@xfail_on_remote
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
@@ -73,6 +83,7 @@ def test_parallel_parametrization_over_source_files(runner, tmp_path):
     assert duration_parallel < duration_normal
 
 
+@xfail_on_remote
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
@@ -127,6 +138,7 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     assert duration_parallel < duration_normal
 
 
+@xfail_on_remote
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
