@@ -1,11 +1,20 @@
+"""This module contains build steps for compiling a LaTeX document.
+
+Each build step must have the following signature:
+
+.. code-block::
+
+    def build_step(main_file: Path, job_name: Optional[str], out_dir: Optional[Path]):
+        ...
+
+A build step constructor must yield a function with this signature.
+
+"""
 from __future__ import annotations
 
 import os
 import subprocess
 from pathlib import Path
-
-# each build step constructor must return a callable with the following signature:
-# run_step(main_file: Path, job_name: Optional[str], out_dir: Optional[Path])
 
 
 def _get_relative_out_dir(main_file, out_dir):
@@ -23,10 +32,6 @@ def _get_relative_out_dir(main_file, out_dir):
 
     """
     return Path(os.path.relpath(out_dir, main_file.parent)).as_posix()
-
-
-def default_steps():
-    return ["latexmk"]
 
 
 def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")):
