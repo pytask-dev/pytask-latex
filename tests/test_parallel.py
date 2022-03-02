@@ -125,3 +125,60 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
     duration_parallel = time.time() - start
 
     assert duration_parallel < duration_normal
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_parallel_parametrization_over_source_file_new_api(runner, tmp_path):
+    source = """
+    import pytask
+    from pytask_latex import build_steps
+
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.parametrize(
+        "produces, latex",
+        [
+            (
+                "document.pdf",
+                {"build_steps": build_steps.latexmk(
+                    ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+                )}
+            ),
+            (
+                "document.dvi",
+                {"build_steps": build_steps.latexmk(
+                    ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
+                )}
+            ),
+        ],
+    )
+    def task_compile_latex_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    Ma il mio mistero e chiuso in me
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    start = time.time()
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+
+    assert result.exit_code == 0
+    duration_normal = time.time() - start
+
+    for name in ["document.pdf", "document.dvi"]:
+        tmp_path.joinpath(name).unlink()
+
+    start = time.time()
+    result = runner.invoke(cli, [tmp_path.as_posix(), "-n", 2])
+
+    assert result.exit_code == 0
+    duration_parallel = time.time() - start
+
+    assert duration_parallel < duration_normal
