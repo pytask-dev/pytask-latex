@@ -23,7 +23,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-if "CI" in os.environ:
+if os.environ.get("CI") == "true":
     xfail_on_remote = pytest.xfail(reason="Does not succeed on CI.")
 else:
 
