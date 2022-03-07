@@ -34,11 +34,12 @@
 pytask-latex
 ============
 
-pytask-latex allows you to compile LaTeX documents.
+pytask-latex allows you to compile LaTeX documents with pytask
 
-It also tries to infer the dependency of the LaTeX document such as included images,
-bibliography files and other ``.tex`` files automatically to compile LaTeX documents
-when it is possible.
+It also uses `latex-dependency-scanner
+<https://github.com/pytask-dev/latex-dependency-scanner>`_ to automatically infer the
+dependencies of the LaTeX document such as images, bibliographies and other ``.tex``
+files which are necessary to compile the LaTeX document.
 
 
 Installation
@@ -65,8 +66,8 @@ following on the command line
     $ latexmk --help
 
 If an error is shown instead of a help page, you can install ``latexmk`` with one of the
-popular LaTeX distributions, like `MiKTeX <https://miktex.org/>`_, `TeX Live
-<https://www.tug.org/texlive/>`_, `MacTeX <http://www.tug.org/mactex/>`_ or others.
+popular LaTeX distributions, like `TeX Live <https://www.tug.org/texlive/>`_, `MiKTeX
+<https://miktex.org/>`_, `MacTeX <http://www.tug.org/mactex/>`_ or others.
 
 
 Usage
@@ -171,7 +172,7 @@ equivalent to the following.
         ...
 
 In this example, ``build_steps.latexmk`` is a build step constructor which accepts a set
-of options and creates a build step function out of it.
+of options and creates a build step function.
 
 You can pass different options to change the compilation process with latexmk. Here is
 an example for generating a ``.dvi``.
@@ -199,6 +200,9 @@ following signature:
         ...
         subproces.run(..., check=True)
 
+You can also pass your custom build step with the same signature to the ``build_steps``
+keyword argument of the decorator.
+
 Each build step receives the path to the LaTeX source file and the path to the final
 document which it uses to call some program on the command line to run another step in
 the compilation process.
@@ -210,8 +214,8 @@ glossaries and the like.
 Parametrization
 ~~~~~~~~~~~~~~~
 
-You can also parametrize the compilation, meaning compiling multiple .tex documents
-as well as compiling a .tex document with different command line arguments.
+You can also parametrize the compilation, meaning compiling multiple ``.tex`` documents
+as well as compiling a ``.tex`` document with different command line arguments.
 
 The following task compiles two latex documents.
 
