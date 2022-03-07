@@ -20,6 +20,7 @@ from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from pytask_latex import build_steps as bs
+from pytask_latex.utils import to_list
 
 
 _DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
@@ -60,11 +61,11 @@ def latex(
 
     if options is not None:
         warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
-        out = [bs.latexmk(_to_list(options))]
+        out = [bs.latexmk(options)]
 
     else:
         out = []
-        for step in _to_list(build_steps):
+        for step in to_list(build_steps):
             if isinstance(step, str):
                 parsed_step = getattr(bs, step)
                 if parsed_step is None:
@@ -225,29 +226,3 @@ def get_build_step_args(session, task):
     out_dir = compiled_document.parent
 
     return {"main_file": latex_document, "job_name": job_name, "out_dir": out_dir}
-
-
-def _to_list(scalar_or_iter):
-    """Convert scalars and iterables to list.
-
-    Parameters
-    ----------
-    scalar_or_iter : str or list
-
-    Returns
-    -------
-    list
-
-    Examples
-    --------
-    >>> _to_list("a")
-    ['a']
-    >>> _to_list(["b"])
-    ['b']
-
-    """
-    return (
-        [scalar_or_iter]
-        if isinstance(scalar_or_iter, str) or not isinstance(scalar_or_iter, Sequence)
-        else list(scalar_or_iter)
-    )

@@ -16,6 +16,8 @@ import os
 import subprocess
 from pathlib import Path
 
+from pytask_latex.utils import to_list
+
 
 def _get_relative_out_dir(main_file, out_dir):
     """The output folder needs to be declared as a relative path to the directory where
@@ -36,7 +38,7 @@ def _get_relative_out_dir(main_file, out_dir):
 
 def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")):
     """Build step that calls latexmk."""
-    options = [str(i) for i in options]
+    options = [str(i) for i in to_list(options)]
 
     def run_latexmk(main_file, job_name, out_dir):
         job_name_opt = [f"--jobname={job_name}"] if job_name else []
