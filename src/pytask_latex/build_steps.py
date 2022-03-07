@@ -4,7 +4,7 @@ Each build step must have the following signature:
 
 .. code-block::
 
-    def build_step(main_file: Path, job_name: Optional[str], out_dir: Optional[Path]):
+    def build_step(path_to_tex: Path, path_to_document: Path):
         ...
 
 A build step constructor must yield a function with this signature.
@@ -54,15 +54,16 @@ def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"
     """Build step that calls latexmk."""
     options = [str(i) for i in to_list(options)]
 
-    def run_latexmk(main_file, job_name, out_dir):
-        job_name_opt = [f"--jobname={job_name}"] if job_name else []
-        out_dir_opt = (
-            [f"--output-directory={_relative_to(main_file, out_dir)}"]
-            if out_dir
-            else []
-        )
+    def run_latexmk(path_to_tex, path_to_document):
+        job_name_opt = [f"--jobname={path_to_document.stem}"]
+        out_dir_opt = [
+            f"--output-directory={_relative_to(path_to_tex, path_to_document.parent)}"
+        ]
         cmd = (
-            ["latexmk", *options] + job_name_opt + out_dir_opt + [main_file.as_posix()]
+            ["latexmk", *options]
+            + job_name_opt
+            + out_dir_opt
+            + [path_to_tex.as_posix()]
         )
         subprocess.run(cmd, check=True)
 

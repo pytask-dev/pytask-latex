@@ -79,12 +79,12 @@ def latex(
     return out
 
 
-def compile_latex_document(build_steps, main_file, job_name, out_dir):
+def compile_latex_document(build_steps, path_to_tex, path_to_document):
     """Replaces the dummy function provided by the user."""
 
     for step in build_steps:
         try:
-            step(main_file, job_name, out_dir)
+            step(path_to_tex=path_to_tex, path_to_document=path_to_document)
         except CalledProcessError as e:
             raise RuntimeError(f"Build step {step.__name__} failed.") from e
 
@@ -213,7 +213,7 @@ def _merge_all_markers(task):
 
 
 def get_build_step_args(session, task):
-    """Prepare arguments for build step functions"""
+    """Prepare arguments passe to each build step."""
     latex_document = _get_node_from_dictionary(
         task.depends_on, session.config["latex_source_key"]
     ).value
@@ -221,8 +221,4 @@ def get_build_step_args(session, task):
         task.produces, session.config["latex_document_key"]
     ).value
 
-    job_name = compiled_document.stem
-
-    out_dir = compiled_document.parent
-
-    return {"main_file": latex_document, "job_name": job_name, "out_dir": out_dir}
+    return {"path_to_tex": latex_document, "path_to_document": compiled_document}
