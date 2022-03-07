@@ -19,8 +19,10 @@ from pathlib import Path
 from pytask_latex.utils import to_list
 
 
-def _get_relative_out_dir(main_file, out_dir):
-    """The output folder needs to be declared as a relative path to the directory where
+def _relative_to(path, relative_to):
+    """Create a relative path from one path to another as a string.
+
+    The output folder needs to be declared as a relative path to the directory where
     the latex source lies.
 
     1. It must be relative because bibtex / biber, which is necessary for
@@ -32,8 +34,20 @@ def _get_relative_out_dir(main_file, out_dir):
     <https://github.com/James-Yu/LaTeX-Workshop/issues/1932#issuecomment-582416434>`_
     for additional information.
 
+    Example
+    -------
+    >>> import sys
+    >>> from pathlib import Path
+    >>> if sys.platform == "win32":
+    ...     p = Path("C:/Users/user/documents/file.tex")
+    ... else:
+    ...     p = Path("/home/user/documents/file.tex")
+    >>> out = p.parents[2].joinpath("bld", "docs")
+    >>> _relative_to(p, out)
+    '../../bld/docs'
+
     """
-    return Path(os.path.relpath(out_dir, main_file.parent)).as_posix()
+    return Path(os.path.relpath(relative_to, path.parent)).as_posix()
 
 
 def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")):
@@ -43,7 +57,7 @@ def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"
     def run_latexmk(main_file, job_name, out_dir):
         job_name_opt = [f"--jobname={job_name}"] if job_name else []
         out_dir_opt = (
-            [f"--output-directory={_get_relative_out_dir(main_file, out_dir)}"]
+            [f"--output-directory={_relative_to(main_file, out_dir)}"]
             if out_dir
             else []
         )
