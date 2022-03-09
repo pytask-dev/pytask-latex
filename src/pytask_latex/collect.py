@@ -19,7 +19,7 @@ from _pytask.nodes import _collect_nodes
 from _pytask.nodes import FilePathNode
 from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
-from pytask_latex import build_steps as bs
+from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
@@ -33,9 +33,9 @@ process convert
 
 to
 
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
-    @pytask.mark.latex(build_steps.latexmk(options))
+    @pytask.mark.latex(compilation_steps.latexmk(options))
     def task_func():
         ...
 
@@ -45,7 +45,9 @@ to
 def latex(
     options: str | Iterable[str] | None = None,
     *,
-    build_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]] = None,
+    compilation_steps: str
+    | Callable[..., Any]
+    | Sequence[str | Callable[..., Any]] = None,
 ):
     """Specify command line options for latexmk.
 
@@ -53,40 +55,40 @@ def latex(
     ----------
     options
         One or multiple command line options passed to latexmk.
-    build_steps
-        Build steps to compile the document.
+    compilation_steps
+        Compilation steps to compile the document.
 
     """
-    build_steps = ["latexmk"] if build_steps is None else build_steps
+    compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
 
     if options is not None:
         warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
-        out = [bs.latexmk(options)]
+        out = [cs.latexmk(options)]
 
     else:
         out = []
-        for step in to_list(build_steps):
+        for step in to_list(compilation_steps):
             if isinstance(step, str):
-                parsed_step = getattr(bs, step)
+                parsed_step = getattr(cs, step)
                 if parsed_step is None:
-                    raise ValueError(f"Build step {step!r} is unknown.")
+                    raise ValueError(f"Compilation step {step!r} is unknown.")
                 out.append(parsed_step())
             elif callable(step):
                 out.append(step)
             else:
-                raise ValueError(f"Build step {step!r} is not a valid step.")
+                raise ValueError(f"Compilation step {step!r} is not a valid step.")
 
     return out
 
 
-def compile_latex_document(build_steps, path_to_tex, path_to_document):
+def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
     """Replaces the dummy function provided by the user."""
 
-    for step in build_steps:
+    for step in compilation_steps:
         try:
             step(path_to_tex=path_to_tex, path_to_document=path_to_document)
         except CalledProcessError as e:
-            raise RuntimeError(f"Build step {step.__name__} failed.") from e
+            raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
 
 
 @hookimpl
@@ -136,8 +138,10 @@ def pytask_collect_task_teardown(session, task):
 
         merged_mark = _merge_all_markers(task)
         steps = latex(*merged_mark.args, **merged_mark.kwargs)
-        args = get_build_step_args(session, task)
-        task_function = functools.partial(task_function, build_steps=steps, **args)
+        args = get_compilation_step_args(session, task)
+        task_function = functools.partial(
+            task_function, compilation_steps=steps, **args
+        )
 
         task.function = task_function
 
@@ -212,8 +216,8 @@ def _merge_all_markers(task):
     return mark
 
 
-def get_build_step_args(session, task):
-    """Prepare arguments passe to each build step."""
+def get_compilation_step_args(session, task):
+    """Prepare arguments passe to each compilation step."""
     latex_document = _get_node_from_dictionary(
         task.depends_on, session.config["latex_source_key"]
     ).value

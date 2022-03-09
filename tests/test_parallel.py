@@ -141,7 +141,7 @@ def test_parallel_parametrization_over_source_file(runner, tmp_path):
 def test_parallel_parametrization_over_source_file_new_api(runner, tmp_path):
     source = """
     import pytask
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.parametrize(
@@ -149,13 +149,13 @@ def test_parallel_parametrization_over_source_file_new_api(runner, tmp_path):
         [
             (
                 "document.pdf",
-                {"build_steps": build_steps.latexmk(
+                {"compilation_steps": compilation_steps.latexmk(
                     ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
                 )}
             ),
             (
                 "document.dvi",
-                {"build_steps": build_steps.latexmk(
+                {"compilation_steps": compilation_steps.latexmk(
                     ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
                 )}
             ),

@@ -282,10 +282,10 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
 def test_compile_latex_document_w_xelatex_new_api(runner, tmp_path):
     task_source = """
     import pytask
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
     @pytask.mark.latex(
-        build_steps=build_steps.latexmk(
+        compilation_steps=compilation_steps.latexmk(
             ["--xelatex", "--interaction=nonstopmode", "--synctex=1", "--cd"]
         )
     )
@@ -465,9 +465,9 @@ def test_compile_document_w_wrong_flag_new_api(tmp_path):
 
     task_source = """
     import pytask
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
-    @pytask.mark.latex(build_steps=build_steps.latexmk("--wrong-flag"))
+    @pytask.mark.latex(compilation_steps=compilation_steps.latexmk("--wrong-flag"))
     @pytask.mark.depends_on("document.tex")
     @pytask.mark.produces("out/document.pdf")
     def task_compile_document():

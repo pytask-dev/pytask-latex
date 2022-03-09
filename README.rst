@@ -149,30 +149,30 @@ decorator.
 
 .. code-block:: python
 
-    @pytask.mark.latex(build_steps="latexmk")
+    @pytask.mark.latex(compilation_steps="latexmk")
     def task_compile_latex_document():
         ...
 
-The ``@pytask.mark.latex`` decorator has a keyword argument called ``build_steps`` which
-accepts which accepts strings or list of strings pointing to internally implemented
-build steps. Using strings will use the default configuration of this build step. It is
-equivalent to the following.
+The ``@pytask.mark.latex`` decorator has a keyword argument called ``compilation_steps``
+which accepts which accepts strings or list of strings pointing to internally
+implemented compilation steps. Using strings will use the default configuration of this
+compilation step. It is equivalent to the following.
 
 .. code-block::
 
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
 
     @pytask.mark.latex(
-        build_steps=build_steps.latexmk(
+        compilation_steps=compilation_steps.latexmk(
             options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
         )
     )
     def task_compile_latex_document():
         ...
 
-In this example, ``build_steps.latexmk`` is a build step constructor which accepts a set
-of options and creates a build step function.
+In this example, ``compilation_steps.latexmk`` is a compilation step constructor which
+accepts a set of options and creates a compilation step function.
 
 You can pass different options to change the compilation process with latexmk. Here is
 an example for generating a ``.dvi``.
@@ -180,15 +180,15 @@ an example for generating a ``.dvi``.
 .. code-block:: python
 
     @pytask.mark.latex(
-        build_steps=build_steps.latexmk(
+        compilation_steps=compilation_steps.latexmk(
             options=("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
         )
     )
     def task_compile_latex_document():
         ...
 
-``build_step.latexmk(options)`` generates a build step which is a function with the
-following signature:
+``compilation_step.latexmk(options)`` generates a compilation step which is a function
+with the following signature:
 
 .. code-block::
 
@@ -196,19 +196,19 @@ following signature:
     import subprocess
 
 
-    def custom_build_step(path_to_tex: Path, path_to_document: Path) -> None:
+    def custom_compilation_step(path_to_tex: Path, path_to_document: Path) -> None:
         ...
         subproces.run(..., check=True)
 
-You can also pass your custom build step with the same signature to the ``build_steps``
-keyword argument of the decorator.
+You can also pass your custom compilation step with the same signature to the
+``compilation_steps`` keyword argument of the decorator.
 
-Each build step receives the path to the LaTeX source file and the path to the final
-document which it uses to call some program on the command line to run another step in
-the compilation process.
+Each compilation step receives the path to the LaTeX source file and the path to the
+final document which it uses to call some program on the command line to run another
+step in the compilation process.
 
-In the future, pytask-latex will provide more build steps for compiling bibliographies,
-glossaries and the like.
+In the future, pytask-latex will provide more compilation steps for compiling
+bibliographies, glossaries and the like.
 
 
 Parametrization
@@ -233,7 +233,7 @@ The following task compiles two latex documents.
 If you want to compile the same document with different command line options, you have
 to include the latex decorator in the parametrization just like with
 ``@pytask.mark.depends_on`` and ``@pytask.mark.produces``. Pass a dictionary for
-possible build steps and their options.
+possible compilation steps and their options.
 
 .. code-block:: python
 
@@ -244,7 +244,7 @@ possible build steps and their options.
             (
                 "document.pdf",
                 {
-                    "build_steps": build_steps.latexmk(
+                    "compilation_steps": compilation_steps.latexmk(
                         ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
                     )
                 },
@@ -252,7 +252,7 @@ possible build steps and their options.
             (
                 "document.dvi",
                 {
-                    "build_steps": build_steps.latexmk(
+                    "compilation_steps": compilation_steps.latexmk(
                         ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
                     )
                 },

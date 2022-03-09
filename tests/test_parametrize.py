@@ -113,20 +113,20 @@ def test_parametrizing_latex_options(tmp_path):
 def test_parametrizing_latex_options_new_api(tmp_path):
     task_source = """
     import pytask
-    from pytask_latex import build_steps
+    from pytask_latex import compilation_steps
 
     @pytask.mark.parametrize("depends_on, produces, latex", [
         (
             "document.tex",
             "document.pdf",
-            {"build_steps": build_steps.latexmk(
+            {"compilation_steps": compilation_steps.latexmk(
                 ("--interaction=nonstopmode", "--pdf", "--cd"))
             }
         ),
         (
             "document.tex",
             "document.dvi",
-            {"build_steps": build_steps.latexmk(
+            {"compilation_steps": compilation_steps.latexmk(
                 ("--interaction=nonstopmode", "--dvi", "--cd"))
             }
         ),
