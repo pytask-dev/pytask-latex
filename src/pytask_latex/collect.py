@@ -14,10 +14,8 @@ import latex_dependency_scanner as lds
 from _pytask.config import hookimpl
 from _pytask.mark import Mark
 from _pytask.mark_utils import get_specific_markers_from_task
-from _pytask.mark_utils import has_marker
 from _pytask.nodes import _collect_nodes
 from _pytask.nodes import FilePathNode
-from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
 from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
@@ -89,23 +87,6 @@ def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
             step(path_to_tex=path_to_tex, path_to_document=path_to_document)
         except CalledProcessError as e:
             raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
-
-
-@hookimpl
-def pytask_collect_task(session, path, name, obj):
-    """Collect a task which is a function.
-
-    There is some discussion on how to detect functions in this `thread
-    <https://stackoverflow.com/q/624926/7523785>`_. :class:`types.FunctionType` does not
-    detect built-ins which is not possible anyway.
-
-    """
-    if name.startswith("task_") and callable(obj) and has_marker(obj, "latex"):
-        task = PythonFunctionTask.from_path_name_function_session(
-            path, name, obj, session
-        )
-
-        return task
 
 
 @hookimpl
