@@ -4,19 +4,24 @@ from __future__ import annotations
 import copy
 import functools
 import warnings
+from pathlib import Path
 from subprocess import CalledProcessError
+from types import FunctionType
 from typing import Any
 from typing import Callable
 from typing import Iterable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
-from _pytask.config import hookimpl
-from _pytask.mark import Mark
-from _pytask.mark_utils import get_specific_markers_from_task
-from _pytask.nodes import _collect_nodes
-from _pytask.nodes import FilePathNode
-from _pytask.parametrize import _copy_func
+from pybaum.tree_util import tree_map
+from pytask import FilePathNode
+from pytask import get_marks
+from pytask import has_mark
+from pytask import hookimpl
+from pytask import Mark
+from pytask import MetaNode
+from pytask import NodeNotCollectedError
+from pytask import Session
 from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
@@ -41,12 +46,13 @@ to
 
 
 def latex(
-    options: str | Iterable[str] | None = None,
     *,
+    script: str | Path | None = None,
+    options: str | Iterable[str] | None = None,
     compilation_steps: str
     | Callable[..., Any]
     | Sequence[str | Callable[..., Any]] = None,
-):
+) -> tuple[str | Path | None, list[Callable[..., Any]]]:
     """Specify command line options for latexmk.
 
     Parameters
@@ -92,7 +98,7 @@ def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
 @hookimpl
 def pytask_collect_task_teardown(session, task):
     """Perform some checks."""
-    if get_specific_markers_from_task(task, "latex"):
+    if has_mark(task, "latex"):
         source = _get_node_from_dictionary(
             task.depends_on, session.config["latex_source_key"]
         )
@@ -177,8 +183,8 @@ def _add_latex_dependencies_retroactively(task, session):
     new_existing_deps = dict(enumerate(new_existing_deps, max_int + 1))
 
     # Collect new dependencies and add them to the task.
-    collected_dependencies = _collect_nodes(
-        session, task.path, task.name, new_existing_deps
+    collected_dependencies = tree_map(
+        lambda x: _collect_node(session, task.path, task.name, x), new_existing_deps
     )
     task.depends_on = {**task.depends_on, **collected_dependencies}
 
@@ -190,7 +196,7 @@ def _add_latex_dependencies_retroactively(task, session):
 
 def _merge_all_markers(task):
     """Combine all information from markers for the compile latex function."""
-    latex_marks = get_specific_markers_from_task(task, "latex")
+    latex_marks = get_marks(task, "latex")
     mark = latex_marks[0]
     for mark_ in latex_marks[1:]:
         mark = mark.combined_with(mark_)
@@ -207,3 +213,67 @@ def get_compilation_step_args(session, task):
     ).value
 
     return {"path_to_tex": latex_document, "path_to_document": compiled_document}
+
+
+def _copy_func(func: FunctionType) -> FunctionType:
+    """Create a copy of a function.
+
+    Based on https://stackoverflow.com/a/13503277/7523785.
+
+    Example
+    -------
+    >>> def _func(): pass
+    >>> copied_func = _copy_func(_func)
+    >>> _func is copied_func
+    False
+
+    """
+    new_func = FunctionType(
+        func.__code__,
+        func.__globals__,
+        name=func.__name__,
+        argdefs=func.__defaults__,
+        closure=func.__closure__,
+    )
+    new_func = functools.update_wrapper(new_func, func)
+    new_func.__kwdefaults__ = func.__kwdefaults__
+    return new_func
+
+
+def _collect_node(
+    session: Session, path: Path, name: str, node: str | Path
+) -> dict[str, MetaNode]:
+    """Collect nodes for a task.
+
+    Parameters
+    ----------
+    session : _pytask.session.Session
+        The session.
+    path : Path
+        The path to the task whose nodes are collected.
+    name : str
+        The name of the task.
+    nodes : Dict[str, Union[str, Path]]
+        A dictionary of nodes parsed from the ``depends_on`` or ``produces`` markers.
+
+    Returns
+    -------
+    Dict[str, MetaNode]
+        A dictionary of node names and their paths.
+
+    Raises
+    ------
+    NodeNotCollectedError
+        If the node could not collected.
+
+    """
+    collected_node = session.hook.pytask_collect_node(
+        session=session, path=path, node=node
+    )
+    if collected_node is None:
+        raise NodeNotCollectedError(
+            f"{node!r} cannot be parsed as a dependency or product for task "
+            f"{name!r} in {path!r}."
+        )
+
+    return collected_node
