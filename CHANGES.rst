@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/conda-forge/pytask-latex>`_.
 
 
+0.2.0 - 2022-xx-xx
+------------------
+
+- :pull:`33` aligns pytask-latex with the pytask v0.2.
+
+
 0.1.2 - 2022-xx-xx
 ------------------
 
