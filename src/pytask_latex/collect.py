@@ -69,7 +69,6 @@ def latex(
 
 def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
     """Replaces the dummy function provided by the user."""
-
     for step in compilation_steps:
         try:
             step(path_to_tex=path_to_tex, path_to_document=path_to_document)
@@ -156,6 +155,8 @@ def pytask_collect_task(session, path, name, obj):
 
         if session.config["infer_latex_dependencies"]:
             task = _add_latex_dependencies_retroactively(task, session)
+
+        return task
 
 
 def _get_node_from_dictionary(obj, key, fallback=0):
