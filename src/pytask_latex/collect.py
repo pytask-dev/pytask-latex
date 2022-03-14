@@ -1,27 +1,28 @@
 """Collect tasks."""
 from __future__ import annotations
 
-import copy
 import functools
-import warnings
 from pathlib import Path
 from subprocess import CalledProcessError
 from types import FunctionType
 from typing import Any
 from typing import Callable
-from typing import Iterable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
 from pybaum.tree_util import tree_map
+from pytask import depends_on
 from pytask import FilePathNode
-from pytask import get_marks
 from pytask import has_mark
 from pytask import hookimpl
 from pytask import Mark
 from pytask import MetaNode
 from pytask import NodeNotCollectedError
+from pytask import parse_nodes
+from pytask import produces
+from pytask import remove_marks
 from pytask import Session
+from pytask import Task
 from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
@@ -47,8 +48,8 @@ to
 
 def latex(
     *,
-    script: str | Path | None = None,
-    options: str | Iterable[str] | None = None,
+    script: str | Path,
+    document: str | Path,
     compilation_steps: str
     | Callable[..., Any]
     | Sequence[str | Callable[..., Any]] = None,
@@ -63,26 +64,7 @@ def latex(
         Compilation steps to compile the document.
 
     """
-    compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
-
-    if options is not None:
-        warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
-        out = [cs.latexmk(options)]
-
-    else:
-        out = []
-        for step in to_list(compilation_steps):
-            if isinstance(step, str):
-                parsed_step = getattr(cs, step)
-                if parsed_step is None:
-                    raise ValueError(f"Compilation step {step!r} is unknown.")
-                out.append(parsed_step())
-            elif callable(step):
-                out.append(step)
-            else:
-                raise ValueError(f"Compilation step {step!r} is not a valid step.")
-
-    return out
+    return script, document, compilation_steps
 
 
 def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
@@ -96,41 +78,81 @@ def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
 
 
 @hookimpl
-def pytask_collect_task_teardown(session, task):
+def pytask_collect_task(session, path, name, obj):
     """Perform some checks."""
-    if has_mark(task, "latex"):
-        source = _get_node_from_dictionary(
-            task.depends_on, session.config["latex_source_key"]
-        )
-        if not (isinstance(source, FilePathNode) and source.value.suffix == ".tex"):
+    __tracebackhide__ = True
+
+    if name.startswith("task_") and callable(obj) and has_mark(obj, "latex"):
+        obj, marks = remove_marks(obj, "latex")
+
+        if len(marks) > 1:
             raise ValueError(
-                "The first or sole dependency of a LaTeX task must be the document "
-                "which will be compiled and has a .tex extension."
+                f"Task {name!r} has multiple @pytask.mark.latex marker, but only one "
+                "is allowed."
             )
 
-        document = _get_node_from_dictionary(
-            task.produces, session.config["latex_document_key"]
+        latex_mark = marks[0]
+        script, document, compilation_steps = latex(**latex_mark.kwargs)
+
+        parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
+
+        obj.pytask_meta.markers.append(latex_mark)
+
+        dependencies = parse_nodes(session, path, name, obj, depends_on)
+        products = parse_nodes(session, path, name, obj, produces)
+
+        markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
+        kwargs = obj.pytask_meta.kwargs if hasattr(obj, "pytask_meta") else {}
+
+        task = Task(
+            base_name=name,
+            path=path,
+            function=_copy_func(compile_latex_document),
+            depends_on=dependencies,
+            produces=products,
+            markers=markers,
+            kwargs=kwargs,
         )
+
+        script_node = session.hook.pytask_collect_node(
+            session=session, path=path, node=script
+        )
+        document_node = session.hook.pytask_collect_node(
+            session=session, path=path, node=document
+        )
+
         if not (
-            isinstance(document, FilePathNode)
-            and document.value.suffix in [".pdf", ".ps", ".dvi"]
+            isinstance(script_node, FilePathNode) and script_node.value.suffix == ".tex"
         ):
             raise ValueError(
-                "The first or sole product of a LaTeX task must point to a .pdf, .ps "
-                "or .dvi file which is the compiled document."
+                "The 'script' keyword of the @pytask.mark.latex decorator must point "
+                "to LaTeX file with the .tex suffix."
             )
 
-        task_function = _copy_func(compile_latex_document)
-        task_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
+        if not (
+            isinstance(document_node, FilePathNode)
+            and document_node.value.suffix in [".pdf", ".ps", ".dvi"]
+        ):
+            raise ValueError(
+                "The 'document' keyword of the @pytask.mark.latex decorator must point "
+                "to a .pdf, .ps or .dvi file."
+            )
 
-        merged_mark = _merge_all_markers(task)
-        steps = latex(*merged_mark.args, **merged_mark.kwargs)
-        args = get_compilation_step_args(session, task)
-        task_function = functools.partial(
-            task_function, compilation_steps=steps, **args
+        if isinstance(task.depends_on, dict):
+            task.depends_on["__script"] = script_node
+        else:
+            task.depends_on = {0: task.depends_on, "__script": script_node}
+        if isinstance(task.produces, dict):
+            task.produces["__document"] = document_node
+        else:
+            task.produces = {0: task.produces, "__document": document_node}
+
+        task.function = functools.partial(
+            task.function,
+            compilation_steps=parsed_compilation_steps,
+            path_to_tex=script_node.path,
+            path_to_document=document_node.path,
         )
-
-        task.function = task_function
 
         if session.config["infer_latex_dependencies"]:
             task = _add_latex_dependencies_retroactively(task, session)
@@ -162,12 +184,8 @@ def _add_latex_dependencies_retroactively(task, session):
         The session.
 
     """
-    source = _get_node_from_dictionary(
-        task.depends_on, session.config["latex_source_key"]
-    )
-
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(lds.scan(source.path))
+    latex_dependencies = set(lds.scan(task.depends_on["__script"].path))
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
@@ -176,43 +194,18 @@ def _add_latex_dependencies_retroactively(task, session):
     }
     new_deps = latex_dependencies - existing_paths
     new_existing_deps = {i for i in new_deps if i.exists()}
-
-    # Put scanned dependencies in a dictionary with incrementing keys.
-    used_integer_keys = [i for i in task.depends_on if isinstance(i, int)]
-    max_int = max(used_integer_keys) if used_integer_keys else 0
-    new_existing_deps = dict(enumerate(new_existing_deps, max_int + 1))
+    new_numbered_deps = dict(enumerate(new_existing_deps))
 
     # Collect new dependencies and add them to the task.
     collected_dependencies = tree_map(
-        lambda x: _collect_node(session, task.path, task.name, x), new_existing_deps
+        lambda x: _collect_node(session, task.path, task.name, x), new_numbered_deps
     )
-    task.depends_on = {**task.depends_on, **collected_dependencies}
+    task.depends_on["__scanned_dependencies"] = collected_dependencies
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
 
     return task
-
-
-def _merge_all_markers(task):
-    """Combine all information from markers for the compile latex function."""
-    latex_marks = get_marks(task, "latex")
-    mark = latex_marks[0]
-    for mark_ in latex_marks[1:]:
-        mark = mark.combined_with(mark_)
-    return mark
-
-
-def get_compilation_step_args(session, task):
-    """Prepare arguments passe to each compilation step."""
-    latex_document = _get_node_from_dictionary(
-        task.depends_on, session.config["latex_source_key"]
-    ).value
-    compiled_document = _get_node_from_dictionary(
-        task.produces, session.config["latex_document_key"]
-    ).value
-
-    return {"path_to_tex": latex_document, "path_to_document": compiled_document}
 
 
 def _copy_func(func: FunctionType) -> FunctionType:
@@ -277,3 +270,21 @@ def _collect_node(
         )
 
     return collected_node
+
+
+def _parse_compilation_steps(compilation_steps):
+    compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
+
+    parsed_compilation_steps = []
+    for step in to_list(compilation_steps):
+        if isinstance(step, str):
+            parsed_step = getattr(cs, step)
+            if parsed_step is None:
+                raise ValueError(f"Compilation step {step!r} is unknown.")
+            parsed_compilation_steps.append(parsed_step())
+        elif callable(step):
+            parsed_compilation_steps.append(step)
+        else:
+            raise ValueError(f"Compilation step {step!r} is not a valid step.")
+
+    return parsed_compilation_steps

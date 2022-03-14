@@ -11,6 +11,7 @@ all releases are available on `Anaconda.org
 ------------------
 
 - :pull:`33` aligns pytask-latex with the pytask v0.2.
+- :pull:`34` deprecates the old api.
 
 
 0.1.2 - 2022-xx-xx
