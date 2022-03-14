@@ -3,64 +3,90 @@ from __future__ import annotations
 
 import copy
 import functools
-import os
-import subprocess
-from pathlib import Path
+import warnings
+from subprocess import CalledProcessError
+from typing import Any
+from typing import Callable
 from typing import Iterable
 from typing import Sequence
 
+import latex_dependency_scanner as lds
 from _pytask.config import hookimpl
 from _pytask.mark import Mark
 from _pytask.mark_utils import get_specific_markers_from_task
-from _pytask.mark_utils import has_marker
 from _pytask.nodes import _collect_nodes
 from _pytask.nodes import FilePathNode
-from _pytask.nodes import PythonFunctionTask
 from _pytask.parametrize import _copy_func
-from latex_dependency_scanner import scan
+from pytask_latex import compilation_steps as cs
+from pytask_latex.utils import to_list
 
 
-DEFAULT_OPTIONS = ["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"]
+_DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
+and will be removed in v0.2.0. To pass custom options to latexmk and the compilation \
+process convert
+
+    @pytask.mark.latex(options)
+    def task_func():
+        ...
+
+to
+
+    from pytask_latex import compilation_steps
+
+    @pytask.mark.latex(compilation_steps.latexmk(options))
+    def task_func():
+        ...
+
+"""
 
 
-def latex(options: str | Iterable[str] | None = None):
+def latex(
+    options: str | Iterable[str] | None = None,
+    *,
+    compilation_steps: str
+    | Callable[..., Any]
+    | Sequence[str | Callable[..., Any]] = None,
+):
     """Specify command line options for latexmk.
 
     Parameters
     ----------
-    options : Optional[Union[str, Iterable[str]]]
+    options
         One or multiple command line options passed to latexmk.
+    compilation_steps
+        Compilation steps to compile the document.
 
     """
-    if options is None:
-        options = DEFAULT_OPTIONS.copy()
+    compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
+
+    if options is not None:
+        warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
+        out = [cs.latexmk(options)]
+
     else:
-        options = _to_list(options)
-    options = [str(i) for i in options]
-    return options
+        out = []
+        for step in to_list(compilation_steps):
+            if isinstance(step, str):
+                parsed_step = getattr(cs, step)
+                if parsed_step is None:
+                    raise ValueError(f"Compilation step {step!r} is unknown.")
+                out.append(parsed_step())
+            elif callable(step):
+                out.append(step)
+            else:
+                raise ValueError(f"Compilation step {step!r} is not a valid step.")
+
+    return out
 
 
-def compile_latex_document(latex):
+def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
     """Replaces the dummy function provided by the user."""
-    print("Executing " + " ".join(latex) + ".")  # noqa: T001
-    subprocess.run(latex, check=True)
 
-
-@hookimpl
-def pytask_collect_task(session, path, name, obj):
-    """Collect a task which is a function.
-
-    There is some discussion on how to detect functions in this `thread
-    <https://stackoverflow.com/q/624926/7523785>`_. :class:`types.FunctionType` does not
-    detect built-ins which is not possible anyway.
-
-    """
-    if name.startswith("task_") and callable(obj) and has_marker(obj, "latex"):
-        task = PythonFunctionTask.from_path_name_function_session(
-            path, name, obj, session
-        )
-
-        return task
+    for step in compilation_steps:
+        try:
+            step(path_to_tex=path_to_tex, path_to_document=path_to_document)
+        except CalledProcessError as e:
+            raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
 
 
 @hookimpl
@@ -88,15 +114,17 @@ def pytask_collect_task_teardown(session, task):
                 "or .dvi file which is the compiled document."
             )
 
-        latex_function = _copy_func(compile_latex_document)
-        latex_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
+        task_function = _copy_func(compile_latex_document)
+        task_function.pytaskmark = copy.deepcopy(task.function.pytaskmark)
 
         merged_mark = _merge_all_markers(task)
-        args = latex(*merged_mark.args, **merged_mark.kwargs)
-        options = _prepare_cmd_options(session, task, args)
-        latex_function = functools.partial(latex_function, latex=options)
+        steps = latex(*merged_mark.args, **merged_mark.kwargs)
+        args = get_compilation_step_args(session, task)
+        task_function = functools.partial(
+            task_function, compilation_steps=steps, **args
+        )
 
-        task.function = latex_function
+        task.function = task_function
 
         if session.config["infer_latex_dependencies"]:
             task = _add_latex_dependencies_retroactively(task, session)
@@ -133,7 +161,7 @@ def _add_latex_dependencies_retroactively(task, session):
     )
 
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(scan(source.path))
+    latex_dependencies = set(lds.scan(source.path))
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
@@ -169,22 +197,8 @@ def _merge_all_markers(task):
     return mark
 
 
-def _prepare_cmd_options(session, task, args):
-    """Prepare the command line arguments to compile the LaTeX document.
-
-    The output folder needs to be declared as a relative path to the directory where the
-    latex source lies.
-
-    1. It must be relative because bibtex / biber, which is necessary for
-       bibliographies, does not accept full paths as a safety measure.
-    2. Due to the ``--cd`` flag, latexmk will change the directory to the one where the
-       source files are. Thus, relative to the latex sources.
-
-    See this `discussion on Github
-    <https://github.com/James-Yu/LaTeX-Workshop/issues/1932#issuecomment-582416434>`_
-    for additional information.
-
-    """
+def get_compilation_step_args(session, task):
+    """Prepare arguments passe to each compilation step."""
     latex_document = _get_node_from_dictionary(
         task.depends_on, session.config["latex_source_key"]
     ).value
@@ -192,52 +206,4 @@ def _prepare_cmd_options(session, task, args):
         task.produces, session.config["latex_document_key"]
     ).value
 
-    # Jobname controls the name of the compiled document. No suffix!
-    if latex_document.stem != compiled_document.stem:
-        jobname = [f"--jobname={compiled_document.stem}"]
-    else:
-        jobname = []
-
-    # The path to the output directory must be relative from the location of the source
-    # file. See docstring for more information.
-    out_relative_to_latex_source = Path(
-        os.path.relpath(compiled_document.parent, latex_document.parent)
-    ).as_posix()
-
-    return (
-        [
-            "latexmk",
-            *args,
-        ]
-        + jobname
-        + [
-            f"--output-directory={out_relative_to_latex_source}",
-            latex_document.as_posix(),
-        ]
-    )
-
-
-def _to_list(scalar_or_iter):
-    """Convert scalars and iterables to list.
-
-    Parameters
-    ----------
-    scalar_or_iter : str or list
-
-    Returns
-    -------
-    list
-
-    Examples
-    --------
-    >>> _to_list("a")
-    ['a']
-    >>> _to_list(["b"])
-    ['b']
-
-    """
-    return (
-        [scalar_or_iter]
-        if isinstance(scalar_or_iter, str) or not isinstance(scalar_or_iter, Sequence)
-        else list(scalar_or_iter)
-    )
+    return {"path_to_tex": latex_document, "path_to_document": compiled_document}

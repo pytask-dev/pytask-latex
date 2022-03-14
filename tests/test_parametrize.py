@@ -99,6 +99,51 @@ def test_parametrizing_latex_options(tmp_path):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
+    with pytest.warns(DeprecationWarning, match="The old syntax"):
+        session = main({"paths": tmp_path})
+
+    assert session.exit_code == 0
+    assert tmp_path.joinpath("document.pdf").exists()
+    assert tmp_path.joinpath("document.dvi").exists()
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_parametrizing_latex_options_new_api(tmp_path):
+    task_source = """
+    import pytask
+    from pytask_latex import compilation_steps
+
+    @pytask.mark.parametrize("depends_on, produces, latex", [
+        (
+            "document.tex",
+            "document.pdf",
+            {"compilation_steps": compilation_steps.latexmk(
+                ("--interaction=nonstopmode", "--pdf", "--cd"))
+            }
+        ),
+        (
+            "document.tex",
+            "document.dvi",
+            {"compilation_steps": compilation_steps.latexmk(
+                ("--interaction=nonstopmode", "--dvi", "--cd"))
+            }
+        ),
+    ])
+    def task_compile_latex_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I can't stop this feeling. Deep inside of me.
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
     session = main({"paths": tmp_path})
 
     assert session.exit_code == 0

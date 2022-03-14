@@ -34,11 +34,12 @@
 pytask-latex
 ============
 
-pytask-latex allows you to compile LaTeX documents.
+pytask-latex allows you to compile LaTeX documents with pytask
 
-It also tries to infer the dependency of the LaTeX document such as included images,
-bibliography files and other .tex files automatically to compile LaTeX documents when it
-is possible.
+It also uses `latex-dependency-scanner
+<https://github.com/pytask-dev/latex-dependency-scanner>`_ to automatically infer the
+dependencies of the LaTeX document such as images, bibliographies and other ``.tex``
+files which are necessary to compile the LaTeX document.
 
 
 Installation
@@ -65,14 +66,14 @@ following on the command line
     $ latexmk --help
 
 If an error is shown instead of a help page, you can install ``latexmk`` with one of the
-popular LaTeX distributions, like `MiKTeX <https://miktex.org/>`_, `TeX Live
-<https://www.tug.org/texlive/>`_, `MacTeX <http://www.tug.org/mactex/>`_ or others.
+popular LaTeX distributions, like `TeX Live <https://www.tug.org/texlive/>`_, `MiKTeX
+<https://miktex.org/>`_, `MacTeX <http://www.tug.org/mactex/>`_ or others.
 
 
 Usage
 -----
 
-Here is an example where you want to compile ``document.tex`` to a PDF.
+Compiling your PDF can be as simple as writing the following task.
 
 .. code-block:: python
 
@@ -85,9 +86,9 @@ Here is an example where you want to compile ``document.tex`` to a PDF.
     def task_compile_latex_document():
         pass
 
-When the task is executed, you find a ``document.pdf`` in the same folder as your
-``document.tex``, but you could also compile the report into a another folder by
-changing the path in ``produces``.
+Use ``@pytask.mark.latex`` to indicate that this task compiles a LaTeX document.
+``@pytask.mark.depends_on`` points to the source file which is compiled and
+``@pytask.mark.produces`` is the path of the compiled PDF.
 
 
 Multiple dependencies and products
@@ -139,46 +140,82 @@ The same applies to the compiled document which is either in the first position,
 the key ``"document"`` or ``0``.
 
 
-Command Line Arguments
-~~~~~~~~~~~~~~~~~~~~~~
+Customizing the compilation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To customize the compilation, you can pass some command line arguments to ``latexmk``
-via the ``@pytask.mark.latex`` marker. The default is the following.
-
-.. code-block:: python
-
-    @pytask.mark.latex(["--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"])
-    def task_compile_latex_document():
-        pass
-
-For example, to compile your document with XeLaTeX, use
+pytask-latex uses latexmk by default to compile the document because it handles most
+use-cases automatically. The following is equivalent to a bare ``@pytask.mark.latex``
+decorator.
 
 .. code-block:: python
 
-    @pytask.mark.latex(["--xelatex", "--interaction=nonstopmode"])
+    @pytask.mark.latex(compilation_steps="latexmk")
     def task_compile_latex_document():
-        pass
+        ...
 
-The options ``--jobname``, ``--output-directory`` and the ``.tex`` file which will be
-compiled are automatically handled and inferred from the ``@pytask.mark.depends_on`` and
-``@pytask.mark.produces`` markers.
+The ``@pytask.mark.latex`` decorator has a keyword argument called ``compilation_steps``
+which accepts which accepts strings or list of strings pointing to internally
+implemented compilation steps. Using strings will use the default configuration of this
+compilation step. It is equivalent to the following.
 
-The ``@pytask.mark.latex`` accepts both, a string or a list of strings with options.
+.. code-block::
 
-For more options and their explanations, visit the `latexmk manual
-<https://man.cx/latexmk>`_ or type the following commands.
+    from pytask_latex import compilation_steps
 
-.. code-block:: console
 
-    $ latexmk -h
-    $ latexmk -showextraoptions
+    @pytask.mark.latex(
+        compilation_steps=compilation_steps.latexmk(
+            options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+        )
+    )
+    def task_compile_latex_document():
+        ...
+
+In this example, ``compilation_steps.latexmk`` is a compilation step constructor which
+accepts a set of options and creates a compilation step function.
+
+You can pass different options to change the compilation process with latexmk. Here is
+an example for generating a ``.dvi``.
+
+.. code-block:: python
+
+    @pytask.mark.latex(
+        compilation_steps=compilation_steps.latexmk(
+            options=("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
+        )
+    )
+    def task_compile_latex_document():
+        ...
+
+``compilation_step.latexmk(options)`` generates a compilation step which is a function
+with the following signature:
+
+.. code-block::
+
+    from pathlib import Path
+    import subprocess
+
+
+    def custom_compilation_step(path_to_tex: Path, path_to_document: Path) -> None:
+        ...
+        subproces.run(..., check=True)
+
+You can also pass your custom compilation step with the same signature to the
+``compilation_steps`` keyword argument of the decorator.
+
+Each compilation step receives the path to the LaTeX source file and the path to the
+final document which it uses to call some program on the command line to run another
+step in the compilation process.
+
+In the future, pytask-latex will provide more compilation steps for compiling
+bibliographies, glossaries and the like.
 
 
 Parametrization
 ~~~~~~~~~~~~~~~
 
-You can also parametrize the compilation, meaning compiling multiple .tex documents
-as well as compiling a .tex document with different command line arguments.
+You can also parametrize the compilation, meaning compiling multiple ``.tex`` documents
+as well as compiling a ``.tex`` document with different command line arguments.
 
 The following task compiles two latex documents.
 
@@ -195,7 +232,8 @@ The following task compiles two latex documents.
 
 If you want to compile the same document with different command line options, you have
 to include the latex decorator in the parametrization just like with
-``@pytask.mark.depends_on`` and ``@pytask.mark.produces``.
+``@pytask.mark.depends_on`` and ``@pytask.mark.produces``. Pass a dictionary for
+possible compilation steps and their options.
 
 .. code-block:: python
 
@@ -205,11 +243,19 @@ to include the latex decorator in the parametrization just like with
         [
             (
                 "document.pdf",
-                ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"),
+                {
+                    "compilation_steps": compilation_steps.latexmk(
+                        ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+                    )
+                },
             ),
             (
                 "document.dvi",
-                ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd"),
+                {
+                    "compilation_steps": compilation_steps.latexmk(
+                        ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
+                    )
+                },
             ),
         ],
     )

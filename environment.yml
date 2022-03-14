@@ -19,7 +19,6 @@ dependencies:
   - black
   - jupyterlab
   - matplotlib
-  - pdbpp
   - pre-commit
   - pytest
   - pytest-cov
