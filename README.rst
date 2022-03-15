@@ -16,7 +16,7 @@
     :alt: PyPI - License
     :target: https://pypi.org/project/pytask-latex
 
-.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/Continuous%20Integration%20Workflow/main
+.. image:: https://img.shields.io/github/workflow/status/pytask-dev/pytask-latex/main/main
    :target: https://github.com/pytask-dev/pytask-latex/actions?query=branch%3Amain
 
 .. image:: https://codecov.io/gh/pytask-dev/pytask-latex/branch/main/graph/badge.svg
@@ -80,64 +80,22 @@ Compiling your PDF can be as simple as writing the following task.
     import pytask
 
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
     def task_compile_latex_document():
         pass
 
-Use ``@pytask.mark.latex`` to indicate that this task compiles a LaTeX document.
-``@pytask.mark.depends_on`` points to the source file which is compiled and
-``@pytask.mark.produces`` is the path of the compiled PDF.
+Use ``@pytask.mark.latex`` to indicate that this task compiles a LaTeX document. The
+``script`` and the ``document`` keywords provide absolute paths or paths relative to the
+task module to the LaTeX file and the compiled document.
 
 
-Multiple dependencies and products
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dependencies and Products
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In general, you might not need to add dependencies other than the main LaTeX file
-because pytask-latex tries to infer other dependencies automatically. See the
-explanation for ``infer_latex_dependencies`` below.
-
-What happens if you need to add more dependencies to a task because they are not found
-automatically? You could use a list, but ensure that the LaTeX document which should be
-compiled is in the first position of the list.
-
-.. code-block:: python
-
-    @pytask.mark.latex
-    @pytask.mark.depends_on(["document.tex", "image.png"])
-    @pytask.mark.produces("document.pdf")
-    def task_compile_latex_document():
-        pass
-
-If you use a dictionary to pass dependencies to the task, pytask-latex will, first, look
-for a ``"source"`` key in the dictionary and, secondly, under the key ``0``.
-
-.. code-block:: python
-
-    @pytask.mark.depends_on({"source": "document.tex", "image": "image.png"})
-    def task_compile_document():
-        pass
-
-
-    # or
-
-
-    @pytask.mark.depends_on({0: "document.tex", "image": "image.png"})
-    def task_compile_document():
-        pass
-
-
-    # or two decorators for the function, if you do not assign a name to the image.
-
-
-    @pytask.mark.depends_on({"source": "document.tex"})
-    @pytask.mark.depends_on("image.png")
-    def task_compile_document():
-        pass
-
-The same applies to the compiled document which is either in the first position, under
-the key ``"document"`` or ``0``.
+Dependencies and products can be added as with a normal pytask task using the
+``@pytask.mark.depends_on`` and ``@pytask.mark.produces`` decorators. which is explained
+in this `tutorial
+<https://pytask-dev.readthedocs.io/en/stable/tutorials/defining_dependencies_products.html>`_.
 
 
 Customizing the compilation
@@ -149,7 +107,11 @@ decorator.
 
 .. code-block:: python
 
-    @pytask.mark.latex(compilation_steps="latexmk")
+    @pytask.mark.latex(
+        script="document.tex",
+        document="document.pdf",
+        compilation_steps="latexmk",
+    )
     def task_compile_latex_document():
         ...
 
@@ -160,11 +122,13 @@ compilation step. It is equivalent to the following.
 
 .. code-block::
 
-    from pytask_latex import compilation_steps
+    from pytask_latex import compilation_steps as cs
 
 
     @pytask.mark.latex(
-        compilation_steps=compilation_steps.latexmk(
+        script="document.tex",
+        document="document.pdf",
+        compilation_steps=cs.latexmk(
             options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
         )
     )
@@ -180,9 +144,11 @@ an example for generating a ``.dvi``.
 .. code-block:: python
 
     @pytask.mark.latex(
-        compilation_steps=compilation_steps.latexmk(
+        script="document.tex",
+        document="document.pdf",
+        compilation_steps=cs.latexmk(
             options=("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
-        )
+        ),
     )
     def task_compile_latex_document():
         ...
@@ -211,24 +177,22 @@ In the future, pytask-latex will provide more compilation steps for compiling
 bibliographies, glossaries and the like.
 
 
-Parametrization
-~~~~~~~~~~~~~~~
+Repeating tasks with different scripts or inputs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also parametrize the compilation, meaning compiling multiple ``.tex`` documents
-as well as compiling a ``.tex`` document with different command line arguments.
+You can compile multiple LaTeX documents as well as compiling a single ``.tex`` document
+with different command line arguments.
 
 The following task compiles two latex documents.
 
 .. code-block:: python
 
-    @pytask.mark.latex
-    @pytask.mark.parametrize(
-        "depends_on, produces",
-        [("document_1.tex", "document_1.pdf"), ("document_2.tex", "document_2.pdf")],
-    )
-    def task_compile_latex_document():
-        pass
+    for i in range(2):
 
+        @pytask.mark.task
+        @pytask.mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
+        def task_compile_latex_document():
+            pass
 
 If you want to compile the same document with different command line options, you have
 to include the latex decorator in the parametrization just like with
@@ -237,50 +201,22 @@ possible compilation steps and their options.
 
 .. code-block:: python
 
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.parametrize(
-        "produces, latex",
-        [
-            (
-                "document.pdf",
-                {
-                    "compilation_steps": compilation_steps.latexmk(
-                        ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
-                    )
-                },
+    for format_ in ("pdf", "dvi"):
+
+        @pytask.mark.task
+        @pytask.mark.latex(
+            script="document.tex",
+            document=f"document.{format_}",
+            compilation_steps=cs.latexmk(
+                (f"--{format_}", "--interaction=nonstopmode", "--synctex=1", "--cd")
             ),
-            (
-                "document.dvi",
-                {
-                    "compilation_steps": compilation_steps.latexmk(
-                        ("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
-                    )
-                },
-            ),
-        ],
-    )
-    def task_compile_latex_document():
-        pass
+        )
+        def task_compile_latex_document():
+            pass
 
 
 Configuration
 -------------
-
-latex_source_key
-    If you want to change the name of the key which identifies the source file, change
-    the following default configuration in your pytask configuration file.
-
-    .. code-block:: ini
-
-        latex_source_key = source
-
-latex_document_key
-    If you want to change the name of the key which identifies the compiled document,
-    change the following default configuration in your pytask configuration file.
-
-    .. code-block:: ini
-
-        latex_source_key = source
 
 infer_latex_dependencies
     pytask-latex tries to scan your LaTeX document for included files with the help of
