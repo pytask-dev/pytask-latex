@@ -144,7 +144,7 @@ def test_parametrizing_latex_options_w_loop(tmp_path):
                 (f"--{ending}", "--interaction=nonstopmode", "--synctex=1", "--cd")
             )
         )
-        def task_compile_latex_document():
+        def compile_latex_document():
             pass
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))

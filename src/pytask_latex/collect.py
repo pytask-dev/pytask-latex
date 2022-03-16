@@ -81,7 +81,11 @@ def pytask_collect_task(session, path, name, obj):
     """Perform some checks."""
     __tracebackhide__ = True
 
-    if name.startswith("task_") and callable(obj) and has_mark(obj, "latex"):
+    if (
+        (name.startswith("task_") or has_mark(obj, "task"))
+        and callable(obj)
+        and has_mark(obj, "latex")
+    ):
         obj, marks = remove_marks(obj, "latex")
 
         if len(marks) > 1:
