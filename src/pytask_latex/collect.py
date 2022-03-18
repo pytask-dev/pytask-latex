@@ -27,25 +27,6 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
-_DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
-and will be removed in v0.2.0. To pass custom options to latexmk and the compilation \
-process convert
-
-    @pytask.mark.latex(options)
-    def task_func():
-        ...
-
-to
-
-    from pytask_latex import compilation_steps
-
-    @pytask.mark.latex(compilation_steps.latexmk(options))
-    def task_func():
-        ...
-
-"""
-
-
 def latex(
     *,
     script: str | Path,
@@ -90,10 +71,9 @@ def pytask_collect_task(session, path, name, obj):
 
         if len(marks) > 1:
             raise ValueError(
-                f"Task {name!r} has multiple @pytask.mark.latex marker, but only one "
-                "is allowed."
+                f"Task {name!r} has multiple @pytask.mark.latex marks, but only one is "
+                "allowed."
             )
-
         latex_mark = marks[0]
         script, document, compilation_steps = latex(**latex_mark.kwargs)
 
@@ -161,12 +141,6 @@ def pytask_collect_task(session, path, name, obj):
             task = _add_latex_dependencies_retroactively(task, session)
 
         return task
-
-
-def _get_node_from_dictionary(obj, key, fallback=0):
-    if isinstance(obj, dict):
-        obj = obj.get(key) or obj.get(fallback)
-    return obj
 
 
 def _add_latex_dependencies_retroactively(task, session):
@@ -278,13 +252,17 @@ def _collect_node(
 
 
 def _parse_compilation_steps(compilation_steps):
+    """Parse compilation steps."""
+    __tracebackhide__ = True
+
     compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
 
     parsed_compilation_steps = []
     for step in to_list(compilation_steps):
         if isinstance(step, str):
-            parsed_step = getattr(cs, step)
-            if parsed_step is None:
+            try:
+                parsed_step = getattr(cs, step)
+            except AttributeError:
                 raise ValueError(f"Compilation step {step!r} is unknown.")
             parsed_compilation_steps.append(parsed_step())
         elif callable(step):

@@ -388,3 +388,142 @@ def test_compile_document_w_image(runner, tmp_path):
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
     assert result.exit_code == ExitCode.OK
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.text")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert "has multiple @pytask.mark.latex marks" in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.tex", document="document.file")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert "The 'document' keyword of the" in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
+    """Compile a LaTeX document with bibliography."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.produces("out_w_bib.bbl")
+    @pytask.mark.latex(
+        script="in_w_bib.tex",
+        document="out_w_bib.pdf",
+    )
+    @pytask.mark.depends_on("references.bib")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \usepackage{natbib}
+    \begin{document}
+    \cite{pytask}
+    \bibliographystyle{plain}
+    \bibliography{references}
+    \end{document}
+    """
+    tmp_path.joinpath("in_w_bib.tex").write_text(textwrap.dedent(latex_source))
+
+    bib_source = r"""
+    @Article{pytask,
+      author  = {Tobias Raabe},
+      title   = {pytask},
+      journal = {Unpublished},
+      year    = {2020},
+    }
+    """
+    tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
+
+    session = runner.invoke(cli, [tmp_path.as_posix()])
+    assert session.exit_code == ExitCode.OK
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+@pytest.mark.parametrize(
+    "step, message",
+    [
+        ("'unknown'", "Compilation step 'unknown' is unknown."),
+        (1, "Compilation step 1 is not a valid step."),
+    ],
+)
+def test_compile_latex_document_w_unknown_compilation_step(
+    runner, tmp_path, step, message
+):
+    """Test simple compilation."""
+    task_source = f"""
+    import pytask
+
+    @pytask.mark.latex(
+        script="document.tex",
+        document="document.pdf",
+        compilation_steps={step},
+    )
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert message in result.output

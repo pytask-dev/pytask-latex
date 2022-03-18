@@ -90,6 +90,8 @@ repos:
     rev: "0.47"
     hooks:
     -   id: check-manifest
+        args: [--no-build-isolation]
+        additional_dependencies: [setuptools-scm, toml]
 -   repo: meta
     hooks:
     -   id: check-hooks-apply

@@ -14,7 +14,7 @@ from pytask import ExitCode
 
 try:
     import pytask_parallel  # noqa: F401
-except ImportError:
+except ImportError:  # pragma: no cover
     _IS_PYTASK_PARALLEL_INSTALLED = False
 else:
     _IS_PYTASK_PARALLEL_INSTALLED = True
