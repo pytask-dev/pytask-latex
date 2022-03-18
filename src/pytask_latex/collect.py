@@ -27,10 +27,45 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
+_ERROR_MSG = """The old syntax for @pytask.mark.latex was suddenly deprecated starting \
+with pytask-latex v0.2 to provide a better user experience. Thank you for your \
+understanding!
+
+It is recommended to upgrade to the new syntax, so you enjoy all the benefits of v0.2 of
+pytask and a better interface for pytask-latex.
+
+You can find a manual here: \
+https://github.com/pytask-dev/pytask-latex/blob/v0.2.0/README.rst
+
+Upgrading can be as easy as rewriting your current task from
+
+    @pytask.mark.latex("--some-option")
+    @pytask.mark.depends_on({"source": "script.tex")
+    @pytask.mark.produces("document.pdf")
+    def task_latex():
+        ...
+
+to
+
+    @pytask.mark.latex(
+        script="script.tex",
+        document="document.pdf",
+        options="--some-options"
+    )
+    def task_julia():
+        ...
+
+You can also fix the version of pytask and pytask-latex to <0.2, so you do not have to \
+to upgrade. At the same time, you will not enjoy the improvements released with \
+version v0.2 of pytask and pytask-latex.
+
+"""
+
+
 def latex(
     *,
-    script: str | Path,
-    document: str | Path,
+    script: str | Path = None,
+    document: str | Path = None,
     compilation_steps: str
     | Callable[..., Any]
     | Sequence[str | Callable[..., Any]] = None,
@@ -45,6 +80,8 @@ def latex(
         Compilation steps to compile the document.
 
     """
+    if script is None or document is None:
+        raise RuntimeError(_ERROR_MSG)
     return script, document, compilation_steps
 
 
