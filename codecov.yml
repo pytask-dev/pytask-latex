@@ -21,6 +21,4 @@ coverage:
 
 ignore:
   - ".tox/**/*"
-  - "setup.py"
-  - "versioneer.py"
   - "src/pytask_latex/_version.py"
