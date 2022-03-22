@@ -160,11 +160,11 @@ compilation step. It is equivalent to the following.
 
 .. code-block::
 
-    from pytask_latex import compilation_steps
+    from pytask_latex import compilation_steps as cs
 
 
     @pytask.mark.latex(
-        compilation_steps=compilation_steps.latexmk(
+        compilation_steps=cs.latexmk(
             options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
         )
     )

@@ -31,9 +31,9 @@ process convert
 
 to
 
-    from pytask_latex import compilation_steps
+    from pytask_latex import compilation_steps as cs
 
-    @pytask.mark.latex(compilation_steps.latexmk(options))
+    @pytask.mark.latex(compilation_steps=cs.latexmk(options))
     def task_func():
         ...
 
@@ -67,8 +67,9 @@ def latex(
         out = []
         for step in to_list(compilation_steps):
             if isinstance(step, str):
-                parsed_step = getattr(cs, step)
-                if parsed_step is None:
+                try:
+                    parsed_step = getattr(cs, step)
+                except AttributeError:
                     raise ValueError(f"Compilation step {step!r} is unknown.")
                 out.append(parsed_step())
             elif callable(step):
