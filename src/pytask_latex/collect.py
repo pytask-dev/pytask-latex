@@ -196,7 +196,7 @@ def _add_latex_dependencies_retroactively(task, session):
     ----------
     task
         The LaTeX task.
-    session : _pytask.session.Session
+    session : pytask.Session
         The session.
 
     """
@@ -256,7 +256,7 @@ def _collect_node(
 
     Parameters
     ----------
-    session : _pytask.session.Session
+    session : pytask.Session
         The session.
     path : Path
         The path to the task whose nodes are collected.

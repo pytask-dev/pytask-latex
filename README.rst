@@ -1,3 +1,6 @@
+pytask-latex
+============
+
 .. image:: https://img.shields.io/pypi/v/pytask-latex?color=blue
     :alt: PyPI
     :target: https://pypi.org/project/pytask-latex
@@ -30,9 +33,6 @@
     :target: https://github.com/psf/black
 
 ------
-
-pytask-latex
-============
 
 pytask-latex allows you to compile LaTeX documents with pytask
 
