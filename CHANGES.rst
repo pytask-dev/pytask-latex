@@ -13,6 +13,7 @@ all releases are available on `Anaconda.org
 - :pull:`32` implements a new interface to the compilation process which consists of
   composable compilation steps. (Many thanks to :user:`axtimhaus`!:tada:)
 - :pull:`36` fixes some issues.
+- :pull:`37` updates the release notes.
 
 
 0.1.1 - 2022-02-08
