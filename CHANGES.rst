@@ -7,7 +7,7 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/conda-forge/pytask-latex>`_.
 
 
-0.1.2 - 2022-xx-xx
+0.1.2 - 2022-03-26
 ------------------
 
 - :pull:`32` implements a new interface to the compilation process which consists of

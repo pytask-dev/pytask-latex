@@ -158,7 +158,7 @@ which accepts which accepts strings or list of strings pointing to internally
 implemented compilation steps. Using strings will use the default configuration of this
 compilation step. It is equivalent to the following.
 
-.. code-block::
+.. code-block:: python
 
     from pytask_latex import compilation_steps as cs
 
@@ -190,7 +190,7 @@ an example for generating a ``.dvi``.
 ``compilation_step.latexmk(options)`` generates a compilation step which is a function
 with the following signature:
 
-.. code-block::
+.. code-block:: python
 
     from pathlib import Path
     import subprocess
