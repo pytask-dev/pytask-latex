@@ -52,7 +52,7 @@ to
         document="document.pdf",
         options="--some-options"
     )
-    def task_julia():
+    def task_latex():
         ...
 
 You can also fix the version of pytask and pytask-latex to <0.2, so you do not have to \
