@@ -184,23 +184,20 @@ for format_ in ("pdf", "dvi"):
 
 ## Configuration
 
-infer_latex_dependencies
+*`infer_latex_dependencies`*
 
-: pytask-latex tries to scan your LaTeX document for included files with the help of
+pytask-latex tries to scan your LaTeX document for included files with the help of
 [latex-dependency-scanner](https://github.com/pytask-dev/latex-dependency-scanner) if
 the following configuration value is true which is also the default.
 
-````
-``` toml
+```toml
 infer_latex_dependencies = true
 ```
 
-Since the package is in its early development phase and LaTeX
-provides a myriad of ways to include files as well as providing
-shortcuts for paths (e.g., `\graphicspath`), there are definitely
-some rough edges left. File an issue here or in the other project in
-case of a problem.
-````
+Since the package is in its early development phase and LaTeX provides a myriad of ways
+to include files as well as providing shortcuts for paths (e.g., `\graphicspath`), there
+are definitely some rough edges left. File an issue here or in the other project in case
+of a problem.
 
 ## Changes
 
