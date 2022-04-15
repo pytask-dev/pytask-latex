@@ -35,7 +35,7 @@ It is recommended to upgrade to the new syntax, so you enjoy all the benefits of
 pytask and a better interface for pytask-latex.
 
 You can find a manual here: \
-https://github.com/pytask-dev/pytask-latex/blob/v0.2.0/README.rst
+https://github.com/pytask-dev/pytask-latex/blob/v0.2.0/README.md
 
 Upgrading can be as easy as rewriting your current task from
 

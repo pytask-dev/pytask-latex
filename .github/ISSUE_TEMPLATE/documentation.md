@@ -1,11 +1,9 @@
----
+______________________________________________________________________
 
-name: Documentation Improvement
-about: Report wrong or missing documentation
-title: "DOC:"
-labels: "documentation"
+name: Documentation Improvement about: Report wrong or missing documentation title:
+"DOC:" labels: "documentation"
 
----
+______________________________________________________________________
 
 #### Location of the documentation
 

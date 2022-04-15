@@ -191,7 +191,7 @@ infer_latex_dependencies
 the following configuration value is true which is also the default.
 
 ````
-``` ini
+``` toml
 infer_latex_dependencies = true
 ```
 
@@ -204,4 +204,4 @@ case of a problem.
 
 ## Changes
 
-Consult the [release notes](CHANGES.rst) to find out about what is new.
+Consult the [release notes](CHANGES.md) to find out about what is new.
