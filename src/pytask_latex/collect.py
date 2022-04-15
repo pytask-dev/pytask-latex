@@ -19,25 +19,6 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
-_DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
-and will be removed in v0.2.0. To pass custom options to latexmk and the compilation \
-process convert
-
-    @pytask.mark.latex(options)
-    def task_func():
-        ...
-
-to
-
-    from pytask_latex import compilation_steps
-
-    @pytask.mark.latex(compilation_steps.latexmk(options))
-    def task_func():
-        ...
-
-"""
-
-
 def latex(
     *,
     compilation_steps: str

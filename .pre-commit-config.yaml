@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.2.0
     hooks:
     -   id: check-added-large-files
         args: ['--maxkb=100']
@@ -29,21 +29,21 @@ repos:
     -   id: rst-inline-touching-normal
     -   id: text-unicode-replacement-char
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v2.31.0
+    rev: v2.32.0
     hooks:
     -   id: pyupgrade
         args: [--py37-plus]
 -   repo: https://github.com/asottile/reorder_python_imports
-    rev: v2.7.1
+    rev: v3.0.1
     hooks:
     -   id: reorder-python-imports
         args: [--py37-plus, --add-import, 'from __future__ import annotations']
 -   repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v1.20.0
+    rev: v1.20.1
     hooks:
     -   id: setup-cfg-fmt
 -   repo: https://github.com/psf/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
     -   id: black
 -   repo: https://github.com/asottile/blacken-docs
@@ -73,7 +73,7 @@ repos:
             Pygments,
         ]
 -   repo: https://github.com/PyCQA/doc8
-    rev: 0.10.1
+    rev: 0.11.1
     hooks:
     -   id: doc8
 -   repo: https://github.com/econchick/interrogate
@@ -87,7 +87,7 @@ repos:
     - id: codespell
       args: [-L als, -L unparseable]
 -   repo: https://github.com/mgedmin/check-manifest
-    rev: "0.47"
+    rev: "0.48"
     hooks:
     -   id: check-manifest
 -   repo: meta
