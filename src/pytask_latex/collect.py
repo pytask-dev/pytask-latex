@@ -3,11 +3,9 @@ from __future__ import annotations
 
 import copy
 import functools
-import warnings
 from subprocess import CalledProcessError
 from typing import Any
 from typing import Callable
-from typing import Iterable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
@@ -21,27 +19,7 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
-_DEPRECATION_WARNING = """The old syntax for using @pytask.mark.latex is deprecated \
-and will be removed in v0.2.0. To pass custom options to latexmk and the compilation \
-process convert
-
-    @pytask.mark.latex(options)
-    def task_func():
-        ...
-
-to
-
-    from pytask_latex import compilation_steps as cs
-
-    @pytask.mark.latex(compilation_steps=cs.latexmk(options))
-    def task_func():
-        ...
-
-"""
-
-
 def latex(
-    options: str | Iterable[str] | None = None,
     *,
     compilation_steps: str
     | Callable[..., Any]
@@ -59,23 +37,17 @@ def latex(
     """
     compilation_steps = ["latexmk"] if compilation_steps is None else compilation_steps
 
-    if options is not None:
-        warnings.warn(_DEPRECATION_WARNING, DeprecationWarning)
-        out = [cs.latexmk(options)]
-
-    else:
-        out = []
-        for step in to_list(compilation_steps):
-            if isinstance(step, str):
-                try:
-                    parsed_step = getattr(cs, step)
-                except AttributeError:
-                    raise ValueError(f"Compilation step {step!r} is unknown.")
-                out.append(parsed_step())
-            elif callable(step):
-                out.append(step)
-            else:
-                raise ValueError(f"Compilation step {step!r} is not a valid step.")
+    out = []
+    for step in to_list(compilation_steps):
+        if isinstance(step, str):
+            parsed_step = getattr(cs, step)
+            if parsed_step is None:
+                raise ValueError(f"Compilation step {step!r} is unknown.")
+            out.append(parsed_step())
+        elif callable(step):
+            out.append(step)
+        else:
+            raise ValueError(f"Compilation step {step!r} is not a valid step.")
 
     return out
 

@@ -249,39 +249,6 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
     import pytask
-
-    @pytask.mark.latex(
-        ["--xelatex", "--interaction=nonstopmode", "--synctex=1", "--cd"]
-    )
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
-    def task_compile_document():
-        pass
-
-    """
-    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
-
-    latex_source = r"""
-    \documentclass{report}
-    \begin{document}
-    I got, I got, I got, I got loyalty, got royalty inside my DNA.
-    \end{document}
-    """
-    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
-
-    with pytest.warns(DeprecationWarning, match="The old syntax"):
-        result = runner.invoke(cli, [tmp_path.as_posix()])
-
-    assert result.exit_code == 0
-    assert tmp_path.joinpath("document.pdf").exists()
-
-
-@needs_latexmk
-@skip_on_github_actions_with_win
-@pytest.mark.end_to_end
-def test_compile_latex_document_w_xelatex_new_api(runner, tmp_path):
-    task_source = """
-    import pytask
     from pytask_latex import compilation_steps
 
     @pytask.mark.latex(
@@ -425,41 +392,6 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_compile_document_w_wrong_flag(tmp_path):
-    """Test that wrong flags raise errors."""
-    tmp_path.joinpath("sub").mkdir(parents=True)
-
-    task_source = """
-    import pytask
-
-    @pytask.mark.latex(["--wrong-flag"])
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("out/document.pdf")
-    def task_compile_document():
-        pass
-
-    """
-    tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
-
-    latex_source = r"""
-    \documentclass{report}
-    \begin{document}
-    The book of love is long and boring ...
-    \end{document}
-    """
-    tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
-
-    with pytest.warns(DeprecationWarning, match="The old syntax"):
-        session = main({"paths": tmp_path})
-
-    assert session.exit_code == 1
-    assert len(session.tasks) == 1
-    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
-
-
-@needs_latexmk
-@skip_on_github_actions_with_win
-@pytest.mark.end_to_end
-def test_compile_document_w_wrong_flag_new_api(tmp_path):
     """Test that wrong flags raise errors."""
     tmp_path.joinpath("sub").mkdir(parents=True)
 

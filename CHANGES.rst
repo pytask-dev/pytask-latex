@@ -7,6 +7,12 @@ all releases are available on `Anaconda.org
 <https://anaconda.org/conda-forge/pytask-latex>`_.
 
 
+0.2.0 - 2022-xx-xx
+------------------
+
+- :pull:`34` deprecates the old api.
+
+
 0.1.2 - 2022-03-26
 ------------------
 
