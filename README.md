@@ -191,6 +191,7 @@ pytask-latex tries to scan your LaTeX document for included files with the help 
 the following configuration value is true which is also the default.
 
 ```toml
+[tool.pytask.ini_options]
 infer_latex_dependencies = true
 ```
 

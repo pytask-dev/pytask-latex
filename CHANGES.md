@@ -4,7 +4,7 @@ This is a record of all past pytask-latex releases and what went into them in re
 chronological order. Releases follow [semantic versioning](https://semver.org/) and all
 releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask-latex).
 
-## 0.2.0 - 2022-xx-xx
+## 0.2.0 - 2022-04-16
 
 - {pull}`33` aligns pytask-latex with the pytask v0.2.
 - {pull}`34` deprecates the old api.
