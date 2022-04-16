@@ -1,76 +1,47 @@
 from __future__ import annotations
 
 import textwrap
-from contextlib import ExitStack as does_not_raise  # noqa: N813
+from pathlib import Path
 
 import pytest
-from _pytask.mark import Mark
 from conftest import needs_latexmk
 from conftest import skip_on_github_actions_with_win
 from conftest import TEST_RESOURCES
 from pytask import cli
+from pytask import ExitCode
 from pytask import main
+from pytask import Mark
+from pytask import Task
 from pytask_latex.execute import pytask_execute_task_setup
 
 
-class DummyTask:
-    pass
-
-
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "found_latexmk, expectation",
-    [
-        (True, does_not_raise()),
-        (None, pytest.raises(RuntimeError)),
-    ],
-)
-def test_pytask_execute_task_setup(monkeypatch, found_latexmk, expectation):
+def test_pytask_execute_task_setup(monkeypatch):
     """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr(
-        "pytask_latex.execute.shutil.which", lambda x: found_latexmk  # noqa: U100
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: U100
     )
-
-    task = DummyTask()
-    task.markers = [Mark("latex", (), {})]
-
-    with expectation:
+    task = Task(
+        base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})]
+    )
+    with pytest.raises(RuntimeError, match="latexmk is needed"):
         pytask_execute_task_setup(task)
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-@pytest.mark.parametrize(
-    "depends_on",
-    [
-        "'document.tex'",
-        {"source": "document.tex"},
-        {0: "document.tex"},
-        {"script": "document.tex"},
-    ],
-)
-@pytest.mark.parametrize(
-    "produces",
-    [
-        "'document.pdf'",
-        {"document": "document.pdf"},
-        {0: "document.pdf"},
-        {"compiled_doc": "document.pdf"},
-    ],
-)
-def test_compile_latex_document(runner, tmp_path, depends_on, produces):
+def test_compile_latex_document_raise_error_old_api(runner, tmp_path):
     """Test simple compilation."""
-    task_source = f"""
+    task_source = """
     import pytask
 
     @pytask.mark.latex
-    @pytask.mark.depends_on({depends_on})
-    @pytask.mark.produces({produces})
+    @pytask.mark.depends_on("document.tex")
+    @pytask.mark.produces("document.pdf")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -82,21 +53,36 @@ def test_compile_latex_document(runner, tmp_path, depends_on, produces):
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
-    config = "[pytask]\n"
-    if (
-        isinstance(depends_on, dict)
-        and "source" not in depends_on
-        and 0 not in depends_on
-    ):
-        config += "latex_source_key = script\n"
-    if isinstance(produces, dict) and "document" not in produces and 0 not in produces:
-        config += "latex_document_key = compiled_doc\n"
-    tmp_path.joinpath("pytask.ini").write_text(config)
-
     result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert result.exit_code == 0
-    assert tmp_path.joinpath("document.pdf").exists()
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert "The old syntax for @pytask.mark.latex" in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK
 
 
 @needs_latexmk
@@ -107,9 +93,10 @@ def test_compile_latex_document_w_relative(runner, tmp_path):
     task_source = f"""
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("{tmp_path.joinpath("bld", "document.pdf").as_posix()}")
+    @pytask.mark.latex(
+        script="document.tex",
+        document="{tmp_path.joinpath("bld", "document.pdf").as_posix()}"
+    )
     def task_compile_document():
         pass
 
@@ -127,9 +114,7 @@ def test_compile_latex_document_w_relative(runner, tmp_path):
     tmp_path.joinpath("src", "document.tex").write_text(textwrap.dedent(latex_source))
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
-
-    assert result.exit_code == 0
-    assert tmp_path.joinpath("bld", "document.pdf").exists()
+    assert result.exit_code == ExitCode.OK
 
 
 @needs_latexmk
@@ -140,9 +125,7 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on("in.tex")
-    @pytask.mark.produces("out.pdf")
+    @pytask.mark.latex(script="in.tex", document="out.pdf")
     def task_compile_document():
         pass
 
@@ -158,25 +141,21 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
     tmp_path.joinpath("in.tex").write_text(textwrap.dedent(latex_source))
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
-
-    assert result.exit_code == 0
-    assert tmp_path.joinpath("out.pdf").exists()
+    assert result.exit_code == ExitCode.OK
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_w_bibliography(tmp_path):
+def test_compile_w_bibliography(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on(["in_w_bib.tex", "references.bib"])
-    @pytask.mark.produces("out_w_bib.pdf")
+    @pytask.mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
+    @pytask.mark.depends_on("references.bib")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -201,10 +180,8 @@ def test_compile_w_bibliography(tmp_path):
     """
     tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
 
-    session = main({"paths": tmp_path})
-
-    assert session.exit_code == 0
-    assert tmp_path.joinpath("out_w_bib.pdf").exists()
+    session = runner.invoke(cli, [tmp_path.as_posix()])
+    assert session.exit_code == ExitCode.OK
 
 
 @needs_latexmk
@@ -214,12 +191,9 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -239,7 +213,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
     session = main({"paths": tmp_path})
 
-    assert session.exit_code == 1
+    assert session.exit_code == ExitCode.FAILED
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
 
 
@@ -252,12 +226,12 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
     from pytask_latex import compilation_steps
 
     @pytask.mark.latex(
+        script="document.tex",
+        document="document.pdf",
         compilation_steps=compilation_steps.latexmk(
             ["--xelatex", "--interaction=nonstopmode", "--synctex=1", "--cd"]
         )
     )
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
     def task_compile_document():
         pass
 
@@ -274,7 +248,7 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
 
-    assert result.exit_code == 0
+    assert result.exit_code == ExitCode.OK
     assert tmp_path.joinpath("document.pdf").exists()
 
 
@@ -285,12 +259,10 @@ def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on(["document.tex", "in.txt"])
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @pytask.mark.depends_on("in.txt")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -301,28 +273,24 @@ def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
     \end{document}
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
-
     tmp_path.joinpath("in.txt").touch()
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
-
-    assert result.exit_code == 0
+    assert result.exit_code == ExitCode.OK
     assert tmp_path.joinpath("document.pdf").exists()
 
 
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
+def test_fail_because_script_is_not_latex(tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on(["in.txt", "document.tex"])
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.latex(script="document.text", document="document.pdf")
+    @pytask.mark.depends_on("in.txt")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -333,12 +301,10 @@ def test_fail_because_latex_document_is_not_first_dependency(tmp_path):
     \end{document}
     """
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
-
     tmp_path.joinpath("in.txt").touch()
 
     session = main({"paths": tmp_path})
-
-    assert session.exit_code == 3
+    assert session.exit_code == ExitCode.COLLECTION_FAILED
     assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
 
 
@@ -359,12 +325,10 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     task_source = """
     import pytask
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on(["document.tex", "resources/content.tex"])
-    @pytask.mark.produces("out/document.pdf")
+    @pytask.mark.latex(script="document.tex", document="out/document.pdf")
+    @pytask.mark.depends_on("resources/content.tex")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -383,8 +347,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
 
     session = main({"paths": tmp_path})
-
-    assert session.exit_code == 0
+    assert session.exit_code == ExitCode.OK
     assert len(session.tasks) == 1
 
 
@@ -399,9 +362,11 @@ def test_compile_document_w_wrong_flag(tmp_path):
     import pytask
     from pytask_latex import compilation_steps
 
-    @pytask.mark.latex(compilation_steps=compilation_steps.latexmk("--wrong-flag"))
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("out/document.pdf")
+    @pytask.mark.latex(
+        script="document.tex",
+        document="out/document.pdf",
+        compilation_steps=compilation_steps.latexmk("--wrong-flag"),
+    )
     def task_compile_document():
         pass
 
@@ -417,8 +382,7 @@ def test_compile_document_w_wrong_flag(tmp_path):
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
     session = main({"paths": tmp_path})
-
-    assert session.exit_code == 1
+    assert session.exit_code == ExitCode.FAILED
     assert len(session.tasks) == 1
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
 
@@ -437,12 +401,9 @@ def test_compile_document_w_image(runner, tmp_path):
             "{tmp_path.joinpath("image.png").as_posix()}"
         )
 
-    @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
-
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
@@ -456,5 +417,170 @@ def test_compile_document_w_image(runner, tmp_path):
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK
 
-    assert result.exit_code == 0
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.text")
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert "has multiple @pytask.mark.latex marks" in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.tex", document="document.file")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert "The 'document' keyword of the" in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
+    """Compile a LaTeX document with bibliography."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.produces("out_w_bib.bbl")
+    @pytask.mark.latex(
+        script="in_w_bib.tex",
+        document="out_w_bib.pdf",
+    )
+    @pytask.mark.depends_on("references.bib")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \usepackage{natbib}
+    \begin{document}
+    \cite{pytask}
+    \bibliographystyle{plain}
+    \bibliography{references}
+    \end{document}
+    """
+    tmp_path.joinpath("in_w_bib.tex").write_text(textwrap.dedent(latex_source))
+
+    bib_source = r"""
+    @Article{pytask,
+      author  = {Tobias Raabe},
+      title   = {pytask},
+      journal = {Unpublished},
+      year    = {2020},
+    }
+    """
+    tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
+
+    session = runner.invoke(cli, [tmp_path.as_posix()])
+    assert session.exit_code == ExitCode.OK
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+@pytest.mark.parametrize(
+    "step, message",
+    [
+        ("'unknown'", "Compilation step 'unknown' is unknown."),
+        (1, "Compilation step 1 is not a valid step."),
+    ],
+)
+def test_compile_latex_document_w_unknown_compilation_step(
+    runner, tmp_path, step, message
+):
+    """Test simple compilation."""
+    task_source = f"""
+    import pytask
+
+    @pytask.mark.latex(
+        script="document.tex",
+        document="document.pdf",
+        compilation_steps={step},
+    )
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.COLLECTION_FAILED
+    assert message in result.output
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_compile_latex_document_with_task_decorator(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @pytask.mark.task
+    def compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    I was tired of my lady
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK

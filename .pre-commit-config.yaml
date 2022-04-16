@@ -24,9 +24,6 @@ repos:
     -   id: python-no-eval
     -   id: python-no-log-warn
     -   id: python-use-type-annotations
-    -   id: rst-backticks
-    -   id: rst-directive-colons
-    -   id: rst-inline-touching-normal
     -   id: text-unicode-replacement-char
 -   repo: https://github.com/asottile/pyupgrade
     rev: v2.32.0
@@ -72,15 +69,20 @@ repos:
             pydocstyle,
             Pygments,
         ]
--   repo: https://github.com/PyCQA/doc8
-    rev: 0.11.1
-    hooks:
-    -   id: doc8
 -   repo: https://github.com/econchick/interrogate
     rev: 1.5.0
     hooks:
     -   id: interrogate
         args: [-v, --fail-under=40, src, tests]
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.14
+    hooks:
+    -   id: mdformat
+        additional_dependencies: [
+            mdformat-gfm,
+            mdformat-black,
+        ]
+        args: [--wrap, "88"]
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
   hooks:
@@ -90,6 +92,8 @@ repos:
     rev: "0.48"
     hooks:
     -   id: check-manifest
+        args: [--no-build-isolation]
+        additional_dependencies: [setuptools-scm, toml]
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
