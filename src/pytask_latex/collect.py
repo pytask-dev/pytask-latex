@@ -53,7 +53,7 @@ to
     @pytask.mark.latex(
         script="script.tex",
         document="document.pdf",
-        options=cs.latexmk(options="--some-options"),
+        compilation_steps=cs.latexmk(options="--some-options"),
     )
     def task_latex():
         ...
