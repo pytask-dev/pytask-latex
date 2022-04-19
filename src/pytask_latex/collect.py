@@ -47,10 +47,13 @@ Upgrading can be as easy as rewriting your current task from
 
 to
 
+    from pytask_latex import compilation_steps as cs
+
+
     @pytask.mark.latex(
         script="script.tex",
         document="document.pdf",
-        options="--some-options"
+        compilation_steps=cs.latexmk(options="--some-options"),
     )
     def task_latex():
         ...
