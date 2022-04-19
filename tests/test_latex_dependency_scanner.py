@@ -46,7 +46,7 @@ def test_infer_dependencies_from_task(
     session = main({"paths": tmp_path})
     assert session.exit_code == ExitCode.OK
     assert len(session.tasks) == 1
-    if infer_dependencies:
+    if infer_dependencies == "true":
         assert len(session.tasks[0].depends_on) == 2
     else:
         assert len(session.tasks[0].depends_on) == 1
