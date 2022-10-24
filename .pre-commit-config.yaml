@@ -92,7 +92,7 @@ repos:
   rev: v2.2.2
   hooks:
     - id: codespell
-      args: [-L als]
+      args: [-L als, -L falsy]
 -   repo: https://github.com/mgedmin/check-manifest
     rev: "0.48"
     hooks:
