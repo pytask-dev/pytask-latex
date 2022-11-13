@@ -42,7 +42,7 @@ jobs:
 
       - name: Install core dependencies.
         shell: bash -l {0}
-        run: mamba install -c conda-forge tox-conda coverage mamba
+        run: mamba install -c conda-forge tox-conda coverage
 
       # Unit, integration, and end-to-end tests.
 
