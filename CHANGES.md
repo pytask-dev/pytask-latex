@@ -4,6 +4,10 @@ This is a record of all past pytask-latex releases and what went into them in re
 chronological order. Releases follow [semantic versioning](https://semver.org/) and all
 releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask-latex).
 
+## 0.3.0 - 2022-12-xx
+
+- {pull}`49` removes support for INI configurations.
+
 ## 0.2.1 - 2022-04-19
 
 - {pull}`40` fixes the error message which advises user to transition to the new

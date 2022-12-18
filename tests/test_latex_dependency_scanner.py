@@ -13,15 +13,8 @@ from pytask import main
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 @pytest.mark.parametrize("infer_dependencies", ["true", "false"])
-@pytest.mark.parametrize(
-    "config_file, content",
-    [
-        ("pytask.ini", "[pytask]\ninfer_latex_dependencies = {}"),
-        ("pyproject.toml", "[tool.pytask.ini_options]\ninfer_latex_dependencies = {}"),
-    ],
-)
 def test_infer_dependencies_from_task(
-    tmp_path, infer_dependencies, config_file, content
+    tmp_path, infer_dependencies
 ):
     task_source = """
     import pytask
@@ -41,7 +34,7 @@ def test_infer_dependencies_from_task(
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
     tmp_path.joinpath("sub_document.tex").write_text("Lorem ipsum.")
 
-    tmp_path.joinpath(config_file).write_text(content.format(infer_dependencies))
+    tmp_path.joinpath("pyproject.toml").write_text(f"[tool.pytask.ini_options]\ninfer_latex_dependencies = {infer_dependencies}")
 
     session = main({"paths": tmp_path})
     assert session.exit_code == ExitCode.OK
