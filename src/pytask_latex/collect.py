@@ -67,8 +67,8 @@ version v0.2 of pytask and pytask-latex.
 
 def latex(
     *,
-    script: str | Path = None,
-    document: str | Path = None,
+    script: str | Path,
+    document: str | Path,
     compilation_steps: str
     | Callable[..., Any]
     | Sequence[str | Callable[..., Any]] = None,
@@ -77,14 +77,14 @@ def latex(
 
     Parameters
     ----------
-    options
-        One or multiple command line options passed to latexmk.
+    script : str | Path
+        The LaTeX file that will be compiled.
+    document : str | Path
+        The path to the compiled document.
     compilation_steps
         Compilation steps to compile the document.
 
     """
-    if script is None or document is None:
-        raise RuntimeError(_ERROR_MSG)
     return script, document, compilation_steps
 
 
