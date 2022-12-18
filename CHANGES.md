@@ -7,6 +7,7 @@ releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask
 ## 0.3.0 - 2022-12-xx
 
 - {pull}`49` removes support for INI configurations.
+- {pull}`50` removes the deprecation message and related code to the old API.
 
 ## 0.2.1 - 2022-04-19
 

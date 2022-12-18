@@ -10,15 +10,15 @@ from pytask_latex.collect import latex
 @pytest.mark.parametrize(
     "kwargs, expectation, expected",
     [
-        ({}, pytest.raises(RuntimeError, match="The old syntax"), None),
+        ({}, pytest.raises(TypeError, match=r"latex\(\) missing 2 required"), None),
         (
             {"document": "document.pdf"},
-            pytest.raises(RuntimeError, match="The old syntax"),
+            pytest.raises(TypeError, match=r"latex\(\) missing 1 required"),
             None,
         ),
         (
             {"script": "script.tex"},
-            pytest.raises(RuntimeError, match="The old syntax"),
+            pytest.raises(TypeError, match=r"latex\(\) missing 1 required"),
             None,
         ),
         (

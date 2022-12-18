@@ -32,36 +32,6 @@ def test_pytask_execute_task_setup(monkeypatch):
 @needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
-def test_compile_latex_document_raise_error_old_api(runner, tmp_path):
-    """Test simple compilation."""
-    task_source = """
-    import pytask
-
-    @pytask.mark.latex
-    @pytask.mark.depends_on("document.tex")
-    @pytask.mark.produces("document.pdf")
-    def task_compile_document():
-        pass
-    """
-    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
-
-    latex_source = r"""
-    \documentclass{report}
-    \begin{document}
-    I was tired of my lady
-    \end{document}
-    """
-    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
-
-    result = runner.invoke(cli, [tmp_path.as_posix()])
-
-    assert result.exit_code == ExitCode.COLLECTION_FAILED
-    assert "The old syntax for @pytask.mark.latex" in result.output
-
-
-@needs_latexmk
-@skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 def test_compile_latex_document(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
