@@ -27,52 +27,19 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 
-_ERROR_MSG = """The old syntax for @pytask.mark.latex was suddenly deprecated starting \
-with pytask-latex v0.2 to provide a better user experience. Thank you for your \
-understanding!
-
-It is recommended to upgrade to the new syntax, so you enjoy all the benefits of v0.2 of
-pytask and a better interface for pytask-latex.
-
-You can find a manual here: \
-https://github.com/pytask-dev/pytask-latex/blob/v0.2.0/README.md
-
-Upgrading can be as easy as rewriting your current task from
-
-    @pytask.mark.latex("--some-option")
-    @pytask.mark.depends_on({"source": "script.tex")
-    @pytask.mark.produces("document.pdf")
-    def task_latex():
-        ...
-
-to
-
-    from pytask_latex import compilation_steps as cs
-
-
-    @pytask.mark.latex(
-        script="script.tex",
-        document="document.pdf",
-        compilation_steps=cs.latexmk(options="--some-options"),
-    )
-    def task_latex():
-        ...
-
-You can also fix the version of pytask and pytask-latex to <0.2, so you do not have to \
-to upgrade. At the same time, you will not enjoy the improvements released with \
-version v0.2 of pytask and pytask-latex.
-
-"""
-
-
 def latex(
     *,
     script: str | Path,
     document: str | Path,
     compilation_steps: str
     | Callable[..., Any]
-    | Sequence[str | Callable[..., Any]] = None,
-) -> tuple[str | Path | None, list[Callable[..., Any]]]:
+    | Sequence[str | Callable[..., Any]]
+    | None = None,
+) -> tuple[
+    str | Path,
+    str | Path,
+    str | Callable[..., Any] | Sequence[str | Callable[..., Any]] | None,
+]:
     """Specify command line options for latexmk.
 
     Parameters
@@ -88,8 +55,16 @@ def latex(
     return script, document, compilation_steps
 
 
-def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
-    """Replaces the dummy function provided by the user."""
+def compile_latex_document(
+    compilation_steps: list[Callable[..., Any]],
+    path_to_tex: Path,
+    path_to_document: Path,
+) -> None:
+    """Compile a LaTeX document iterating over compilations steps.
+
+    Replaces the placeholder function provided by the user.
+
+    """
     for step in compilation_steps:
         try:
             step(path_to_tex=path_to_tex, path_to_document=path_to_document)
@@ -98,7 +73,9 @@ def compile_latex_document(compilation_steps, path_to_tex, path_to_document):
 
 
 @hookimpl
-def pytask_collect_task(session, path, name, obj):
+def pytask_collect_task(
+    session: Session, path: Path, name: str, obj: Any
+) -> Task | None:
     """Perform some checks."""
     __tracebackhide__ = True
 
@@ -130,7 +107,7 @@ def pytask_collect_task(session, path, name, obj):
         task = Task(
             base_name=name,
             path=path,
-            function=_copy_func(compile_latex_document),
+            function=_copy_func(compile_latex_document),  # type: ignore[arg-type]
             depends_on=dependencies,
             produces=products,
             markers=markers,
@@ -154,7 +131,7 @@ def pytask_collect_task(session, path, name, obj):
 
         if not (
             isinstance(document_node, FilePathNode)
-            and document_node.value.suffix in [".pdf", ".ps", ".dvi"]
+            and document_node.value.suffix in (".pdf", ".ps", ".dvi")
         ):
             raise ValueError(
                 "The 'document' keyword of the @pytask.mark.latex decorator must point "
@@ -181,9 +158,10 @@ def pytask_collect_task(session, path, name, obj):
             task = _add_latex_dependencies_retroactively(task, session)
 
         return task
+    return None
 
 
-def _add_latex_dependencies_retroactively(task, session):
+def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
     """Add dependencies from LaTeX document to task.
 
     Unfortunately, the dependencies have to be added retroactively, after the task has
@@ -291,7 +269,9 @@ def _collect_node(
     return collected_node
 
 
-def _parse_compilation_steps(compilation_steps):
+def _parse_compilation_steps(
+    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]]
+) -> list[Callable[..., Any]]:
     """Parse compilation steps."""
     __tracebackhide__ = True
 
@@ -303,7 +283,7 @@ def _parse_compilation_steps(compilation_steps):
             try:
                 parsed_step = getattr(cs, step)
             except AttributeError:
-                raise ValueError(f"Compilation step {step!r} is unknown.")
+                raise ValueError(f"Compilation step {step!r} is unknown.") from None
             parsed_compilation_steps.append(parsed_step())
         elif callable(step):
             parsed_compilation_steps.append(step)

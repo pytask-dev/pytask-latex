@@ -1,13 +1,14 @@
 """Parametrize tasks."""
 from __future__ import annotations
 
+from typing import Any
+
 import pytask
 from pytask import hookimpl
 
 
 @hookimpl
-def pytask_parametrize_kwarg_to_marker(obj, kwargs):
+def pytask_parametrize_kwarg_to_marker(obj: Any, kwargs: dict[str, Any]) -> None:
     """Register kwargs as latex marker."""
-    if callable(obj):
-        if "latex" in kwargs:
-            pytask.mark.latex(**kwargs.pop("latex"))(obj)
+    if callable(obj) and "latex" in kwargs:
+        pytask.mark.latex(**kwargs.pop("latex"))(obj)

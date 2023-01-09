@@ -8,12 +8,12 @@ from pytask import cli
 from pytask import ExitCode
 
 
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 @pytest.mark.parametrize(
     "dependencies",
-    [[], ["in.txt"], ["in_1.txt", "in_2.txt"]],
+    [(), ("in.txt",), ("in_1.txt", "in_2.txt")],
 )
-@pytest.mark.parametrize("products", [["out.txt"], ["out_1.txt", "out_2.txt"]])
+@pytest.mark.parametrize("products", [("out.txt",), ("out_1.txt", "out_2.txt")])
 def test_execution_w_varying_dependencies_products(
     runner, tmp_path, dependencies, products
 ):

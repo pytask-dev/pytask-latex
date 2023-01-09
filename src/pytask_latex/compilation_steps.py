@@ -13,16 +13,23 @@ A compilation step constructor must yield a function with this signature.
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
+from typing import Any
+from typing import Callable
 
 from pytask_latex.path import relative_to
 from pytask_latex.utils import to_list
 
 
-def latexmk(options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")):
+def latexmk(
+    options: str
+    | list[str]
+    | tuple[str, ...] = ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+) -> Callable[..., Any]:
     """Compilation step that calls latexmk."""
     options = [str(i) for i in to_list(options)]
 
-    def run_latexmk(path_to_tex, path_to_document):
+    def run_latexmk(path_to_tex: Path, path_to_document: Path) -> None:
         job_name_opt = [f"--jobname={path_to_document.stem}"]
         out_dir_opt = [
             f"--output-directory={relative_to(path_to_tex, path_to_document.parent)}"
