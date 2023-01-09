@@ -15,12 +15,12 @@ from pytask import Task
 from pytask_latex.execute import pytask_execute_task_setup
 
 
-@pytest.mark.unit
+@pytest.mark.unit()
 def test_pytask_execute_task_setup(monkeypatch):
     """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr(
-        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: U100
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: ARG005
     )
     task = Task(
         base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})]
@@ -31,7 +31,7 @@ def test_pytask_execute_task_setup(monkeypatch):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
@@ -57,7 +57,7 @@ def test_compile_latex_document(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_w_relative(runner, tmp_path):
     """Test simple compilation."""
     task_source = f"""
@@ -89,7 +89,7 @@ def test_compile_latex_document_w_relative(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_to_different_name(runner, tmp_path):
     """Compile a LaTeX document where source and output name differ."""
     task_source = """
@@ -116,7 +116,7 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_w_bibliography(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
@@ -156,7 +156,7 @@ def test_compile_w_bibliography(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     task_source = """
     import pytask
@@ -178,7 +178,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
     # Hide latexmk if available.
     monkeypatch.setattr(
-        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: U100
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: ARG005
     )
 
     session = main({"paths": tmp_path})
@@ -189,7 +189,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
     import pytask
@@ -224,7 +224,7 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
     task_source = """
     import pytask
@@ -252,7 +252,7 @@ def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_fail_because_script_is_not_latex(tmp_path):
     task_source = """
     import pytask
@@ -280,7 +280,7 @@ def test_fail_because_script_is_not_latex(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     """Test that motivates the ``"--cd"`` flag.
 
@@ -323,7 +323,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_document_w_wrong_flag(tmp_path):
     """Test that wrong flags raise errors."""
     tmp_path.joinpath("sub").mkdir(parents=True)
@@ -358,7 +358,7 @@ def test_compile_document_w_wrong_flag(tmp_path):
 
 
 @needs_latexmk
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_document_w_image(runner, tmp_path):
     task_source = f"""
     import pytask
@@ -392,7 +392,7 @@ def test_compile_document_w_image(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
@@ -420,7 +420,7 @@ def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
@@ -447,7 +447,7 @@ def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
@@ -491,9 +491,9 @@ def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 @pytest.mark.parametrize(
-    "step, message",
+    ("step", "message"),
     [
         ("'unknown'", "Compilation step 'unknown' is unknown."),
         (1, "Compilation step 1 is not a valid step."),
@@ -531,7 +531,7 @@ def test_compile_latex_document_w_unknown_compilation_step(
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_compile_latex_document_with_task_decorator(runner, tmp_path):
     """Test simple compilation."""
     task_source = """

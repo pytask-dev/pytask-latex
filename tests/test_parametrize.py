@@ -11,7 +11,7 @@ from pytask import main
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_parametrized_compilation_of_latex_documents_w_parametrize(tmp_path):
     task_source = """
     import pytask
@@ -25,10 +25,10 @@ def test_parametrized_compilation_of_latex_documents_w_parametrize(tmp_path):
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
 
-    for name, content in [
+    for name, content in (
         ("document_1.tex", "Like a worn out recording"),
         ("document_2.tex", "Of a favorite song"),
-    ]:
+    ):
         latex_source = rf"""
         \documentclass{{report}}
         \begin{{document}}
@@ -46,7 +46,7 @@ def test_parametrized_compilation_of_latex_documents_w_parametrize(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
     source = """
     import pytask
@@ -60,10 +60,10 @@ def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(source))
 
-    for name, content in [
+    for name, content in (
         ("document_1.tex", "Like a worn out recording"),
         ("document_2.tex", "Of a favorite song"),
-    ]:
+    ):
         latex_source = rf"""
         \documentclass{{report}}
         \begin{{document}}
@@ -81,7 +81,7 @@ def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_parametrizing_latex_options_w_parametrize(tmp_path):
     task_source = """
     import pytask
@@ -128,7 +128,7 @@ def test_parametrizing_latex_options_w_parametrize(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
+@pytest.mark.end_to_end()
 def test_parametrizing_latex_options_w_loop(tmp_path):
     source = """
     import pytask

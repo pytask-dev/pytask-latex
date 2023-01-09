@@ -1,3 +1,4 @@
+"""This module contains the main namespace."""
 from __future__ import annotations
 
 try:

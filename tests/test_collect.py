@@ -6,9 +6,9 @@ import pytest
 from pytask_latex.collect import latex
 
 
-@pytest.mark.unit
+@pytest.mark.unit()
 @pytest.mark.parametrize(
-    "kwargs, expectation, expected",
+    ("kwargs", "expectation", "expected"),
     [
         ({}, pytest.raises(TypeError, match=r"latex\(\) missing 2 required"), None),
         (

@@ -7,3 +7,5 @@ exclude tox.ini
 
 include README.md
 include LICENSE
+
+recursive-include src *.typed

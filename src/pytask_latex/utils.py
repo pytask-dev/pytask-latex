@@ -1,9 +1,11 @@
+"""This module contains shared functions."""
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 
-def to_list(scalar_or_iter):
+def to_list(scalar_or_iter: Any) -> list[Any]:
     """Convert scalars and iterables to list.
 
     Parameters
