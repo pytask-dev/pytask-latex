@@ -21,11 +21,11 @@ else:
 
 
 pytestmark = pytest.mark.skipif(
-    not _IS_PYTASK_PARALLEL_INSTALLED, reason="Tests require pytask-parallel."
+    not _IS_PYTASK_PARALLEL_INSTALLED, reason="Tests require pytask-parallel.",
 )
 
 xfail_on_remote = pytest.mark.xfail(
-    condition=os.environ.get("CI") == "true", reason="Does not succeed on CI."
+    condition=os.environ.get("CI") == "true", reason="Does not succeed on CI.",
 )
 
 

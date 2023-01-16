@@ -24,7 +24,7 @@ from pytask_latex.utils import to_list
 def latexmk(
     options: str
     | list[str]
-    | tuple[str, ...] = ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+    | tuple[str, ...] = ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd"),
 ) -> Callable[..., Any]:
     """Compilation step that calls latexmk."""
     options = [str(i) for i in to_list(options)]
@@ -32,7 +32,7 @@ def latexmk(
     def run_latexmk(path_to_tex: Path, path_to_document: Path) -> None:
         job_name_opt = [f"--jobname={path_to_document.stem}"]
         out_dir_opt = [
-            f"--output-directory={relative_to(path_to_tex, path_to_document.parent)}"
+            f"--output-directory={relative_to(path_to_tex, path_to_document.parent)}",
         ]
         cmd = (
             ["latexmk", *options]
