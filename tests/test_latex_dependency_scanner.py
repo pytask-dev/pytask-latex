@@ -33,7 +33,7 @@ def test_infer_dependencies_from_task(tmp_path, infer_dependencies):
     tmp_path.joinpath("sub_document.tex").write_text("Lorem ipsum.")
 
     tmp_path.joinpath("pyproject.toml").write_text(
-        f"[tool.pytask.ini_options]\ninfer_latex_dependencies = {infer_dependencies}",
+        f"[tool.pytask.ini_options]\ninfer_latex_dependencies = {infer_dependencies}"
     )
 
     session = main({"paths": tmp_path})

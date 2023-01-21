@@ -74,7 +74,7 @@ def compile_latex_document(
 
 @hookimpl
 def pytask_collect_task(
-    session: Session, path: Path, name: str, obj: Any,
+    session: Session, path: Path, name: str, obj: Any
 ) -> Task | None:
     """Perform some checks."""
     __tracebackhide__ = True
@@ -89,7 +89,7 @@ def pytask_collect_task(
         if len(marks) > 1:
             raise ValueError(
                 f"Task {name!r} has multiple @pytask.mark.latex marks, but only one is "
-                "allowed.",
+                "allowed."
             )
         latex_mark = marks[0]
         script, document, compilation_steps = latex(**latex_mark.kwargs)
@@ -115,18 +115,19 @@ def pytask_collect_task(
         )
 
         script_node = session.hook.pytask_collect_node(
-            session=session, path=path, node=script,
+            session=session, path=path, node=script
         )
         document_node = session.hook.pytask_collect_node(
-            session=session, path=path, node=document,
+            session=session, path=path, node=document
         )
 
         if not (
-            isinstance(script_node, FilePathNode) and script_node.value.suffix == ".tex"
+            isinstance(script_node, FilePathNode)
+            and script_node.value.suffix == ".tex"  # noqa: PLR2004
         ):
             raise ValueError(
                 "The 'script' keyword of the @pytask.mark.latex decorator must point "
-                "to LaTeX file with the .tex suffix.",
+                "to LaTeX file with the .tex suffix."
             )
 
         if not (
@@ -135,7 +136,7 @@ def pytask_collect_task(
         ):
             raise ValueError(
                 "The 'document' keyword of the @pytask.mark.latex decorator must point "
-                "to a .pdf, .ps or .dvi file.",
+                "to a .pdf, .ps or .dvi file."
             )
 
         if isinstance(task.depends_on, dict):
@@ -195,7 +196,7 @@ def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
 
     # Collect new dependencies and add them to the task.
     collected_dependencies = tree_map(
-        lambda x: _collect_node(session, task.path, task.name, x), new_numbered_deps,
+        lambda x: _collect_node(session, task.path, task.name, x), new_numbered_deps
     )
     task.depends_on["__scanned_dependencies"] = collected_dependencies
 
@@ -231,7 +232,7 @@ def _copy_func(func: FunctionType) -> FunctionType:
 
 
 def _collect_node(
-    session: Session, path: Path, name: str, node: str | Path,
+    session: Session, path: Path, name: str, node: str | Path
 ) -> dict[str, MetaNode]:
     """Collect nodes for a task.
 
@@ -258,19 +259,19 @@ def _collect_node(
 
     """
     collected_node = session.hook.pytask_collect_node(
-        session=session, path=path, node=node,
+        session=session, path=path, node=node
     )
     if collected_node is None:
         raise NodeNotCollectedError(
             f"{node!r} cannot be parsed as a dependency or product for task "
-            f"{name!r} in {path!r}.",
+            f"{name!r} in {path!r}."
         )
 
     return collected_node
 
 
 def _parse_compilation_steps(
-    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]],
+    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]]
 ) -> list[Callable[..., Any]]:
     """Parse compilation steps."""
     __tracebackhide__ = True

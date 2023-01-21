@@ -20,10 +20,10 @@ def test_pytask_execute_task_setup(monkeypatch):
     """Make sure that the task setup raises errors."""
     # Act like latexmk is installed since we do not test this.
     monkeypatch.setattr(
-        "pytask_latex.execute.shutil.which", lambda x: None,  # noqa: ARG005
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: ARG005
     )
     task = Task(
-        base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})],
+        base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})]
     )
     with pytest.raises(RuntimeError, match="latexmk is needed"):
         pytask_execute_task_setup(task)
@@ -178,7 +178,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
     # Hide latexmk if available.
     monkeypatch.setattr(
-        "pytask_latex.execute.shutil.which", lambda x: None,  # noqa: ARG005
+        "pytask_latex.execute.shutil.which", lambda x: None  # noqa: ARG005
     )
 
     session = main({"paths": tmp_path})
@@ -500,7 +500,7 @@ def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
     ],
 )
 def test_compile_latex_document_w_unknown_compilation_step(
-    runner, tmp_path, step, message,
+    runner, tmp_path, step, message
 ):
     """Test simple compilation."""
     task_source = f"""

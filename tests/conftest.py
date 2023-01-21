@@ -14,7 +14,7 @@ TEST_RESOURCES = Path(__file__).parent / "resources"
 
 
 needs_latexmk = pytest.mark.skipif(
-    shutil.which("latexmk") is None, reason="latexmk needs to be installed.",
+    shutil.which("latexmk") is None, reason="latexmk needs to be installed."
 )
 
 skip_on_github_actions_with_win = pytest.mark.skipif(
