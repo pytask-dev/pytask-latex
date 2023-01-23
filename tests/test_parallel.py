@@ -6,8 +6,8 @@ import textwrap
 import time
 
 import pytest
-from conftest import needs_latexmk
-from conftest import skip_on_github_actions_with_win
+from tests.conftest import needs_latexmk
+from tests.conftest import skip_on_github_actions_with_win
 from pytask import cli
 from pytask import ExitCode
 
