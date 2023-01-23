@@ -4,15 +4,16 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from conftest import needs_latexmk
-from conftest import skip_on_github_actions_with_win
-from conftest import TEST_RESOURCES
 from pytask import cli
 from pytask import ExitCode
 from pytask import main
 from pytask import Mark
 from pytask import Task
 from pytask_latex.execute import pytask_execute_task_setup
+
+from tests.conftest import needs_latexmk
+from tests.conftest import skip_on_github_actions_with_win
+from tests.conftest import TEST_RESOURCES
 
 
 @pytest.mark.unit()

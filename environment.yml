@@ -12,7 +12,7 @@ dependencies:
 
   # Package dependencies
   - pytask >= 0.3
-  - pytask-parallel >= 0.1
+  - pytask-parallel >= 0.3
   - latex-dependency-scanner >=0.1.1
   - pybaum >=0.1.1
 

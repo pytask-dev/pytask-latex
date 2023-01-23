@@ -3,10 +3,11 @@ from __future__ import annotations
 import textwrap
 
 import pytest
-from conftest import needs_latexmk
-from conftest import skip_on_github_actions_with_win
 from pytask import ExitCode
 from pytask import main
+
+from tests.conftest import needs_latexmk
+from tests.conftest import skip_on_github_actions_with_win
 
 
 @needs_latexmk
