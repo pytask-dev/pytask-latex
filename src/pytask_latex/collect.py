@@ -122,8 +122,7 @@ def pytask_collect_task(
         )
 
         if not (
-            isinstance(script_node, FilePathNode)
-            and script_node.value.suffix == ".tex"
+            isinstance(script_node, FilePathNode) and script_node.value.suffix == ".tex"
         ):
             raise ValueError(
                 "The 'script' keyword of the @pytask.mark.latex decorator must point "
