@@ -34,20 +34,10 @@ repos:
     rev: v2.2.0
     hooks:
     -   id: setup-cfg-fmt
--   repo: https://github.com/PyCQA/docformatter
-    rev: v1.6.0
-    hooks:
-    -   id: docformatter
-        args: [--in-place, --wrap-summaries, "88", --wrap-descriptions, "88", --blank]
 -   repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
     -   id: black
--   repo: https://github.com/asottile/blacken-docs
-    rev: 1.13.0
-    hooks:
-    -   id: blacken-docs
-        additional_dependencies: [black]
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.261
     hooks:
