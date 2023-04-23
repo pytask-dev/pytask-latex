@@ -29,6 +29,8 @@ target-version = "py37"
 select = ["ALL"]
 fix = true
 extend-ignore = [
+    "TCH",
+    "TRY",
     # Numpy docstyle
     "D107",
     "D203",
@@ -61,3 +63,15 @@ extend-ignore = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+
+[tool.pytest.ini_options]
+# Do not add src since it messes with the loading of pytask-parallel as a plugin.
+testpaths = ["test"]
+markers = [
+    "wip: Tests that are work-in-progress.",
+    "unit: Flag for unit tests which target mainly a single function.",
+    "integration: Flag for integration tests which may comprise of multiple unit tests.",
+    "end_to_end: Flag for tests that cover the whole program.",
+]
+norecursedirs = [".idea", ".tox"]

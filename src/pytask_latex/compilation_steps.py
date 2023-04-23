@@ -34,12 +34,9 @@ def latexmk(
         out_dir_opt = [
             f"--output-directory={relative_to(path_to_tex, path_to_document.parent)}"
         ]
-        cmd = (
-            ["latexmk", *options]
-            + job_name_opt
-            + out_dir_opt
-            + [path_to_tex.as_posix()]
-        )
+        cmd = ["latexmk", *options, *job_name_opt, *out_dir_opt] + [
+            path_to_tex.as_posix()
+        ]
         subprocess.run(cmd, check=True)
 
     return run_latexmk
