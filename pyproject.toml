@@ -25,7 +25,7 @@ ignore_errors = true
 
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 select = ["ALL"]
 fix = true
 extend-ignore = [
