@@ -65,11 +65,11 @@ def compile_latex_document(
     Replaces the placeholder function provided by the user.
 
     """
-    for step in compilation_steps:
-        try:
+    try:
+        for step in compilation_steps:
             step(path_to_tex=path_to_tex, path_to_document=path_to_document)
-        except CalledProcessError as e:
-            raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
+    except CalledProcessError as e:
+        raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
 
 
 @hookimpl
@@ -182,7 +182,9 @@ def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
 
     """
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(lds.scan(task.depends_on["__script"].path))
+    latex_dependencies = set(
+        lds.scan(task.depends_on["__script"].path)  # type: ignore[attr-defined]
+    )
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
