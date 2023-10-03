@@ -160,13 +160,16 @@ def pytask_collect_task(
             )
 
         # Parse other dependencies and products.
-        path_nodes = Path.cwd() if path is None else path.parent
         dependencies = parse_dependencies_from_task_function(
             session, path, name, path_nodes, obj
         )
         products = parse_products_from_task_function(
             session, path, name, path_nodes, obj
         )
+
+        # Add script and document
+        dependencies["__script"] = script_node
+        products["__document"] = document_node
 
         markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
 
@@ -195,10 +198,6 @@ def pytask_collect_task(
                 produces=products,
                 markers=markers,
             )
-
-        # Add the other nodes.
-        task.depends_on["__script"] = script_node
-        task.produces["__document"] = document_node
 
         if session.config["infer_latex_dependencies"]:
             task = _add_latex_dependencies_retroactively(task, session)
