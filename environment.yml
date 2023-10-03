@@ -13,8 +13,8 @@ dependencies:
   - toml
 
   # Package dependencies
-  - pytask >= 0.4
-  - pytask-parallel >= 0.4
+  - pytask >= 0.4.0rc4
+  - pytask-parallel >= 0.4.0rc1
   - latex-dependency-scanner >=0.1.1
 
   # Misc
