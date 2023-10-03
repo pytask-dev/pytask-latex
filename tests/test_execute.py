@@ -122,9 +122,11 @@ def test_compile_w_bibliography(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
+    from pytask import task
+    from pathlib import Path
 
+    @task(kwargs={"path": Path("references.bib")})
     @pytask.mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
-    @pytask.mark.depends_on("references.bib")
     def task_compile_document():
         pass
     """
@@ -150,9 +152,8 @@ def test_compile_w_bibliography(runner, tmp_path):
     }
     """
     tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
-
-    session = runner.invoke(cli, [tmp_path.as_posix()])
-    assert session.exit_code == ExitCode.OK
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK
 
 
 @needs_latexmk

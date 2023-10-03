@@ -50,10 +50,11 @@ popular LaTeX distributions, like [TeX Live](https://www.tug.org/texlive/),
 Compiling your PDF can be as simple as writing the following task.
 
 ```python
+from pathlib import Path
 import pytask
 
 
-@pytask.mark.latex(script="document.tex", document="document.pdf")
+@pytask.mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
 def task_compile_latex_document():
     pass
 ```
@@ -64,10 +65,23 @@ task module to the LaTeX file and the compiled document.
 
 ### Dependencies and Products
 
-Dependencies and products can be added as with a normal pytask task using the
-`@pytask.mark.depends_on` and `@pytask.mark.produces` decorators. which is explained in
-this
+Dependencies and products can be added as usual. Read this
 [tutorial](https://pytask-dev.readthedocs.io/en/stable/tutorials/defining_dependencies_products.html).
+
+For example, with the `@pytask.task` decorator. (The choice of the kwarg name, here
+`path`, is arbitrary.)
+
+```python
+import pytask
+from pytask import task
+from pathlib import Path
+
+
+@task(kwargs={"path": Path("path_to_another_dependency.tex")})
+@pytask.mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
+def task_compile_latex_document():
+    pass
+```
 
 ### Customizing the compilation
 
@@ -77,8 +91,8 @@ decorator.
 
 ```python
 @pytask.mark.latex(
-    script="document.tex",
-    document="document.pdf",
+    script=Path("document.tex"),
+    document=Path("document.pdf"),
     compilation_steps="latexmk",
 )
 def task_compile_latex_document():
@@ -95,8 +109,8 @@ from pytask_latex import compilation_steps as cs
 
 
 @pytask.mark.latex(
-    script="document.tex",
-    document="document.pdf",
+    script=Path("document.tex"),
+    document=Path("document.pdf"),
     compilation_steps=cs.latexmk(
         options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
     ),
@@ -113,8 +127,8 @@ an example for generating a `.dvi`.
 
 ```python
 @pytask.mark.latex(
-    script="document.tex",
-    document="document.pdf",
+    script=Path("document.tex"),
+    document=Path("document.pdf"),
     compilation_steps=cs.latexmk(
         options=("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
     ),
@@ -157,14 +171,16 @@ The following task compiles two latex documents.
 for i in range(2):
 
     @pytask.mark.task
-    @pytask.mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
+    @pytask.mark.latex(
+        script=Path(f"document_{i}.tex"),
+        document=Path(f"document_{i}.pdf")
+    )
     def task_compile_latex_document():
         pass
 ```
 
 If you want to compile the same document with different command line options, you have
-to include the latex decorator in the parametrization just like with
-`@pytask.mark.depends_on` and `@pytask.mark.produces`. Pass a dictionary for possible
+to include the latex decorator in the parametrization. Pass a dictionary for possible
 compilation steps and their options.
 
 ```python
@@ -172,8 +188,8 @@ for format_ in ("pdf", "dvi"):
 
     @pytask.mark.task
     @pytask.mark.latex(
-        script="document.tex",
-        document=f"document.{format_}",
+        script=Path("document.tex"),
+        document=Path(f"document.{format_}"),
         compilation_steps=cs.latexmk(
             (f"--{format_}", "--interaction=nonstopmode", "--synctex=1", "--cd")
         ),
