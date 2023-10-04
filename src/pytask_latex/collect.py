@@ -10,7 +10,7 @@ from typing import Callable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
-from pytask import has_mark
+from pytask import PTask, has_mark
 from pytask import hookimpl
 from pytask import is_task_function
 from pytask import Mark
@@ -80,8 +80,8 @@ def compile_latex_document(
 
 @hookimpl
 def pytask_collect_task(
-    session: Session, path: Path, name: str, obj: Any
-) -> Task | None:
+    session: Session, path: Path | None, name: str, obj: Any
+) -> PTask | None:
     """Perform some checks."""
     __tracebackhide__ = True
 
@@ -181,6 +181,7 @@ def pytask_collect_task(
             path_to_document=document_node.path,
         )
 
+        task: PTask
         if path is None:
             task = TaskWithoutPath(
                 name=name,
@@ -206,7 +207,7 @@ def pytask_collect_task(
     return None
 
 
-def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
+def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTask:
     """Add dependencies from LaTeX document to task.
 
     Unfortunately, the dependencies have to be added retroactively, after the task has
@@ -241,6 +242,7 @@ def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
     new_numbered_deps = dict(enumerate(new_existing_deps))
 
     # Collect new dependencies and add them to the task.
+    task_path = task.path if isinstance(task, PTaskWithPath) else None
     path_nodes = task.path.parent if isinstance(task, PTaskWithPath) else Path.cwd()
 
     collected_dependencies = tree_map(
@@ -251,7 +253,7 @@ def _add_latex_dependencies_retroactively(task: Task, session: Session) -> Task:
                 arg_name="__scanned_dependencies",
                 path=(),
                 value=x,
-                task_path=task.path,
+                task_path=task_path,
                 task_name=task.name,
             ),
         ),
@@ -291,7 +293,7 @@ def _collect_node(
 
 
 def _parse_compilation_steps(
-    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]]
+    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]] | None
 ) -> list[Callable[..., Any]]:
     """Parse compilation steps."""
     __tracebackhide__ = True
