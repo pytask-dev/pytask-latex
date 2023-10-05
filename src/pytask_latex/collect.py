@@ -99,7 +99,7 @@ def pytask_collect_task(
             )
         latex_mark = marks[0]
         script, document, compilation_steps = latex(**latex_mark.kwargs)
-        _parse_compilation_steps(compilation_steps)
+        parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
 
         obj.pytask_meta.markers.append(latex_mark)
 
@@ -159,13 +159,13 @@ def pytask_collect_task(
                 "to a .pdf, .ps or .dvi file."
             )
 
-        session.hook.pytask_collect_node(
+        compilation_steps_node = session.hook.pytask_collect_node(
             session=session,
             path=path_nodes,
             node_info=NodeInfo(
                 arg_name="_compilation_steps",
                 path=(),
-                value=compilation_steps,
+                value=parsed_compilation_steps,
                 task_path=path,
                 task_name=name,
             ),
@@ -181,6 +181,7 @@ def pytask_collect_task(
 
         # Add script and document
         dependencies["_path_to_tex"] = script_node
+        dependencies["_compilation_steps"] = compilation_steps_node
         products["_path_to_document"] = document_node
 
         markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
