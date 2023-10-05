@@ -1,7 +1,6 @@
 """Collect tasks."""
 from __future__ import annotations
 
-import functools
 import warnings
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -10,7 +9,7 @@ from typing import Callable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
-from pytask import PTask, has_mark
+from pytask import has_mark
 from pytask import hookimpl
 from pytask import is_task_function
 from pytask import Mark
@@ -21,6 +20,7 @@ from pytask import parse_dependencies_from_task_function
 from pytask import parse_products_from_task_function
 from pytask import PathNode
 from pytask import PPathNode
+from pytask import PTask
 from pytask import PTaskWithPath
 from pytask import remove_marks
 from pytask import Session
@@ -61,9 +61,9 @@ def latex(
 
 
 def compile_latex_document(
-    compilation_steps: list[Callable[..., Any]],
-    path_to_tex: Path,
-    path_to_document: Path,
+    _compilation_steps: list[Callable[..., Any]],
+    _path_to_tex: Path,
+    _path_to_document: Path,
     **kwargs: Any,  # noqa: ARG001
 ) -> None:
     """Compile a LaTeX document iterating over compilations steps.
@@ -72,8 +72,8 @@ def compile_latex_document(
 
     """
     try:
-        for step in compilation_steps:
-            step(path_to_tex=path_to_tex, path_to_document=path_to_document)
+        for step in _compilation_steps:
+            step(path_to_tex=_path_to_tex, path_to_document=_path_to_document)
     except CalledProcessError as e:
         raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
 
@@ -99,7 +99,7 @@ def pytask_collect_task(
             )
         latex_mark = marks[0]
         script, document, compilation_steps = latex(**latex_mark.kwargs)
-        parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
+        _parse_compilation_steps(compilation_steps)
 
         obj.pytask_meta.markers.append(latex_mark)
 
@@ -159,6 +159,18 @@ def pytask_collect_task(
                 "to a .pdf, .ps or .dvi file."
             )
 
+        session.hook.pytask_collect_node(
+            session=session,
+            path=path_nodes,
+            node_info=NodeInfo(
+                arg_name="_compilation_steps",
+                path=(),
+                value=compilation_steps,
+                task_path=path,
+                task_name=name,
+            ),
+        )
+
         # Parse other dependencies and products.
         dependencies = parse_dependencies_from_task_function(
             session, path, name, path_nodes, obj
@@ -168,24 +180,16 @@ def pytask_collect_task(
         )
 
         # Add script and document
-        dependencies["__script"] = script_node
-        products["__document"] = document_node
+        dependencies["_path_to_tex"] = script_node
+        products["_path_to_document"] = document_node
 
         markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
-
-        # Prepare the task function.
-        task_function = functools.partial(
-            compile_latex_document,
-            compilation_steps=parsed_compilation_steps,
-            path_to_tex=script_node.path,
-            path_to_document=document_node.path,
-        )
 
         task: PTask
         if path is None:
             task = TaskWithoutPath(
                 name=name,
-                function=task_function,
+                function=compile_latex_document,
                 depends_on=dependencies,
                 produces=products,
                 markers=markers,
@@ -194,7 +198,7 @@ def pytask_collect_task(
             task = Task(
                 base_name=name,
                 path=path,
-                function=task_function,
+                function=compile_latex_document,
                 depends_on=dependencies,
                 produces=products,
                 markers=markers,
@@ -228,9 +232,15 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
 
     """
     # Scan the LaTeX document for included files.
-    latex_dependencies = set(
-        lds.scan(task.depends_on["__script"].path)  # type: ignore[attr-defined]
-    )
+    try:
+        latex_dependencies = set(
+            lds.scan(task.depends_on["_path_to_tex"].path)  # type: ignore[attr-defined]
+        )
+    except Exception:  # noqa: BLE001
+        warnings.warn(
+            "pytask-latex failed to scan latex document for dependencies.", stacklevel=1
+        )
+        latex_dependencies = set()
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
@@ -250,7 +260,7 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
             session,
             path_nodes,
             NodeInfo(
-                arg_name="__scanned_dependencies",
+                arg_name="_scanned_dependencies",
                 path=(),
                 value=x,
                 task_path=task_path,
@@ -260,7 +270,7 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
         new_numbered_deps,
     )
     task.depends_on[
-        "__scanned_dependencies"
+        "_scanned_dependencies"
     ] = collected_dependencies  # type: ignore[assignment]
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
@@ -293,7 +303,10 @@ def _collect_node(
 
 
 def _parse_compilation_steps(
-    compilation_steps: str | Callable[..., Any] | Sequence[str | Callable[..., Any]] | None
+    compilation_steps: str
+    | Callable[..., Any]
+    | Sequence[str | Callable[..., Any]]
+    | None
 ) -> list[Callable[..., Any]]:
     """Parse compilation steps."""
     __tracebackhide__ = True

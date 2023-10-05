@@ -172,8 +172,7 @@ for i in range(2):
 
     @pytask.mark.task
     @pytask.mark.latex(
-        script=Path(f"document_{i}.tex"),
-        document=Path(f"document_{i}.pdf")
+        script=Path(f"document_{i}.tex"), document=Path(f"document_{i}.pdf")
     )
     def task_compile_latex_document():
         pass
