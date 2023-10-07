@@ -4,9 +4,9 @@ import textwrap
 from pathlib import Path
 
 import pytest
+from pytask import build
 from pytask import cli
 from pytask import ExitCode
-from pytask import main
 from pytask import Mark
 from pytask import Task
 from pytask_latex.execute import pytask_execute_task_setup
@@ -122,9 +122,11 @@ def test_compile_w_bibliography(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
     import pytask
+    from pytask import task
+    from pathlib import Path
 
+    @task(kwargs={"path": Path("references.bib")})
     @pytask.mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
-    @pytask.mark.depends_on("references.bib")
     def task_compile_document():
         pass
     """
@@ -150,9 +152,8 @@ def test_compile_w_bibliography(runner, tmp_path):
     }
     """
     tmp_path.joinpath("references.bib").write_text(textwrap.dedent(bib_source))
-
-    session = runner.invoke(cli, [tmp_path.as_posix()])
-    assert session.exit_code == ExitCode.OK
+    result = runner.invoke(cli, [tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK
 
 
 @needs_latexmk
@@ -182,7 +183,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
         "pytask_latex.execute.shutil.which", lambda x: None  # noqa: ARG005
     )
 
-    session = main({"paths": tmp_path})
+    session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.FAILED
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
@@ -274,7 +275,7 @@ def test_fail_because_script_is_not_latex(tmp_path):
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
     tmp_path.joinpath("in.txt").touch()
 
-    session = main({"paths": tmp_path})
+    session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.COLLECTION_FAILED
     assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
 
@@ -317,7 +318,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     """
     tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
 
-    session = main({"paths": tmp_path})
+    session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.OK
     assert len(session.tasks) == 1
 
@@ -352,7 +353,7 @@ def test_compile_document_w_wrong_flag(tmp_path):
     """
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
-    session = main({"paths": tmp_path})
+    session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.FAILED
     assert len(session.tasks) == 1
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
@@ -555,3 +556,31 @@ def test_compile_latex_document_with_task_decorator(runner, tmp_path):
 
     result = runner.invoke(cli, [tmp_path.as_posix()])
     assert result.exit_code == ExitCode.OK
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end()
+def test_use_task_without_path(tmp_path):
+    task_source = """
+    import pytask
+    from pytask import task
+
+    task_compile_document = pytask.mark.latex(
+        script="document.tex", document="document.pdf"
+    )(
+        task()(lambda *x: None)
+    )
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    Ein Fuchs muss tun, was ein Fuchs tun muss. Luxus und Ruhm und rulen bis zum
+    Schluss.
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+    session = build(paths=tmp_path)
+    assert session.exit_code == ExitCode.OK

@@ -1,6 +1,8 @@
 name: pytask-latex
 
 channels:
+  - conda-forge/label/pytask_rc
+  - conda-forge/label/pytask_parallel_rc
   - conda-forge
   - nodefaults
 
@@ -11,10 +13,9 @@ dependencies:
   - toml
 
   # Package dependencies
-  - pytask >= 0.3
-  - pytask-parallel >= 0.3
+  - pytask >= 0.4.0
+  - pytask-parallel >= 0.4.0
   - latex-dependency-scanner >=0.1.1
-  - pybaum >=0.1.1
 
   # Misc
   - black
