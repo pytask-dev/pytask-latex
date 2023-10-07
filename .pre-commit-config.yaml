@@ -73,7 +73,7 @@ repos:
         additional_dependencies: [
             attrs>=21.3.0,
             click,
-            pytask>=0.4.0rc4,
+            pytask>=0.4.0,
             types-PyYAML,
             types-setuptools
         ]
