@@ -584,3 +584,41 @@ def test_use_task_without_path(tmp_path):
     tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.OK
+
+
+@needs_latexmk
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end()
+def test_collect_latex_document_with_product_from_another_task(runner, tmp_path):
+    """Test simple compilation."""
+    task_source = """
+    import pytask
+
+    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document():
+        pass
+
+
+    def task_create_input_tex(
+        path: Annotated[Path, Product] = Path("second.tex")
+    ) -> None:
+        path.write_text("weil du meine Mitten extrahierst.")
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    \input{duesseldorf}
+    \input{duesterboys}
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+    tmp_path.joinpath("duesseldorf.tex").write_text(
+        "Bin ich wieder nur so nett zu dir, "
+    )
+
+    result = runner.invoke(cli, ["collect", "--nodes", tmp_path.as_posix()])
+    assert result.exit_code == ExitCode.OK
+    assert "duesseldorf.tex" in result.output
+    assert "duesterboys.tex" in result.output

@@ -205,14 +205,27 @@ def pytask_collect_task(
                 markers=markers,
             )
 
-        if session.config["infer_latex_dependencies"]:
-            task = _add_latex_dependencies_retroactively(task, session)
-
         return task
     return None
 
 
-def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTask:
+@hookimpl
+def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
+    """Add dependencies from from LaTeX documents to tasks."""
+    all_products = {
+        product.path
+        for task in tasks
+        for product in tree_leaves(task.produces)
+        if isinstance(product, PPathNode)
+    }
+    latex_tasks = [task for task in tasks if has_mark(task, "latex")]
+    for task in latex_tasks:
+        _add_latex_dependencies_retroactively(task, session, all_products)
+
+
+def _add_latex_dependencies_retroactively(
+    task: PTask, session: Session, all_products: set[Path]
+) -> None:
     """Add dependencies from LaTeX document to task.
 
     Unfortunately, the dependencies have to be added retroactively, after the task has
@@ -234,23 +247,22 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
     """
     # Scan the LaTeX document for included files.
     try:
-        latex_dependencies = set(
+        scanned_deps = set(
             lds.scan(task.depends_on["_path_to_tex"].path)  # type: ignore[attr-defined]
         )
     except Exception:  # noqa: BLE001
         warnings.warn(
             "pytask-latex failed to scan latex document for dependencies.", stacklevel=1
         )
-        latex_dependencies = set()
+        scanned_deps = set()
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
-    existing_paths = {
+    task_deps = {
         i.path for i in tree_leaves(task.depends_on) if isinstance(i, PPathNode)
     }
-    new_deps = latex_dependencies - existing_paths
-    new_existing_deps = {i for i in new_deps if i.exists()}
-    new_numbered_deps = dict(enumerate(new_existing_deps))
+    additional_deps = scanned_deps - task_deps
+    new_deps = [i for i in additional_deps if i in all_products or i.exists()]
 
     # Collect new dependencies and add them to the task.
     task_path = task.path if isinstance(task, PTaskWithPath) else None
@@ -268,7 +280,7 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
                 task_name=task.name,
             ),
         ),
-        new_numbered_deps,
+        new_deps,
     )
     task.depends_on[
         "_scanned_dependencies"
@@ -276,8 +288,6 @@ def _add_latex_dependencies_retroactively(task: PTask, session: Session) -> PTas
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
-
-    return task
 
 
 def _collect_node(
