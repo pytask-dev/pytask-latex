@@ -593,14 +593,16 @@ def test_collect_latex_document_with_product_from_another_task(runner, tmp_path)
     """Test simple compilation."""
     task_source = """
     import pytask
+    from pathlib import Path
+    from pytask import Product
+    from typing_extensions import Annotated
 
     @pytask.mark.latex(script="document.tex", document="document.pdf")
-    def task_compile_document():
-        pass
+    def task_compile_document(): pass
 
 
     def task_create_input_tex(
-        path: Annotated[Path, Product] = Path("second.tex")
+        path: Annotated[Path, Product] = Path("duesterboys.tex")
     ) -> None:
         path.write_text("weil du meine Mitten extrahierst.")
     """

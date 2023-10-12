@@ -212,15 +212,16 @@ def pytask_collect_task(
 @hookimpl
 def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
     """Add dependencies from from LaTeX documents to tasks."""
-    all_products = {
-        product.path
-        for task in tasks
-        for product in tree_leaves(task.produces)
-        if isinstance(product, PPathNode)
-    }
-    latex_tasks = [task for task in tasks if has_mark(task, "latex")]
-    for task in latex_tasks:
-        _add_latex_dependencies_retroactively(task, session, all_products)
+    if session.config["infer_latex_dependencies"]:
+        all_products = {
+            product.path
+            for task in tasks
+            for product in tree_leaves(task.produces)
+            if isinstance(product, PPathNode)
+        }
+        latex_tasks = [task for task in tasks if has_mark(task, "latex")]
+        for task in latex_tasks:
+            _add_latex_dependencies_retroactively(task, session, all_products)
 
 
 def _add_latex_dependencies_retroactively(
