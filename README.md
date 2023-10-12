@@ -51,34 +51,34 @@ Compiling your PDF can be as simple as writing the following task.
 
 ```python
 from pathlib import Path
-import pytask
+from pytask import mark
 
 
-@pytask.mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
+@mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
 def task_compile_latex_document():
     pass
 ```
 
-Use `@pytask.mark.latex` to indicate that this task compiles a LaTeX document. The
-`script` and the `document` keywords provide absolute paths or paths relative to the
-task module to the LaTeX file and the compiled document.
+Use `@mark.latex` to indicate that this task compiles a LaTeX document. The `script` and
+the `document` keywords provide absolute paths or paths relative to the task module to
+the LaTeX file and the compiled document.
 
 ### Dependencies and Products
 
 Dependencies and products can be added as usual. Read this
 [tutorial](https://pytask-dev.readthedocs.io/en/stable/tutorials/defining_dependencies_products.html).
 
-For example, with the `@pytask.task` decorator. (The choice of the kwarg name, here
-`path`, is arbitrary.)
+For example, with the `@task` decorator. (The choice of the kwarg name, here `path`, is
+arbitrary.)
 
 ```python
-import pytask
+from pytask import mark
 from pytask import task
 from pathlib import Path
 
 
 @task(kwargs={"path": Path("path_to_another_dependency.tex")})
-@pytask.mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
+@mark.latex(script=Path("document.tex"), document=Path("document.pdf"))
 def task_compile_latex_document():
     pass
 ```
@@ -86,11 +86,10 @@ def task_compile_latex_document():
 ### Customizing the compilation
 
 pytask-latex uses latexmk by default to compile the document because it handles most
-use-cases automatically. The following is equivalent to a bare `@pytask.mark.latex`
-decorator.
+use-cases automatically. The following is equivalent to a bare `@mark.latex` decorator.
 
 ```python
-@pytask.mark.latex(
+@mark.latex(
     script=Path("document.tex"),
     document=Path("document.pdf"),
     compilation_steps="latexmk",
@@ -99,16 +98,16 @@ def task_compile_latex_document():
     ...
 ```
 
-The `@pytask.mark.latex` decorator has a keyword argument called `compilation_steps`
-which accepts which accepts strings or list of strings pointing to internally
-implemented compilation steps. Using strings will use the default configuration of this
-compilation step. It is equivalent to the following.
+The `@mark.latex` decorator has a keyword argument called `compilation_steps` which
+accepts which accepts strings or list of strings pointing to internally implemented
+compilation steps. Using strings will use the default configuration of this compilation
+step. It is equivalent to the following.
 
 ```python
 from pytask_latex import compilation_steps as cs
 
 
-@pytask.mark.latex(
+@mark.latex(
     script=Path("document.tex"),
     document=Path("document.pdf"),
     compilation_steps=cs.latexmk(
@@ -126,7 +125,7 @@ You can pass different options to change the compilation process with latexmk. H
 an example for generating a `.dvi`.
 
 ```python
-@pytask.mark.latex(
+@mark.latex(
     script=Path("document.tex"),
     document=Path("document.pdf"),
     compilation_steps=cs.latexmk(
@@ -170,10 +169,8 @@ The following task compiles two latex documents.
 ```python
 for i in range(2):
 
-    @pytask.mark.task
-    @pytask.mark.latex(
-        script=Path(f"document_{i}.tex"), document=Path(f"document_{i}.pdf")
-    )
+    @task
+    @mark.latex(script=Path(f"document_{i}.tex"), document=Path(f"document_{i}.pdf"))
     def task_compile_latex_document():
         pass
 ```
@@ -185,8 +182,8 @@ compilation steps and their options.
 ```python
 for format_ in ("pdf", "dvi"):
 
-    @pytask.mark.task
-    @pytask.mark.latex(
+    @task
+    @mark.latex(
         script=Path("document.tex"),
         document=Path(f"document.{format_}"),
         compilation_steps=cs.latexmk(
