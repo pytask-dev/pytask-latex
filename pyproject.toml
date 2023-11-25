@@ -16,7 +16,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [ "latex-dependency-scanner>=0.1.1", "pluggy>=1.0.0", "pytask>=0.4.0"]
 dynamic = [ "version" ]
-authors = [ { name = "Tobias Raabe", email = "raabe@poste.de"}]
+authors = [ { name = "Tobias Raabe", email = "raabe@poste.de"} ]
 readme = { file = "README.md", content-type = "text/markdown"}
 license = { text = "MIT" }
 
@@ -26,6 +26,9 @@ Changelog = "https://github.com/pytask-dev/pytask-latex/blob/main/CHANGES.md"
 Documentation = "https://github.com/pytask-dev/pytask-latex"
 Github = "https://github.com/pytask-dev/pytask-latex"
 Tracker = "https://github.com/pytask-dev/pytask-latex/issues"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [tool.setuptools]
 include-package-data = true
