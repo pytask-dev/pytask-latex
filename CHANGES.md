@@ -4,6 +4,14 @@ This is a record of all past pytask-latex releases and what went into them in re
 chronological order. Releases follow [semantic versioning](https://semver.org/) and all
 releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask-latex).
 
+## 0.4.2 - 2023-xx-xx
+
+- {pull}`65` simplifies dependency management.
+
+## 0.4.1 - 2023-xx-xx
+
+- {pull}`63` improves the collection of dependencies.
+
 ## 0.4.0 - 2023-10-07
 
 - {pull}`60` updates the package to use pytask v0.4.0.
