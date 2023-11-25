@@ -1,4 +1,4 @@
-"""This module contains compilation steps for compiling a LaTeX document.
+"""Contains compilation steps for compiling a LaTeX document.
 
 Each compilation step must have the following signature:
 
@@ -13,18 +13,24 @@ A compilation step constructor must yield a function with this signature.
 from __future__ import annotations
 
 import subprocess
-from pathlib import Path
 from typing import Any
 from typing import Callable
+from typing import TYPE_CHECKING
 
 from pytask_latex.path import relative_to
 from pytask_latex.utils import to_list
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 def latexmk(
-    options: str
-    | list[str]
-    | tuple[str, ...] = ("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
+    options: str | list[str] | tuple[str, ...] = (
+        "--pdf",
+        "--interaction=nonstopmode",
+        "--synctex=1",
+        "--cd",
+    ),
 ) -> Callable[..., Any]:
     """Compilation step that calls latexmk."""
     options = [str(i) for i in to_list(options)]

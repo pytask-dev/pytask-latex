@@ -75,7 +75,8 @@ def compile_latex_document(
         for step in _compilation_steps:
             step(path_to_tex=_path_to_tex, path_to_document=_path_to_document)
     except CalledProcessError as e:
-        raise RuntimeError(f"Compilation step {step.__name__} failed.") from e
+        msg = f"Compilation step {step.__name__} failed."
+        raise RuntimeError(msg) from e
 
 
 @hookimpl
@@ -93,10 +94,11 @@ def pytask_collect_task(
         # Parse the @pytask.mark.latex decorator.
         obj, marks = remove_marks(obj, "latex")
         if len(marks) > 1:
-            raise ValueError(
+            msg = (
                 f"Task {name!r} has multiple @pytask.mark.latex marks, but only one is "
                 "allowed."
             )
+            raise ValueError(msg)
         latex_mark = marks[0]
         script, document, compilation_steps = latex(**latex_mark.kwargs)
         parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
@@ -145,19 +147,21 @@ def pytask_collect_task(
         if not (
             isinstance(script_node, PathNode) and script_node.path.suffix == ".tex"
         ):
-            raise ValueError(
+            msg = (
                 "The 'script' keyword of the @pytask.mark.latex decorator must point "
                 f"to LaTeX file with the .tex suffix, but it is {script_node}."
             )
+            raise ValueError(msg)
 
         if not (
             isinstance(document_node, PathNode)
             and document_node.path.suffix in (".pdf", ".ps", ".dvi")
         ):
-            raise ValueError(
+            msg = (
                 "The 'document' keyword of the @pytask.mark.latex decorator must point "
                 "to a .pdf, .ps or .dvi file."
             )
+            raise ValueError(msg)
 
         compilation_steps_node = session.hook.pytask_collect_node(
             session=session,
@@ -283,9 +287,7 @@ def _add_latex_dependencies_retroactively(
         ),
         new_deps,
     )
-    task.depends_on[
-        "_scanned_dependencies"
-    ] = collected_dependencies  # type: ignore[assignment]
+    task.depends_on["_scanned_dependencies"] = collected_dependencies
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
@@ -306,10 +308,11 @@ def _collect_node(
         session=session, path=path, node_info=node_info
     )
     if collected_node is None:
-        raise NodeNotCollectedError(
+        msg = (
             f"{node_info.arg_name!r} cannot be parsed as a dependency or product for "
             f"task {node_info.task_name!r} in {node_info.task_path!r}."
         )
+        raise NodeNotCollectedError(msg)
 
     return collected_node
 
@@ -318,7 +321,7 @@ def _parse_compilation_steps(
     compilation_steps: str
     | Callable[..., Any]
     | Sequence[str | Callable[..., Any]]
-    | None
+    | None,
 ) -> list[Callable[..., Any]]:
     """Parse compilation steps."""
     __tracebackhide__ = True
@@ -331,11 +334,13 @@ def _parse_compilation_steps(
             try:
                 parsed_step = getattr(cs, step)
             except AttributeError:
-                raise ValueError(f"Compilation step {step!r} is unknown.") from None
+                msg = f"Compilation step {step!r} is unknown."
+                raise ValueError(msg) from None
             parsed_compilation_steps.append(parsed_step())
         elif callable(step):
             parsed_compilation_steps.append(step)
         else:
-            raise ValueError(f"Compilation step {step!r} is not a valid step.")
+            msg = f"Compilation step {step!r} is not a valid step."
+            raise TypeError(msg)
 
     return parsed_compilation_steps

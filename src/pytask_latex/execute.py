@@ -12,7 +12,8 @@ from pytask import PTask
 def pytask_execute_task_setup(task: PTask) -> None:
     """Check that latexmk is found on the PATH if a LaTeX task should be executed."""
     if has_mark(task, "latex") and shutil.which("latexmk") is None:
-        raise RuntimeError(
+        msg = (
             "latexmk is needed to compile LaTeX documents, but it is not found on "
             "your PATH."
         )
+        raise RuntimeError(msg)

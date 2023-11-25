@@ -1,4 +1,4 @@
-"""This module contains functions related to handling paths."""
+"""Contains functions related to handling paths."""
 from __future__ import annotations
 
 import os
