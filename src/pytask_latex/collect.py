@@ -13,12 +13,12 @@ from pytask import has_mark
 from pytask import hookimpl
 from pytask import is_task_function
 from pytask import Mark
-from pytask import MetaNode
 from pytask import NodeInfo
 from pytask import NodeNotCollectedError
 from pytask import parse_dependencies_from_task_function
 from pytask import parse_products_from_task_function
 from pytask import PathNode
+from pytask import PNode
 from pytask import PPathNode
 from pytask import PTask
 from pytask import PTaskWithPath
@@ -295,7 +295,7 @@ def _add_latex_dependencies_retroactively(
 
 def _collect_node(
     session: Session, path: Path, node_info: NodeInfo
-) -> dict[str, MetaNode]:
+) -> dict[str, PNode]:
     """Collect nodes for a task.
 
     Raises
