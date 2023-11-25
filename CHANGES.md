@@ -7,8 +7,9 @@ releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask
 ## 0.4.2 - 2023-xx-xx
 
 - {pull}`65` simplifies dependency management.
+- {pull}`66` removes using `MetaNode`.
 
-## 0.4.1 - 2023-xx-xx
+## 0.4.1 - 2023-10-12
 
 - {pull}`63` improves the collection of dependencies.
 
