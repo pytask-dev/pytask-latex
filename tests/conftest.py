@@ -11,7 +11,6 @@ from typing import Callable
 import pytest
 from click.testing import CliRunner
 
-
 TEST_RESOURCES = Path(__file__).parent / "resources"
 
 
