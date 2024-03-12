@@ -8,6 +8,7 @@ releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask
 
 - {pull}`65` simplifies dependency management.
 - {pull}`66` removes using `MetaNode`.
+- {pull}`72` updates syntax of tests.
 
 ## 0.4.1 - 2023-10-12
 

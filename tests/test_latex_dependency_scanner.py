@@ -16,9 +16,9 @@ from tests.conftest import skip_on_github_actions_with_win
 @pytest.mark.parametrize("infer_dependencies", ["true", "false"])
 def test_infer_dependencies_from_task(tmp_path, infer_dependencies):
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
     """

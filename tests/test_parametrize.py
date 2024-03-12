@@ -15,12 +15,13 @@ from tests.conftest import skip_on_github_actions_with_win
 @pytest.mark.end_to_end()
 def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
     source = """
+    from pytask import mark, task
     import pytask
 
     for i in range(1, 3):
 
-        @pytask.mark.task
-        @pytask.mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
+        @task
+        @mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
         def task_compile_latex_document():
             pass
     """
@@ -50,13 +51,14 @@ def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
 @pytest.mark.end_to_end()
 def test_parametrizing_latex_options_w_loop(tmp_path):
     source = """
+    from pytask import mark, task
     import pytask
     from pytask_latex import compilation_steps as cs
 
     for ending in ("pdf", "dvi"):
 
-        @pytask.mark.task
-        @pytask.mark.latex(
+        @task
+        @mark.latex(
             script="document.tex",
             document=f"document.{ending}",
             compilation_steps=cs.latexmk(
