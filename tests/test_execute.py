@@ -368,6 +368,7 @@ def test_compile_document_w_image(runner, tmp_path):
     from pytask import Product
     import shutil
     from typing_extensions import Annotated
+    from pathlib import Path
 
     def task_create_image(image: Annotated[Path, Product] = Path("image.png")):
         shutil.copy(
