@@ -369,6 +369,7 @@ def test_compile_document_w_image(runner, tmp_path):
     import shutil
     from typing_extensions import Annotated
     from pathlib import Path
+    from pytask import mark
 
     def task_create_image(image: Annotated[Path, Product] = Path("image.png")):
         shutil.copy(
@@ -376,7 +377,7 @@ def test_compile_document_w_image(runner, tmp_path):
             "{tmp_path.joinpath("image.png").as_posix()}"
         )
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
     """
