@@ -231,11 +231,11 @@ def test_compile_latex_document_w_xelatex(runner, tmp_path):
 @pytest.mark.end_to_end()
 def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
     task_source = """
-    import pytask
+    from pytask import mark
+    from pathlib import Path
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
-    @pytask.mark.depends_on("in.txt")
-    def task_compile_document():
+    @mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document(path: Path = Path("in.txt")):
         pass
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
@@ -259,11 +259,11 @@ def test_compile_latex_document_w_two_dependencies(runner, tmp_path):
 @pytest.mark.end_to_end()
 def test_fail_because_script_is_not_latex(tmp_path):
     task_source = """
-    import pytask
+    from pytask import mark
+    from pathlib import Path
 
-    @pytask.mark.latex(script="document.text", document="document.pdf")
-    @pytask.mark.depends_on("in.txt")
-    def task_compile_document():
+    @mark.latex(script="document.text", document="document.pdf")
+    def task_compile_document(path: Path = Path("in.txt")):
         pass
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
@@ -297,11 +297,11 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     tmp_path.joinpath("sub", "resources").mkdir(parents=True)
 
     task_source = """
-    import pytask
+    from pytask import mark
+    from pathlib import Path
 
-    @pytask.mark.latex(script="document.tex", document="out/document.pdf")
-    @pytask.mark.depends_on("resources/content.tex")
-    def task_compile_document():
+    @mark.latex(script="document.tex", document="out/document.pdf")
+    def task_compile_document(path: Path = Path("resources/content.tex")):
         pass
     """
     tmp_path.joinpath("sub", "task_dummy.py").write_text(textwrap.dedent(task_source))
@@ -365,11 +365,11 @@ def test_compile_document_w_wrong_flag(tmp_path):
 @pytest.mark.end_to_end()
 def test_compile_document_w_image(runner, tmp_path):
     task_source = f"""
-    import pytask
+    from pytask import Product
     import shutil
+    from typing_extensions import Annotated
 
-    @pytask.mark.produces("image.png")
-    def task_create_image():
+    def task_create_image(image: Annotated[Path, Product] = Path("image.png")):
         shutil.copy(
             "{TEST_RESOURCES.joinpath("image.png").as_posix()}",
             "{tmp_path.joinpath("image.png").as_posix()}"
@@ -455,15 +455,15 @@ def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
 def test_compile_w_bibliography_and_keep_bbl(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
-    import pytask
+    from pytask import mark, Product
+    from pathlib import Path
+    from typing_extensions import Annotated
 
-    @pytask.mark.produces("out_w_bib.bbl")
-    @pytask.mark.latex(
-        script="in_w_bib.tex",
-        document="out_w_bib.pdf",
-    )
-    @pytask.mark.depends_on("references.bib")
-    def task_compile_document():
+    @mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
+    def task_compile_document(
+        bibliography: Path = Path("references.bib"),
+        bbl: Annotated[Path, Product] = Path("out_w_bib.bbl"),
+    ):
         pass
     """
     tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
