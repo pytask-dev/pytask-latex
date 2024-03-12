@@ -2,7 +2,6 @@
 requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
 
-
 [project]
 name = "pytask_latex"
 description = "Compile LaTeX documents with pytask."
@@ -49,10 +48,8 @@ pytask_latex = "pytask_latex.plugin"
 where = [ "src" ]
 namespaces = false
 
-
 [tool.setuptools_scm]
 write_to = "src/pytask_latex/_version.py"
-
 
 [tool.mypy]
 files = ["src", "tests"]
@@ -64,36 +61,35 @@ no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 
-
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
 ignore_errors = true
 
-
 [tool.ruff]
 target-version = "py38"
-select = ["ALL"]
 fix = true
 unsafe-fixes = true
+
+[tool.ruff.lint]
 extend-ignore = [
     # Others.
-    "I",  # ignore isort
     "ANN101",  # type annotating self
     "ANN102",  # type annotating cls
     "ANN401",  # Allow typing.Any.
     "COM812",  # Comply with ruff-format
     "ISC001",  # Comply with ruff-format
 ]
+select = ["ALL"]
 
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D", "ANN", "PLR2004", "S101"]
 
+[tool.ruff.lint.isort]
+force-single-line = true
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
-
 
 [tool.pytest.ini_options]
 # Do not add src since it messes with the loading of pytask-parallel as a plugin.

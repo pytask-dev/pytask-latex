@@ -13,9 +13,9 @@ A compilation step constructor must yield a function with this signature.
 from __future__ import annotations
 
 import subprocess
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import TYPE_CHECKING
 
 from pytask_latex.path import relative_to
 from pytask_latex.utils import to_list

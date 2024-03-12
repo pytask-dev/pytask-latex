@@ -5,12 +5,11 @@ import os
 import textwrap
 
 import pytest
-from pytask import cli
 from pytask import ExitCode
+from pytask import cli
 
 from tests.conftest import needs_latexmk
 from tests.conftest import skip_on_github_actions_with_win
-
 
 try:
     import pytask_parallel  # noqa: F401

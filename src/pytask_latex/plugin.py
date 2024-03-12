@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pytask import hookimpl
+
 from pytask_latex import collect
 from pytask_latex import config
 from pytask_latex import execute

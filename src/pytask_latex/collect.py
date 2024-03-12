@@ -9,25 +9,26 @@ from typing import Callable
 from typing import Sequence
 
 import latex_dependency_scanner as lds
-from pytask import has_mark
-from pytask import hookimpl
-from pytask import is_task_function
 from pytask import Mark
 from pytask import NodeInfo
 from pytask import NodeNotCollectedError
-from pytask import parse_dependencies_from_task_function
-from pytask import parse_products_from_task_function
 from pytask import PathNode
 from pytask import PNode
 from pytask import PPathNode
 from pytask import PTask
 from pytask import PTaskWithPath
-from pytask import remove_marks
 from pytask import Session
 from pytask import Task
 from pytask import TaskWithoutPath
+from pytask import has_mark
+from pytask import hookimpl
+from pytask import is_task_function
+from pytask import parse_dependencies_from_task_function
+from pytask import parse_products_from_task_function
+from pytask import remove_marks
 from pytask.tree_util import tree_leaves
 from pytask.tree_util import tree_map
+
 from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 

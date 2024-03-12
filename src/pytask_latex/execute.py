@@ -3,9 +3,9 @@ from __future__ import annotations
 
 import shutil
 
+from pytask import PTask
 from pytask import has_mark
 from pytask import hookimpl
-from pytask import PTask
 
 
 @hookimpl
