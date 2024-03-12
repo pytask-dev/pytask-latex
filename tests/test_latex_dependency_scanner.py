@@ -3,8 +3,8 @@ from __future__ import annotations
 import textwrap
 
 import pytest
-from pytask import build
 from pytask import ExitCode
+from pytask import build
 
 from tests.conftest import needs_latexmk
 from tests.conftest import skip_on_github_actions_with_win

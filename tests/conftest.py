@@ -10,7 +10,7 @@ from typing import Callable
 
 import pytest
 from click.testing import CliRunner
-
+from pytask import storage
 
 TEST_RESOURCES = Path(__file__).parent / "resources"
 
@@ -79,6 +79,7 @@ def _restore_sys_path_and_module_after_test_execution():
 class CustomCliRunner(CliRunner):
     def invoke(self, *args, **kwargs):
         """Restore sys.path and sys.modules after an invocation."""
+        storage.create()
         with restore_sys_path_and_module_after_test_execution():
             return super().invoke(*args, **kwargs)
 
