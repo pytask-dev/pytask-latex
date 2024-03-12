@@ -37,9 +37,9 @@ def test_pytask_execute_task_setup(monkeypatch):
 def test_compile_latex_document(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
     """
@@ -63,9 +63,9 @@ def test_compile_latex_document(runner, tmp_path):
 def test_compile_latex_document_w_relative(runner, tmp_path):
     """Test simple compilation."""
     task_source = f"""
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(
+    @mark.latex(
         script="document.tex",
         document="{tmp_path.joinpath("bld", "document.pdf").as_posix()}"
     )
@@ -95,9 +95,9 @@ def test_compile_latex_document_w_relative(runner, tmp_path):
 def test_compile_latex_document_to_different_name(runner, tmp_path):
     """Compile a LaTeX document where source and output name differ."""
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="in.tex", document="out.pdf")
+    @mark.latex(script="in.tex", document="out.pdf")
     def task_compile_document():
         pass
 
@@ -122,12 +122,11 @@ def test_compile_latex_document_to_different_name(runner, tmp_path):
 def test_compile_w_bibliography(runner, tmp_path):
     """Compile a LaTeX document with bibliography."""
     task_source = """
-    import pytask
-    from pytask import task
+    from pytask import task, mark
     from pathlib import Path
 
     @task(kwargs={"path": Path("references.bib")})
-    @pytask.mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
+    @mark.latex(script="in_w_bib.tex", document="out_w_bib.pdf")
     def task_compile_document():
         pass
     """
@@ -162,9 +161,9 @@ def test_compile_w_bibliography(runner, tmp_path):
 @pytest.mark.end_to_end()
 def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
     """
@@ -196,10 +195,10 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 @pytest.mark.end_to_end()
 def test_compile_latex_document_w_xelatex(runner, tmp_path):
     task_source = """
-    import pytask
+    from pytask import mark
     from pytask_latex import compilation_steps
 
-    @pytask.mark.latex(
+    @mark.latex(
         script="document.tex",
         document="document.pdf",
         compilation_steps=compilation_steps.latexmk(
@@ -333,10 +332,10 @@ def test_compile_document_w_wrong_flag(tmp_path):
     tmp_path.joinpath("sub").mkdir(parents=True)
 
     task_source = """
-    import pytask
+    from pytask import mark
     from pytask_latex import compilation_steps
 
-    @pytask.mark.latex(
+    @mark.latex(
         script="document.tex",
         document="out/document.pdf",
         compilation_steps=compilation_steps.latexmk("--wrong-flag"),
@@ -402,10 +401,10 @@ def test_compile_document_w_image(runner, tmp_path):
 def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="document.text")
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.text")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document():
         pass
     """
@@ -430,9 +429,9 @@ def test_compile_latex_document_w_multiple_marks(runner, tmp_path):
 def test_compile_latex_document_with_wrong_extension(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(script="document.tex", document="document.file")
+    @mark.latex(script="document.tex", document="document.file")
     def task_compile_document():
         pass
     """
@@ -510,9 +509,9 @@ def test_compile_latex_document_w_unknown_compilation_step(
 ):
     """Test simple compilation."""
     task_source = f"""
-    import pytask
+    from pytask import mark
 
-    @pytask.mark.latex(
+    @mark.latex(
         script="document.tex",
         document="document.pdf",
         compilation_steps={step},
@@ -541,10 +540,10 @@ def test_compile_latex_document_w_unknown_compilation_step(
 def test_compile_latex_document_with_task_decorator(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
-    import pytask
+    from pytask import mark, task
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
-    @pytask.mark.task
+    @mark.latex(script="document.tex", document="document.pdf")
+    @task
     def compile_document():
         pass
     """
@@ -596,12 +595,11 @@ def test_use_task_without_path(tmp_path):
 def test_collect_latex_document_with_product_from_another_task(runner, tmp_path):
     """Test simple compilation."""
     task_source = """
-    import pytask
     from pathlib import Path
-    from pytask import Product
+    from pytask import Product, mark
     from typing_extensions import Annotated
 
-    @pytask.mark.latex(script="document.tex", document="document.pdf")
+    @mark.latex(script="document.tex", document="document.pdf")
     def task_compile_document(): pass
 
 

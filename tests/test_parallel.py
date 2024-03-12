@@ -34,12 +34,12 @@ xfail_on_remote = pytest.mark.xfail(
 @pytest.mark.end_to_end()
 def test_parallel_parametrization_over_source_files_w_loop(runner, tmp_path):
     source = """
-    import pytask
+    from pytask import mark, task
 
     for i in range(1, 3):
 
-        @pytask.mark.task
-        @pytask.mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
+        @task
+        @mark.latex(script=f"document_{i}.tex", document=f"document_{i}.pdf")
         def task_compile_latex_document():
             pass
     """
@@ -70,13 +70,13 @@ def test_parallel_parametrization_over_source_files_w_loop(runner, tmp_path):
 @pytest.mark.end_to_end()
 def test_parallel_parametrization_over_source_file_w_loop(runner, tmp_path):
     source = """
-    import pytask
+    from pytask import mark, task
     from pytask_latex import compilation_steps as cs
 
     for ending in ("pdf", "dvi"):
 
-        @pytask.mark.task
-        @pytask.mark.latex(
+        @task
+        @mark.latex(
             script="document.tex",
             document=f"document.{ending}",
             compilation_steps=cs.latexmk(
