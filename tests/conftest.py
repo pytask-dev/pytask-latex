@@ -30,7 +30,7 @@ class SysPathsSnapshot:
     """A snapshot for sys.path."""
 
     def __init__(self) -> None:
-        self.__saved = list(sys.path), list(sys.meta_path)
+        self.__saved = sys.path.copy(), sys.meta_path.copy()
 
     def restore(self) -> None:
         sys.path[:], sys.meta_path[:] = self.__saved
@@ -41,7 +41,7 @@ class SysModulesSnapshot:
 
     def __init__(self, preserve: Callable[[str], bool] | None = None) -> None:
         self.__preserve = preserve
-        self.__saved = dict(sys.modules)
+        self.__saved = sys.modules.copy()
 
     def restore(self) -> None:
         if self.__preserve:

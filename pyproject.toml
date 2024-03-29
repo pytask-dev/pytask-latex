@@ -73,9 +73,6 @@ unsafe-fixes = true
 
 [tool.ruff.lint]
 extend-ignore = [
-    # Others.
-    "ANN101",  # type annotating self
-    "ANN102",  # type annotating cls
     "ANN401",  # Allow typing.Any.
     "COM812",  # Comply with ruff-format
     "ISC001",  # Comply with ruff-format
@@ -83,7 +80,7 @@ extend-ignore = [
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["D", "ANN", "PLR2004", "S101"]
+"tests/*" = ["D", "ANN", "S101"]
 
 [tool.ruff.lint.isort]
 force-single-line = true

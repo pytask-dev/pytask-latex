@@ -94,7 +94,8 @@ use-cases automatically. The following is equivalent to a bare `@mark.latex` dec
     document=Path("document.pdf"),
     compilation_steps="latexmk",
 )
-def task_compile_latex_document(): ...
+def task_compile_latex_document():
+    ...
 ```
 
 The `@mark.latex` decorator has a keyword argument called `compilation_steps` which
@@ -113,7 +114,8 @@ from pytask_latex import compilation_steps as cs
         options=("--pdf", "--interaction=nonstopmode", "--synctex=1", "--cd")
     ),
 )
-def task_compile_latex_document(): ...
+def task_compile_latex_document():
+    ...
 ```
 
 In this example, `compilation_steps.latexmk` is a compilation step constructor which
@@ -130,7 +132,8 @@ an example for generating a `.dvi`.
         options=("--dvi", "--interaction=nonstopmode", "--synctex=1", "--cd")
     ),
 )
-def task_compile_latex_document(): ...
+def task_compile_latex_document():
+    ...
 ```
 
 `compilation_step.latexmk(options)` generates a compilation step which is a function
