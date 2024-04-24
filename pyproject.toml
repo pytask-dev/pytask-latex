@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "pytask_latex"
@@ -10,13 +10,17 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only"
+    "Programming Language :: Python :: 3 :: Only",
 ]
 requires-python = ">=3.8"
-dependencies = [ "latex-dependency-scanner>=0.1.1", "pluggy>=1.0.0", "pytask>=0.4.0"]
-dynamic = [ "version" ]
-authors = [ { name = "Tobias Raabe", email = "raabe@poste.de"} ]
-readme = { file = "README.md", content-type = "text/markdown"}
+dependencies = [
+    "latex-dependency-scanner>=0.1.1",
+    "pluggy>=1.0.0",
+    "pytask>=0.4.0",
+]
+dynamic = ["version"]
+authors = [{ name = "Tobias Raabe", email = "raabe@poste.de" }]
+readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "MIT" }
 
 [project.urls]
@@ -29,27 +33,28 @@ Tracker = "https://github.com/pytask-dev/pytask-latex/issues"
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov", "pytest-xdist"]
 
-[tool.setuptools]
-include-package-data = true
-zip-safe = false
-platforms = [ "any",]
-license-files = [ "LICENSE" ]
-
-[tool.check-manifest]
-ignore = ["src/pytask_latex/_version.py"]
-
 [project.entry-points.pytask]
 pytask_latex = "pytask_latex.plugin"
 
-[tool.setuptools.package-dir]
-"" = "src"
+[tool.rye]
+managed = true
 
-[tool.setuptools.packages.find]
-where = [ "src" ]
-namespaces = false
+[tool.hatch.build.hooks.vcs]
+version-file = "src/pytask_latex/_version.py"
 
-[tool.setuptools_scm]
-write_to = "src/pytask_latex/_version.py"
+[tool.hatch.build.targets.sdist]
+exclude = ["tests"]
+only-packages = true
+
+[tool.hatch.build.targets.wheel]
+exclude = ["tests"]
+only-packages = true
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.mypy]
 files = ["src", "tests"]
@@ -73,9 +78,9 @@ unsafe-fixes = true
 
 [tool.ruff.lint]
 extend-ignore = [
-    "ANN401",  # Allow typing.Any.
-    "COM812",  # Comply with ruff-format
-    "ISC001",  # Comply with ruff-format
+    "ANN401", # Allow typing.Any.
+    "COM812", # Comply with ruff-format
+    "ISC001", # Comply with ruff-format
 ]
 select = ["ALL"]
 
@@ -89,7 +94,6 @@ force-single-line = true
 convention = "numpy"
 
 [tool.pytest.ini_options]
-# Do not add src since it messes with the loading of pytask-parallel as a plugin.
 testpaths = ["src", "tests"]
 markers = [
     "wip: Tests that are work-in-progress.",
