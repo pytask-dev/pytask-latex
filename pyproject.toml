@@ -32,6 +32,9 @@ Tracker = "https://github.com/pytask-dev/pytask-latex/issues"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov", "pytest-xdist"]
+typing = [
+    "mypy>=1.10.0",
+]
 
 [project.entry-points.pytask]
 pytask_latex = "pytask_latex.plugin"
