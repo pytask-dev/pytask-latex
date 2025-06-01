@@ -5,9 +5,6 @@ concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  CONDA_EXE: mamba
-
 on:
   push:
     branches:
@@ -25,13 +22,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
-          python-version-file: .python-version
-          allow-prereleases: true
-          cache: pip
-      - run: pip install tox-uv
-      - run: tox -e typing
+          enable-cache: true
+      - run: uv run --extra typing mypy
 
   run-tests:
 
@@ -48,18 +42,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-tinytex@v2
         if: runner.os != 'Windows'
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
-          cache: pip
-          allow-prereleases: true
-      - run: pip install tox
 
       # Unit, integration, and end-to-end tests.
 
       - name: Run unit tests and doctests.
         shell: bash -l {0}
-        run: tox -e pytest -- -m "unit or (not integration and not end_to_end)" --cov=./ --cov-report=xml -n auto
+        run: uv run --extra test pytest -- -m "unit or (not integration and not end_to_end)" --cov=./ --cov-report=xml -n auto
 
       - name: Upload coverage report for unit tests and doctests.
         if: runner.os == 'Linux' && matrix.python-version == '3.10'
@@ -68,7 +60,7 @@ jobs:
 
       - name: Run end-to-end tests.
         shell: bash -l {0}
-        run: tox -e pytest -- -m end_to_end --cov=./ --cov-report=xml -n auto
+        run: uv run --extra test pytest -- -m end_to_end --cov=./ --cov-report=xml -n auto
 
       - name: Upload coverage reports of end-to-end tests.
         if: runner.os == 'Linux' && matrix.python-version == '3.10'
