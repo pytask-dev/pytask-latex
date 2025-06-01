@@ -39,9 +39,6 @@ typing = [
 [project.entry-points.pytask]
 pytask_latex = "pytask_latex.plugin"
 
-[tool.rye]
-managed = true
-
 [tool.hatch.build.hooks.vcs]
 version-file = "src/pytask_latex/_version.py"
 
