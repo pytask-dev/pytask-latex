@@ -9,6 +9,7 @@ releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask
 - {pull}`75` adds rye.
 - {pull}`81` adds support for Python 3.13 and drops support for Python 3.8.
 - {pull}`82` remove setup with tox-uv.
+- {pull}`83` defers latexmk check after the evaluation of skips.
 
 ## 0.4.2 - 2023-11-30
 

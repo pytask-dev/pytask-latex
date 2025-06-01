@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from pytask import ExitCode
 from pytask import Mark
+from pytask import Skipped
 from pytask import Task
 from pytask import build
 from pytask import cli
@@ -156,7 +157,6 @@ def test_compile_w_bibliography(runner, tmp_path):
     assert result.exit_code == ExitCode.OK
 
 
-@needs_latexmk
 @skip_on_github_actions_with_win
 @pytest.mark.end_to_end
 def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
@@ -188,6 +188,40 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
 
     assert session.exit_code == ExitCode.FAILED
     assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
+
+
+@skip_on_github_actions_with_win
+@pytest.mark.end_to_end
+def test_skip_even_if_latexmk_is_not_found(tmp_path, monkeypatch):
+    task_source = """
+    from pytask import mark
+
+    @mark.skip(reason="Skip it.")
+    @mark.latex(script="document.tex", document="document.pdf")
+    def task_compile_document():
+        pass
+    """
+    tmp_path.joinpath("task_dummy.py").write_text(textwrap.dedent(task_source))
+
+    latex_source = r"""
+    \documentclass{report}
+    \begin{document}
+    Ein Fuchs muss tun, was ein Fuchs tun muss. Luxus und Ruhm und rulen bis zum
+    Schluss.
+    \end{document}
+    """
+    tmp_path.joinpath("document.tex").write_text(textwrap.dedent(latex_source))
+
+    # Hide latexmk if available.
+    monkeypatch.setattr(
+        "pytask_latex.execute.shutil.which",
+        lambda x: None,  # noqa: ARG005
+    )
+
+    session = build(paths=tmp_path)
+
+    assert session.exit_code == ExitCode.OK
+    assert isinstance(session.execution_reports[0].exc_info[1], Skipped)
 
 
 @needs_latexmk
