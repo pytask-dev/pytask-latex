@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
-from typing import Sequence
 
 
 def to_list(scalar_or_iter: Any) -> list[Any]:
