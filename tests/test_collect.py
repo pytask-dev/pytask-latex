@@ -3,10 +3,11 @@ from __future__ import annotations
 from contextlib import ExitStack as does_not_raise  # noqa: N813
 
 import pytest
+
 from pytask_latex.collect import latex
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("kwargs", "expectation", "expected"),
     [

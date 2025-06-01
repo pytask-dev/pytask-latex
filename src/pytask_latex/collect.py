@@ -5,9 +5,9 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import Sequence
 
 import latex_dependency_scanner as lds
 from pytask import Mark
@@ -32,6 +32,9 @@ from pytask.tree_util import tree_map
 
 from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 def latex(
@@ -219,10 +222,10 @@ def pytask_collect_task(
 def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
     """Add dependencies from from LaTeX documents to tasks."""
     if session.config["infer_latex_dependencies"]:
-        all_products = {
+        all_products = {  # type: ignore[var-annotated]
             product.path
             for task in tasks
-            for product in tree_leaves(task.produces)
+            for product in tree_leaves(task.produces)  # type: ignore[arg-type]
             if isinstance(product, PPathNode)
         }
         latex_tasks = [task for task in tasks if has_mark(task, "latex")]
@@ -255,7 +258,7 @@ def _add_latex_dependencies_retroactively(
     # Scan the LaTeX document for included files.
     try:
         scanned_deps = set(
-            lds.scan(task.depends_on["_path_to_tex"].path)  # type: ignore[attr-defined]
+            lds.scan(task.depends_on["_path_to_tex"].path)  # type: ignore[arg-type]
         )
     except Exception:  # noqa: BLE001
         warnings.warn(
@@ -265,8 +268,10 @@ def _add_latex_dependencies_retroactively(
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
-    task_deps = {
-        i.path for i in tree_leaves(task.depends_on) if isinstance(i, PPathNode)
+    task_deps = {  # type: ignore[var-annotated]
+        i.path
+        for i in tree_leaves(task.depends_on)  # type: ignore[arg-type]
+        if isinstance(i, PPathNode)
     }
     additional_deps = scanned_deps - task_deps
     new_deps = [i for i in additional_deps if i in all_products or i.exists()]
@@ -287,9 +292,9 @@ def _add_latex_dependencies_retroactively(
                 task_name=task.name,
             ),
         ),
-        new_deps,
+        new_deps,  # type: ignore[arg-type]
     )
-    task.depends_on["_scanned_dependencies"] = collected_dependencies
+    task.depends_on["_scanned_dependencies"] = collected_dependencies  # type: ignore[assignment]
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
