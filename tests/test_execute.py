@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import textwrap
 from pathlib import Path
+from typing import cast
 
 import pytest
 from pytask import ExitCode
@@ -187,8 +188,8 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.FAILED
-    execution_reports = session.execution_reports
-    assert execution_reports is not None
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
     assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
@@ -223,8 +224,8 @@ def test_skip_even_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.OK
-    execution_reports = session.execution_reports
-    assert execution_reports is not None
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
     assert isinstance(execution_reports[0].exc_info[1], Skipped)
 
 
@@ -316,8 +317,8 @@ def test_fail_because_script_is_not_latex(tmp_path):
 
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.COLLECTION_FAILED
-    collection_reports = session.collection_reports
-    assert collection_reports is not None
+    assert session.collection_reports is not None
+    collection_reports = cast("list", session.collection_reports)
     assert isinstance(collection_reports[0].exc_info[1], ValueError)
 
 
@@ -397,8 +398,8 @@ def test_compile_document_w_wrong_flag(tmp_path):
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.FAILED
     assert len(session.tasks) == 1
-    execution_reports = session.execution_reports
-    assert execution_reports is not None
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
     assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
