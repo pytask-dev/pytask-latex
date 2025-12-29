@@ -7,7 +7,6 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Callable
 
 import latex_dependency_scanner as lds
 from pytask import Mark
@@ -34,6 +33,7 @@ from pytask_latex import compilation_steps as cs
 from pytask_latex.utils import to_list
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from collections.abc import Sequence
 
 
