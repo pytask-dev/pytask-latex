@@ -187,8 +187,9 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.FAILED
-    assert session.execution_reports is not None
-    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
+    execution_reports = session.execution_reports
+    assert execution_reports is not None
+    assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
 @skip_on_github_actions_with_win
@@ -222,8 +223,9 @@ def test_skip_even_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.OK
-    assert session.execution_reports is not None
-    assert isinstance(session.execution_reports[0].exc_info[1], Skipped)
+    execution_reports = session.execution_reports
+    assert execution_reports is not None
+    assert isinstance(execution_reports[0].exc_info[1], Skipped)
 
 
 @needs_latexmk
@@ -314,8 +316,9 @@ def test_fail_because_script_is_not_latex(tmp_path):
 
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.COLLECTION_FAILED
-    assert session.collection_reports is not None
-    assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
+    collection_reports = session.collection_reports
+    assert collection_reports is not None
+    assert isinstance(collection_reports[0].exc_info[1], ValueError)
 
 
 @needs_latexmk
@@ -394,8 +397,9 @@ def test_compile_document_w_wrong_flag(tmp_path):
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.FAILED
     assert len(session.tasks) == 1
-    assert session.execution_reports is not None
-    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
+    execution_reports = session.execution_reports
+    assert execution_reports is not None
+    assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
 @needs_latexmk
