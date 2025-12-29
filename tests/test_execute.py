@@ -27,7 +27,10 @@ def test_pytask_execute_task_setup(monkeypatch):
         lambda x: None,  # noqa: ARG005
     )
     task = Task(
-        base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})]
+        base_name="example",
+        path=Path(),
+        function=lambda: None,
+        markers=[Mark("latex", (), {})],
     )
     with pytest.raises(RuntimeError, match="latexmk is needed"):
         pytask_execute_task_setup(task)

@@ -80,7 +80,8 @@ def compile_latex_document(
         for step in _compilation_steps:
             step(path_to_tex=_path_to_tex, path_to_document=_path_to_document)
     except CalledProcessError as e:
-        msg = f"Compilation step {step.__name__} failed."
+        step_name = getattr(step, "__name__", step.__class__.__name__)
+        msg = f"Compilation step {step_name} failed."
         raise RuntimeError(msg) from e
 
 
@@ -108,7 +109,9 @@ def pytask_collect_task(
         script, document, compilation_steps = latex(**latex_mark.kwargs)
         parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
 
-        obj.pytask_meta.markers.append(latex_mark)
+        pytask_meta = getattr(obj, "pytask_meta", None)
+        if pytask_meta is not None:
+            pytask_meta.markers.append(latex_mark)
 
         # Collect the nodes in @pytask.mark.latex and validate them.
         path_nodes = Path.cwd() if path is None else path.parent
@@ -193,7 +196,7 @@ def pytask_collect_task(
         dependencies["_compilation_steps"] = compilation_steps_node
         products["_path_to_document"] = document_node
 
-        markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
+        markers = pytask_meta.markers if pytask_meta is not None else []
 
         task: PTask
         if path is None:
@@ -292,9 +295,9 @@ def _add_latex_dependencies_retroactively(
                 task_name=task.name,
             ),
         ),
-        new_deps,  # type: ignore[arg-type]
+        new_deps,
     )
-    task.depends_on["_scanned_dependencies"] = collected_dependencies  # type: ignore[assignment]
+    task.depends_on["_scanned_dependencies"] = collected_dependencies
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
