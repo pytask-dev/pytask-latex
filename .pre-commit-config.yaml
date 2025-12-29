@@ -3,14 +3,13 @@ repos:
     rev: v6.0.0
     hooks:
     -   id: check-added-large-files
-        args: ['--maxkb=100']
+        args: ['--maxkb=25']
     -   id: check-merge-conflict
     -   id: check-yaml
     -   id: debug-statements
     -   id: end-of-file-fixer
     -   id: check-case-conflict
     -   id: check-vcs-permalinks
-    -   id: check-yaml
     -   id: fix-byte-order-marker
     -   id: mixed-line-ending
     -   id: no-commit-to-branch
@@ -28,7 +27,7 @@ repos:
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
-      - id: ruff
+      - id: ruff-check
       - id: ruff-format
 -   repo: https://github.com/executablebooks/mdformat
     rev: 1.0.0
@@ -39,11 +38,10 @@ repos:
             mdformat-black,
         ]
         args: [--wrap, "88"]
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
-  hooks:
-    - id: codespell
-      args: [-L als, -L falsy]
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.40.1
+    hooks:
+    -   id: typos
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
