@@ -225,10 +225,10 @@ def pytask_collect_task(
 def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
     """Add dependencies from from LaTeX documents to tasks."""
     if session.config["infer_latex_dependencies"]:
-        all_products = {  # type: ignore[var-annotated]
+        all_products = {
             product.path
             for task in tasks
-            for product in tree_leaves(task.produces)  # type: ignore[arg-type]
+            for product in tree_leaves(task.produces)
             if isinstance(product, PPathNode)
         }
         latex_tasks = [task for task in tasks if has_mark(task, "latex")]
@@ -271,10 +271,8 @@ def _add_latex_dependencies_retroactively(
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
-    task_deps = {  # type: ignore[var-annotated]
-        i.path
-        for i in tree_leaves(task.depends_on)  # type: ignore[arg-type]
-        if isinstance(i, PPathNode)
+    task_deps = {
+        i.path for i in tree_leaves(task.depends_on) if isinstance(i, PPathNode)
     }
     additional_deps = scanned_deps - task_deps
     new_deps = [i for i in additional_deps if i in all_products or i.exists()]
