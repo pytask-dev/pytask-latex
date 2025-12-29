@@ -16,11 +16,11 @@ from __future__ import annotations
 import subprocess
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Callable
 
 from pytask_latex.utils import to_list
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
