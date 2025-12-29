@@ -4,6 +4,10 @@ This is a record of all past pytask-latex releases and what went into them in re
 chronological order. Releases follow [semantic versioning](https://semver.org/) and all
 releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask-latex).
 
+## Unreleased
+
+- {pull}`93` drops support for Python 3.8 and 3.9 and adds support for Python 3.14.
+
 ## 0.4.3 - 2025-06-01
 
 - {pull}`75` adds rye.
