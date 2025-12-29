@@ -7,11 +7,14 @@ import shutil
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
 from pytask import storage
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 TEST_RESOURCES = Path(__file__).parent / "resources"
 
