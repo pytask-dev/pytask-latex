@@ -33,6 +33,7 @@ Tracker = "https://github.com/pytask-dev/pytask-latex/issues"
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov", "pytest-xdist"]
 typing = [
+    "pytask-parallel",
     "ty>=0.0.7",
 ]
 

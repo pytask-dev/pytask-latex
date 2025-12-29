@@ -26,7 +26,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - run: uv run --extra typing ty check src/ tests/
+      - run: uv run --extra typing --extra test ty check src/ tests/
 
   run-tests:
 
