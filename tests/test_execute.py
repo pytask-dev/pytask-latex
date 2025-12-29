@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import textwrap
 from pathlib import Path
+from typing import cast
 
 import pytest
 from pytask import ExitCode
@@ -26,7 +27,10 @@ def test_pytask_execute_task_setup(monkeypatch):
         lambda x: None,  # noqa: ARG005
     )
     task = Task(
-        base_name="example", path=Path(), function=None, markers=[Mark("latex", (), {})]
+        base_name="example",
+        path=Path(),
+        function=lambda: None,
+        markers=[Mark("latex", (), {})],
     )
     with pytest.raises(RuntimeError, match="latexmk is needed"):
         pytask_execute_task_setup(task)
@@ -187,7 +191,9 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.FAILED
-    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
+    assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
 @skip_on_github_actions_with_win
@@ -221,7 +227,9 @@ def test_skip_even_if_latexmk_is_not_found(tmp_path, monkeypatch):
     session = build(paths=tmp_path)
 
     assert session.exit_code == ExitCode.OK
-    assert isinstance(session.execution_reports[0].exc_info[1], Skipped)
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
+    assert isinstance(execution_reports[0].exc_info[1], Skipped)
 
 
 @needs_latexmk
@@ -312,7 +320,9 @@ def test_fail_because_script_is_not_latex(tmp_path):
 
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.COLLECTION_FAILED
-    assert isinstance(session.collection_reports[0].exc_info[1], ValueError)
+    assert session.collection_reports is not None
+    collection_reports = cast("list", session.collection_reports)
+    assert isinstance(collection_reports[0].exc_info[1], ValueError)
 
 
 @needs_latexmk
@@ -391,7 +401,9 @@ def test_compile_document_w_wrong_flag(tmp_path):
     session = build(paths=tmp_path)
     assert session.exit_code == ExitCode.FAILED
     assert len(session.tasks) == 1
-    assert isinstance(session.execution_reports[0].exc_info[1], RuntimeError)
+    assert session.execution_reports is not None
+    execution_reports = cast("list", session.execution_reports)
+    assert isinstance(execution_reports[0].exc_info[1], RuntimeError)
 
 
 @needs_latexmk

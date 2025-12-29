@@ -80,7 +80,8 @@ def compile_latex_document(
         for step in _compilation_steps:
             step(path_to_tex=_path_to_tex, path_to_document=_path_to_document)
     except CalledProcessError as e:
-        msg = f"Compilation step {step.__name__} failed."
+        step_name = getattr(step, "__name__", step.__class__.__name__)
+        msg = f"Compilation step {step_name} failed."
         raise RuntimeError(msg) from e
 
 
@@ -108,7 +109,9 @@ def pytask_collect_task(
         script, document, compilation_steps = latex(**latex_mark.kwargs)
         parsed_compilation_steps = _parse_compilation_steps(compilation_steps)
 
-        obj.pytask_meta.markers.append(latex_mark)
+        pytask_meta = getattr(obj, "pytask_meta", None)
+        if pytask_meta is not None:
+            pytask_meta.markers.append(latex_mark)
 
         # Collect the nodes in @pytask.mark.latex and validate them.
         path_nodes = Path.cwd() if path is None else path.parent
@@ -193,7 +196,7 @@ def pytask_collect_task(
         dependencies["_compilation_steps"] = compilation_steps_node
         products["_path_to_document"] = document_node
 
-        markers = obj.pytask_meta.markers if hasattr(obj, "pytask_meta") else []
+        markers = pytask_meta.markers if pytask_meta is not None else []
 
         task: PTask
         if path is None:
@@ -222,10 +225,10 @@ def pytask_collect_task(
 def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
     """Add dependencies from from LaTeX documents to tasks."""
     if session.config["infer_latex_dependencies"]:
-        all_products = {  # type: ignore[var-annotated]
+        all_products = {
             product.path
             for task in tasks
-            for product in tree_leaves(task.produces)  # type: ignore[arg-type]
+            for product in tree_leaves(task.produces)
             if isinstance(product, PPathNode)
         }
         latex_tasks = [task for task in tasks if has_mark(task, "latex")]
@@ -268,10 +271,8 @@ def _add_latex_dependencies_retroactively(
 
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
-    task_deps = {  # type: ignore[var-annotated]
-        i.path
-        for i in tree_leaves(task.depends_on)  # type: ignore[arg-type]
-        if isinstance(i, PPathNode)
+    task_deps = {
+        i.path for i in tree_leaves(task.depends_on) if isinstance(i, PPathNode)
     }
     additional_deps = scanned_deps - task_deps
     new_deps = [i for i in additional_deps if i in all_products or i.exists()]
@@ -292,9 +293,9 @@ def _add_latex_dependencies_retroactively(
                 task_name=task.name,
             ),
         ),
-        new_deps,  # type: ignore[arg-type]
+        new_deps,
     )
-    task.depends_on["_scanned_dependencies"] = collected_dependencies  # type: ignore[assignment]
+    task.depends_on["_scanned_dependencies"] = collected_dependencies
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
