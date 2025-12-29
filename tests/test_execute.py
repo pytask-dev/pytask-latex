@@ -172,7 +172,7 @@ def test_raise_error_if_latexmk_is_not_found(tmp_path, monkeypatch):
     latex_source = r"""
     \documentclass{report}
     \begin{document}
-    In Fuchs muss tun, was in Fuchs tun muss. Luxus und Ruhm und rulen bis zum
+    Ein Fuchs muss tun, was ein Fuchs tun muss. Luxus und Ruhm und rulen bis zum
     Schluss.
     \end{document}
     """
@@ -206,7 +206,7 @@ def test_skip_even_if_latexmk_is_not_found(tmp_path, monkeypatch):
     latex_source = r"""
     \documentclass{report}
     \begin{document}
-    In Fuchs muss tun, was in Fuchs tun muss. Luxus und Ruhm und rulen bis zum
+    Ein Fuchs muss tun, was ein Fuchs tun muss. Luxus und Ruhm und rulen bis zum
     Schluss.
     \end{document}
     """
@@ -348,7 +348,7 @@ def test_compile_document_to_out_if_document_has_relative_resources(tmp_path):
     tmp_path.joinpath("sub", "document.tex").write_text(textwrap.dedent(latex_source))
 
     resources = r"""
-    In Ottakring, in Ottakring, wo das Bitter so viel suesser schmeckt also irgendwo in
+    In Ottakring, in Ottakring, wo das Bitter so viel suesser schmeckt als irgendwo in
     Wien.
     """
     tmp_path.joinpath("sub", "resources", "content.tex").write_text(resources)
@@ -614,7 +614,7 @@ def test_use_task_without_path(tmp_path):
     latex_source = r"""
     \documentclass{report}
     \begin{document}
-    In Fuchs muss tun, was in Fuchs tun muss. Luxus und Ruhm und rulen bis zum
+    Ein Fuchs muss tun, was ein Fuchs tun muss. Luxus und Ruhm und rulen bis zum
     Schluss.
     \end{document}
     """
