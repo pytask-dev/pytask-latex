@@ -143,7 +143,7 @@ import subprocess
 
 def custom_compilation_step(path_to_tex: Path, path_to_document: Path) -> None:
     ...
-    subproces.run(..., check=True)
+    subprocess.run(..., check=True)
 ```
 
 You can also pass your custom compilation step with the same signature to the
