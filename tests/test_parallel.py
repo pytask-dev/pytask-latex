@@ -32,7 +32,6 @@ xfail_on_remote = pytest.mark.xfail(
 @xfail_on_remote
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 def test_parallel_parametrization_over_source_files_w_loop(runner, tmp_path):
     source = """
     from pytask import mark, task
@@ -68,7 +67,6 @@ def test_parallel_parametrization_over_source_files_w_loop(runner, tmp_path):
 @xfail_on_remote
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 def test_parallel_parametrization_over_source_file_w_loop(runner, tmp_path):
     source = """
     from pytask import mark, task

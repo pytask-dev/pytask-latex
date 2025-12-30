@@ -12,7 +12,6 @@ from tests.conftest import skip_on_github_actions_with_win
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 @pytest.mark.parametrize("infer_dependencies", ["true", "false"])
 def test_infer_dependencies_from_task(tmp_path, infer_dependencies):
     task_source = """

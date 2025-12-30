@@ -48,22 +48,11 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
 
-      # Unit, integration, and end-to-end tests.
-
-      - name: Run unit tests and doctests.
+      - name: Run tests
         shell: bash -l {0}
-        run: uv run --extra test pytest -m "unit or (not integration and not end_to_end)" --cov=./ --cov-report=xml -n auto
+        run: uv run --extra test pytest --cov=./ --cov-report=xml -n auto
 
-      - name: Upload coverage report for unit tests and doctests.
+      - name: Upload coverage report
         if: runner.os == 'Linux' && matrix.python-version == '3.10'
         shell: bash -l {0}
-        run: bash <(curl -s https://codecov.io/bash) -F unit -c
-
-      - name: Run end-to-end tests.
-        shell: bash -l {0}
-        run: uv run --extra test pytest -m end_to_end --cov=./ --cov-report=xml -n auto
-
-      - name: Upload coverage reports of end-to-end tests.
-        if: runner.os == 'Linux' && matrix.python-version == '3.10'
-        shell: bash -l {0}
-        run: bash <(curl -s https://codecov.io/bash) -F end_to_end -c
+        run: bash <(curl -s https://codecov.io/bash) -c
