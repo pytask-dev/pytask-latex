@@ -84,6 +84,13 @@ unused-ignore-comment = "error"
 [tool.ty.terminal]
 error-on-warning = true
 
+[[tool.ty.overrides]]
+include = ["src/**/_version.py"]
+
+[tool.ty.overrides.rules]
+invalid-type-form = "ignore"
+
+
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
 markers = [
