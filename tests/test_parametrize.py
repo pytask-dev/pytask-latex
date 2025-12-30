@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import textwrap
 
-import pytest
 from pytask import ExitCode
 from pytask import build
 
@@ -12,7 +11,6 @@ from tests.conftest import skip_on_github_actions_with_win
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
     source = """
     from pytask import mark, task
@@ -48,7 +46,6 @@ def test_parametrized_compilation_of_latex_documents_w_loop(tmp_path):
 
 @needs_latexmk
 @skip_on_github_actions_with_win
-@pytest.mark.end_to_end
 def test_parametrizing_latex_options_w_loop(tmp_path):
     source = """
     from pytask import mark, task

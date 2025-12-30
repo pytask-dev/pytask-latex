@@ -7,7 +7,6 @@ import pytest
 from pytask_latex.collect import latex
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     ("kwargs", "expectation", "expected"),
     [
