@@ -90,6 +90,12 @@ include = ["src/**/_version.py"]
 [tool.ty.overrides.rules]
 invalid-type-form = "ignore"
 
+[[tool.ty.overrides]]
+include = ["src/**/__init__.py"]
+
+[tool.ty.overrides.rules]
+unused-ignore-comment = "ignore"
+
 
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
