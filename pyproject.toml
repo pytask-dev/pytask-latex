@@ -30,7 +30,7 @@ Documentation = "https://github.com/pytask-dev/pytask-latex"
 Github = "https://github.com/pytask-dev/pytask-latex"
 Tracker = "https://github.com/pytask-dev/pytask-latex/issues"
 
-[project.optional-dependencies]
+[dependency-groups]
 test = ["pytest", "pytest-cov", "pytest-xdist"]
 typing = [
     "pytask-parallel",

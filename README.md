@@ -25,11 +25,11 @@ pytask-latex is available on [PyPI](https://pypi.org/project/pytask-latex) and
 [Anaconda.org](https://anaconda.org/conda-forge/pytask-latex). Install it with
 
 ```console
-$ pip install pytask-latex
+$ uv add pytask-latex
 
 # or
 
-$ conda install -c conda-forge pytask-latex
+$ pixi add pytask-latex
 ```
 
 You also need to have `latexmk` installed which determines the necessary number of
