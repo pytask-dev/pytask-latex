@@ -26,7 +26,9 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - run: uv run --extra typing --extra test ty check src/ tests/
+      - name: Install just
+        uses: extractions/setup-just@v3
+      - run: just typing
 
   run-tests:
 
@@ -47,10 +49,12 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
+      - name: Install just
+        uses: extractions/setup-just@v3
 
       - name: Run tests
         shell: bash -l {0}
-        run: uv run --extra test pytest --cov=./ --cov-report=xml -n auto
+        run: just test-cov
 
       - name: Upload coverage report
         if: runner.os == 'Linux' && matrix.python-version == '3.10'
