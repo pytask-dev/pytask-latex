@@ -25,7 +25,7 @@ repos:
     -   id: python-use-type-annotations
     -   id: text-unicode-replacement-char
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.14.13
     hooks:
       - id: ruff-check
       - id: ruff-format
@@ -39,7 +39,7 @@ repos:
         ]
         args: [--wrap, "88"]
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.40.1
+    rev: v1
     hooks:
     -   id: typos
 -   repo: meta
