@@ -260,8 +260,11 @@ def _add_latex_dependencies_retroactively(
     """
     # Scan the LaTeX document for included files.
     try:
-        scanned_deps = set(
-            lds.scan(task.depends_on["_path_to_tex"].path)  # type: ignore[arg-type]
+        path_to_tex = task.depends_on["_path_to_tex"]
+        scanned_deps = (
+            set(lds.scan(path_to_tex.path))
+            if isinstance(path_to_tex, PPathNode)
+            else set()
         )
     except Exception:  # noqa: BLE001
         warnings.warn(
