@@ -228,7 +228,7 @@ def pytask_collect_modify_tasks(session: Session, tasks: list[PTask]) -> None:
         all_products = {
             product.path
             for task in tasks
-            for product in tree_leaves(task.produces)
+            for product in tree_leaves(task.produces)  # ty: ignore[invalid-argument-type]
             if isinstance(product, PPathNode)
         }
         latex_tasks = [task for task in tasks if has_mark(task, "latex")]
@@ -262,7 +262,7 @@ def _add_latex_dependencies_retroactively(
     try:
         path_to_tex = task.depends_on["_path_to_tex"]
         scanned_deps = (
-            set(lds.scan(path_to_tex.path))
+            set(lds.scan(path_to_tex.path))  # ty: ignore[invalid-argument-type]
             if isinstance(path_to_tex, PPathNode)
             else set()
         )
@@ -275,7 +275,9 @@ def _add_latex_dependencies_retroactively(
     # Remove duplicated dependencies which have already been added by the user and those
     # which do not exist.
     task_deps = {
-        i.path for i in tree_leaves(task.depends_on) if isinstance(i, PPathNode)
+        i.path
+        for i in tree_leaves(task.depends_on)  # ty: ignore[invalid-argument-type]
+        if isinstance(i, PPathNode)
     }
     additional_deps = scanned_deps - task_deps
     new_deps = [i for i in additional_deps if i in all_products or i.exists()]
@@ -296,7 +298,7 @@ def _add_latex_dependencies_retroactively(
                 task_name=task.name,
             ),
         ),
-        new_deps,
+        new_deps,  # ty: ignore[invalid-argument-type]
     )
     task.depends_on["_scanned_dependencies"] = collected_dependencies
 
