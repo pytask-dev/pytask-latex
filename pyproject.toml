@@ -65,6 +65,7 @@ unsafe-fixes = true
 extend-ignore = [
     "ANN401", # Allow typing.Any.
     "COM812", # Comply with ruff-format
+    "CPY001", # Copyright notices are not required.
     "ISC001", # Comply with ruff-format
 ]
 select = ["ALL"]

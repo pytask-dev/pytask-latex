@@ -300,7 +300,7 @@ def _add_latex_dependencies_retroactively(
         ),
         new_deps,  # ty: ignore[invalid-argument-type]
     )
-    task.depends_on["_scanned_dependencies"] = collected_dependencies
+    task.depends_on["_scanned_dependencies"] = collected_dependencies  # ty: ignore[invalid-assignment]
 
     # Mark the task as being delayed to avoid conflicts with unmatched dependencies.
     task.markers.append(Mark("try_last", (), {}))
