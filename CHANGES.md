@@ -6,6 +6,7 @@ releases are available on [Anaconda.org](https://anaconda.org/conda-forge/pytask
 
 ## Unreleased
 
+- Raise the minimum supported Python version to 3.11.
 - {pull}`93` drops support for Python 3.8 and 3.9 and adds support for Python 3.14.
 - {pull}`94` switches type checking to ty.
 - {pull}`95` updates pre-commit hooks.
